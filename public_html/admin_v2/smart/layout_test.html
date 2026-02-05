@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layout Test - Lead Card</title>
+    <link rel="stylesheet" href="lead_list_styles.css">
+    <style>
+        body {
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-header {
+            background: #fff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .device-indicator {
+            font-weight: bold;
+            color: #26a69a;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h2>Lead Card Layout Test</h2>
+            <p>Current device: <span class="device-indicator" id="deviceIndicator">Desktop</span></p>
+            <p>Resize your browser window to see the layout change:</p>
+            <ul>
+                <li><strong>Desktop (&gt;600px):</strong> All elements (QR code, lead-info-left, lead-info-right) in one row side by side</li>
+                <li><strong>Mobile (≤600px):</strong> QR code and lead-info-left side by side, lead-info-right on next row</li>
+            </ul>
+        </div>
+
+        <!-- Sample Lead Card -->
+        <div class="card lead-card">
+            <!-- Portion 1: Lead Info -->
+            <div class="lead-info-section">
+                <div class="lead-qr-code">
+                    <div class="qr-placeholder" style="background: repeating-linear-gradient(45deg, #9ec2e180, #9ec2e175 24px, #d4f9fb14, #d4f9fb69 26px);">
+                        <div class="avatar-shape avatar-circle" style="background-color: #26a69a;">
+                            <span class="avatar-initials">JD</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="lead-info-left">
+                    <div class="lead-name">John Doe</div>
+                    <div class="lead-phone">9876543210</div>
+                </div>
+                <div class="lead-info-right">
+                    <div class="lead-specs">
+                        <span class="spec-label">HDD</span> <span class="spec-value">1TB</span> 
+                        <span class="spec-label">RES</span> <span class="spec-value">1080p</span> x 
+                        <span class="spec-value">4</span> 
+                        <span class="spec-label">CAM REC</span> <span class="spec-value">DVR</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Portion 2: Form Section (initially empty) -->
+            <div class="lead-form-section"></div>
+            
+            <!-- Portion 3: Controls -->
+            <div class="lead-controls-section">
+                <div class="lead-controls-left">
+                    <span class="lead-meta assign-tag"><strong>Agent Smith</strong></span>
+                </div>
+                <div class="lead-controls-right">
+                    <a href="#" class="edit-lead-btn">
+                        <i class="fa fa-edit"></i> Edit
+                    </a>
+                    <a href="#" class="blue-text open-quote">
+                        <i class="fa fa-file-invoice"></i> Quote
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Another Sample with Different Data -->
+        <div class="card lead-card">
+            <div class="lead-info-section">
+                <div class="lead-qr-code">
+                    <div class="qr-placeholder" style="background-color: #f9f9f9; background-image: radial-gradient(#ccc 2px, transparent 2px); background-size: 10px 10px;">
+                        <div class="avatar-shape avatar-square" style="background-color: #e74c3c;">
+                            <span class="avatar-initials">AB</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="lead-info-left">
+                    <div class="lead-name">Alice Brown</div>
+                    <div class="lead-phone">9123456789</div>
+                </div>
+                <div class="lead-info-right">
+                    <div class="lead-specs">
+                        <span class="spec-label">HDD</span> <span class="spec-unknown">X</span> 
+                        <span class="spec-label">RES</span> <span class="spec-unknown">X</span> x 
+                        <span class="spec-unknown">X</span> 
+                        <span class="spec-label">CAM REC</span> <span class="spec-unknown">X</span>
+                    </div>
+                </div>
+            </div>
+            <div class="lead-form-section"></div>
+            <div class="lead-controls-section">
+                <div class="lead-controls-left">
+                    <span class="lead-meta assign-tag"><strong>Agent Jones</strong></span>
+                </div>
+                <div class="lead-controls-right">
+                    <a href="#" class="edit-lead-btn">
+                        <i class="fa fa-edit"></i> Edit
+                    </a>
+                    <a href="#" class="blue-text open-quote">
+                        <i class="fa fa-file-invoice"></i> Quote
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Update device indicator based on screen size
+        function updateDeviceIndicator() {
+            const width = window.innerWidth;
+            const indicator = document.getElementById('deviceIndicator');
+            if (width <= 600) {
+                indicator.textContent = 'Mobile';
+                indicator.style.color = '#e74c3c';
+            } else {
+                indicator.textContent = 'Desktop';
+                indicator.style.color = '#26a69a';
+            }
+        }
+
+        // Initial update and listen for resize
+        updateDeviceIndicator();
+        window.addEventListener('resize', updateDeviceIndicator);
+    </script>
+</body>
+</html>

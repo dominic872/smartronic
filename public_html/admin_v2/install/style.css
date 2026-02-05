@@ -1,0 +1,222 @@
+
+* {
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 20px;
+  background: #f7f7f7;
+  color: #333;
+}
+
+form {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.05);
+  max-width: 600px;
+  margin: auto;
+}
+
+#formOverlay {
+  position: fixed; 
+  top: 0; left: 0; width: 100vw;  background: rgba(0,0,0,0.6); z-index: 9999; overflow: auto;
+  height: 100vh;
+}
+
+label {
+  display: block;
+  margin-top: 15px;
+  font-weight: bold;
+}
+
+input[type="text"],
+input[type="number"],
+select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+button {
+  margin-top: 20px;
+  padding: 10px 15px;
+  background-color: #ed2e0f;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #adadad;
+}
+
+h3 {
+  margin-top: 20px;
+  color: #ed2e0f;
+}
+
+@media (max-width: 600px) {
+  form {
+    padding: 15px;
+  }
+
+  input,
+  select {
+    font-size: 16px;
+  }
+
+ 
+}
+
+#extraLabel {
+  width: 68%
+}
+#extraValue {
+  width: 30%
+}
+
+.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  position: relative;
+}
+
+@media (min-width: 600px) {
+  .card {
+    max-width: 300px;
+  }
+}
+form.edit-form {
+    position: absolute;
+    top: -10px;
+    right: 0;
+    display: flex;
+    gap: 0px;
+
+    background: none;
+    padding: unset;
+    border-radius: 0;
+    box-shadow: unset;
+    max-width: unset;
+    margin: unset;
+}
+#addButton {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  font-size: 22px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  z-index: 9999;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+#addButton:hover {
+  background-color: #218838;
+}
+
+.editBtn, .submitBtn {
+  background: #333;
+  color: white;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  font-size: 16px;
+  margin: 4px;
+  cursor: pointer;
+  padding: 10px;
+  background-color: #ed2e0f;
+}
+.deleteBtn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: black;
+  cursor: pointer;
+}
+
+.formCloseBtn {
+  position: absolute;
+  top: -10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: black;
+  cursor: pointer;
+}
+
+.formSubmitBtn {
+  background-color: #ed2e0f;
+  color: white;
+  font-size: 30px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  
+}
+form input[type="text"],
+form input[type="number"],
+form input[type="date"],
+form select,
+form textarea {
+  width: 100%;
+  padding: 10px;
+  margin: 6px 0 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;
+  font-size: 16px;
+  font-family: inherit;
+}
+form label {
+  font-weight: 600;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.fa-money-bill-wave.Yes:before, .fa-thumbs-up.Yes:before, .fa-check-circle.Yes:before  {
+    color: rgb(22, 195, 37);
+    font-size: 20px;
+  }
+#totals-summary div {
+    background: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #999;
+    text-align: center;
+    font-weight: 500;
+    width: 33%;
+}
+#totals-summary .fas {
+      color: #999;
+    font-size: 22px;
+    margin-bottom: 10px;
+
+}
+
+.header {
+  padding: 0 10px 15px;
+}
+
+.controls {
+  display: flex; gap: 10px; margin-top: 10px; flex-direction: row-reverse
+}

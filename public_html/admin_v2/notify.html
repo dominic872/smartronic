@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mac Notification</title>
+</head>
+<body>
+    <h2>Click the button to enable notifications</h2>
+    <button onclick="requestPermission()">Enable Notifications</button>
+
+    <script>
+        function requestPermission() {
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    alert("Notifications enabled! They will now be sent every 15 seconds.");
+                    startNotifications();
+                } else {
+                    alert("Notifications denied. Please allow them in browser settings.");
+                }
+            });
+        }
+
+        function startNotifications() {
+            setInterval(() => {
+                if (Notification.permission === "granted") {
+                    new Notification("Reminder", {
+                        body: "This is your scheduled notification!",
+                        icon: "https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg"
+                    });
+                }
+            }, 15000);
+        }
+        // request permission on page load
+document.addEventListener('DOMContentLoaded', function() {
+  if (!Notification) {
+    alert('Desktop notifications not available in your browser. Try Chromium.');
+    return;
+  }
+
+  if (Notification.permission !== "granted")
+    Notification.requestPermission();
+});
+
+function notifyMe() {
+  if (Notification.permission !== "granted")
+    Notification.requestPermission();
+  else {
+    var notification = new Notification('Notification title', {
+      icon: 'http://cdn.sstatic.net/stackexchange/img/logos/so/so-icon.png',
+      body: "Hey there! You've been notified!",
+    });
+
+    notification.onclick = function() {
+      window.open("http://stackoverflow.com/a/13328397/1269037");
+    };
+  }
+}
+
+notifyMe();
+    </script>
+</body>
+</html>

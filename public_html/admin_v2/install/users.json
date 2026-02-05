@@ -1,0 +1,6 @@
+[
+  { "username": "ashok", "password": "mani@123", "role": "tech", "name": "Ashok Mani" },
+  { "username": "dominic", "password": "smart@70", "role": "admin", "name": "Dominic Sagayaraj" },
+  { "username": "dharshan", "password": "smart@24th", "role": "market", "name": "Dharshan M" },
+  { "username": "david", "password": "smart@cctv", "role": "tech", "name": "David Joseph"}
+]

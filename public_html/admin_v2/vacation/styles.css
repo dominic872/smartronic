@@ -1,0 +1,367 @@
+body { font-family: Arial,sans-serif; margin:0; background:#f9f9f9;}
+.header { background:#222; color:#fafafa; padding:12px 20px; }
+.centered { text-align:center; margin-top: 8%; }
+form { margin-top:12px; }
+input, select { margin:6px 0; padding:8px; border-radius:4px; border:1px solid #ccc; width:90%; }
+button { background:#007bff; color:#fff; border:none; padding:7px 18px; border-radius:4px; margin:5px 0; cursor:pointer;}
+button:hover { background: #2060a0; }
+.error { color: darkred; margin:8px 0;}
+.calendar-container { margin:28px auto; max-width:800px; background:#fff; border-radius:9px; box-shadow:1px 3px 20px #eee; padding:18px 20px;}
+.calendar td, .calendar th { min-width: 65px; }
+.log-leave-btn { color:#0f0; padding:2px 8px;}
+.log-leave-btn:hover {background:none;}
+
+  /* Reset and base */
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0; padding: 0; background: #f7f9fc;
+    color: #333;
+  }
+  .header {
+    background-color: #f1f1f1;
+    color: #0b0303;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    width: -webkit-fill-available;
+  }
+  .header img {
+    height: 40px;
+    max-width: 160px;
+  }
+  .header a {
+    color: #ddd;
+    text-decoration: none;
+    font-size: 0.9rem;
+  }
+  .header a:hover {
+    color: white;
+    text-decoration: underline;
+  }
+
+  hr {
+    margin: 0;
+    border: none;
+    border-top: 1px solid #ddd;
+  }
+
+  .summary-box {
+    max-width: 900px;
+    margin: 70px auto 16px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 3px 12px rgb(0 0 0 / 0.1);
+    padding: 16px 20px;
+    font-size: 14px;
+    color: #444;
+  }
+  .summary-box h2 {
+    margin-top: 0;
+    font-weight: 600;
+    font-size: 1.2rem;
+    color: #007bff;
+  }
+  .summary-box p {
+    margin: 8px 0;
+  }
+  .summary-box .leave-names {
+    font-weight: 600;
+    color: #d9534f;
+  }
+  .summary-box .no-leaves {
+    color: #777;
+    font-style: italic;
+  }
+  .summary-box .counts {
+    margin-top: 12px;
+    font-weight: 500;
+  }
+
+  .calendar-container {
+    max-width: 900px;
+    margin: auto;
+    background: #f1f1f1;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgb(0 0 0 / 0.1);
+    padding: 16px 20px;
+  }
+
+  form[method=get] {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+  }
+  form select, form button {
+    padding: 10px 14px;
+    font-size: 1rem;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    cursor: pointer;
+  }
+  form button {
+    background: #007bff;
+    color: white;
+    border: none;
+    transition: background 0.3s ease;
+  }
+  form button:hover {
+    background: #0056b3;
+  }
+
+  /* Calendar table */
+  table.calendar {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 320px;
+    font-size: 0.9rem;
+  }
+  table.calendar th, table.calendar td {
+    border: 1px solid #ddd;
+    text-align: center;
+    padding: 10px 5px;
+    vertical-align: top;
+    position: relative;
+  }
+  table.calendar th {
+    background-color: #007bff;
+    color: white;
+    font-weight: 600;
+    padding: 12px 5px;
+  }
+
+  .current-day {
+    background-color: #f0ad4e33;
+    border: 2px solid #f0ad4e;
+  }
+  .leave {
+    background-color: #d9534f;
+    color: #fff;
+  }
+  .day-num {
+    color: #999;
+
+    font-size: 150%;
+    /* padding: 10px; */
+    top: -4px;
+    left: -10px;
+    z-index: 0;
+  }
+  .employee-leaves {
+    font-size: 11px;
+    
+        text-transform: uppercase;
+        
+    margin-top: 6px;
+    color: white;
+ 
+   
+    text-align: left;
+  }
+ .employee-leaves .leave-person {
+    display: block;
+    overflow: hidden;
+        white-space: nowrap;
+        width: 90%;
+        text-overflow: ellipsis;
+         word-wrap: break-word;
+         margin-top: 2px;
+            background-color: orange;
+            padding: 0 2px;
+        border-radius: 2px;
+        
+       
+ }
+
+ .remove-leave {
+    color: #fff;
+    font-weight: bold;
+    margin-left: 0px;
+    cursor: pointer;
+    font-size: 12px;
+    vertical-align: text-middle;
+
+}
+.remove-leave:hover {
+    color: #d8000c;
+}
+  /* Make log leave button bigger & friendly */
+  .log-leave-btn {
+    margin-top: 6px;
+    background-color: transparent;
+    color: #090;
+    text-align: right;
+    font-size: 40px;
+    cursor: pointer;
+    width: 100%;
+    white-space: normal;
+    opacity: 0.3;
+    transition: background 0.2s ease;
+    line-height: 10px;
+    margin-top: 30px;
+  }
+  /* Modal Styles */
+  #leaveModal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(50,50,50,0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 10px;
+  }
+  #leaveModal > div {
+    background: white;
+    padding: 25px 20px;
+    max-width: 400px;
+    border-radius: 12px;
+    width: 100%;
+    position: relative;
+    box-shadow: 0 8px 16px rgb(0 0 0 / 0.3);
+  }
+  #leaveModal button.close-btn {
+    position: absolute;
+    top: 10px; right: 12px;
+    background: none;
+    border: none;
+    font-size: 26px;
+    cursor: pointer;
+    color: #555;
+    transition: color 0.3s ease;
+  }
+  #leaveModal button.close-btn:hover {
+    color: #000;
+  }
+
+  #leaveModal h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-weight: 600;
+  }
+  #leaveModal label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  #leaveModal input[type="text"] {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 1rem;
+    margin-bottom: 14px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+  }
+  #leaveModal button[type="submit"] {
+    background: #007bff;
+    border: none;
+    padding: 12px 18px;
+    color: white;
+    font-size: 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.3s ease;
+  }
+  #leaveModal button[type="submit"]:hover {
+    background: #0056b3;
+  }
+  #modal-message {
+    margin-top: 12px;
+    font-weight: 500;
+    color: #d9534f;
+    min-height: 20px;
+  }
+
+  /* Responsive for small devices */
+  @media (max-width: 768px) {
+    .calendar-container {
+      padding: 12px 12px;
+    }
+    table.calendar {
+      display: block;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    table.calendar th, table.calendar td {
+      min-width: 75px;
+      padding: 10px 8px;
+    }
+    form[method=get] {
+      flex-direction: column;
+      align-items: center;
+    }
+    form select, form button {
+      width: 90%;
+      max-width: 280px;
+      font-size: 1.1rem;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+    .log-leave-btn {
+      font-size: 45px;
+      padding: 10px;
+    }
+    .employee-leaves .leave-person {
+      
+        font-size: 11px;
+        width: 45px;
+        
+    }
+  }
+  .calendar-grid {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+}
+.calendar-day-label, .calendar-cell {
+  flex: 1 0 13.2857%; /* 100% / 7 columns */
+  max-width: 14.2857%;
+  box-sizing: border-box;
+  text-align: center;
+    border-radius: 4px;
+}
+.calendar-day-label {
+  background: #70abeb;
+  color: #fff;
+  padding: 8px 2px;
+  font-weight: 600;
+  border: 1px solid #eee;
+
+}
+.calendar-cell {
+min-height: 80px;
+    border: 1px solid #eee;
+    background: #f9fafb;
+
+    justify-content: space-between;
+    padding: 8px 2px 6px 2px;
+
+    display: flex
+;
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    align-content: space-around;
+}
+
+.calendar-cell:hover .log-leave-btn {
+    opacity: 1;
+}
+.calendar-cell.empty {
+  background: transparent;
+  border: none;
+}
+@media (max-width: 600px) {
+  .calendar-day-label, .calendar-cell {
+    min-width: 36px;
+    font-size: 14px;
+    padding: 5px 2px;
+  }
+  .calendar-cell { min-height: 55px; }
+}
+

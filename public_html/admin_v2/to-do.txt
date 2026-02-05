@@ -1,0 +1,11 @@
+quotation changes
+    automate nvr options 
+    2mp / 4mp to reflect for nvr on the messages
+
+
+Task calender 
+    add nvr option to material
+    add colour cam options including nvr
+    include name and area in phone search on tasks
+    display formated text in issues
+    try to add other table too to the search (check first if needed)

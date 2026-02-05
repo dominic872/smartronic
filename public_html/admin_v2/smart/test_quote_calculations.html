@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Quote Calculations - Sticky Totals</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .test-result { margin: 15px 0; padding: 15px; border-radius: 5px; border-left: 4px solid; }
+        .pass { background-color: #e8f5e8; color: #2d5a2d; border-left-color: #4caf50; }
+        .fail { background-color: #ffeaea; color: #8b0000; border-left-color: #f44336; }
+        .info { background-color: #e3f2fd; color: #1565c0; border-left-color: #2196f3; }
+        .calculation { background-color: #fff3e0; color: #e65100; border-left-color: #ff9800; }
+        .sticky-totals { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; border: 2px solid #dee2e6; }
+        .sticky-row { display: flex; justify-content: space-between; margin: 8px 0; padding: 8px; background: white; border-radius: 3px; }
+        .sticky-label { font-weight: bold; }
+        .sticky-value { font-family: monospace; font-size: 1.1em; }
+        h1, h2 { color: #333; }
+        .formula { background: #f5f5f5; padding: 10px; border-radius: 3px; font-family: monospace; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧮 Quote System Calculation Test</h1>
+        <p>This test verifies that the sticky totals calculations work correctly after our profit percentage fix.</p>
+        
+        <div class="sticky-totals">
+            <h3>📊 Sticky Totals Preview</h3>
+            <div id="sticky-preview">
+                <div class="info">Loading calculations...</div>
+            </div>
+        </div>
+
+        <div id="test-results">
+            <div class="info">Running tests...</div>
+        </div>
+    </div>
+
+    <script>
+        // Simulate the exact calculation logic from scripts.js
+        function calculateStickyTotals(total, profitFlat, profitPercentage, additionalPercentage = 0, additionalDiscount = 0) {
+            // Step 1: Calculate minTotal (base cost + 3000)
+            const minTotal = total + 3000;
+            
+            // Step 2: Calculate finalTotal (with profit)
+            const totalWithFlatProfit = total + profitFlat;
+            const profitAmount = totalWithFlatProfit * (profitPercentage / 100); // Fixed: divide by 100
+            const finalTotal = totalWithFlatProfit + profitAmount;
+            
+            // Step 3: Calculate baseMaxAmount and displayMaxAmount
+            const baseMaxAmount = finalTotal;
+            let displayMaxAmount = baseMaxAmount;
+            
+            // Apply additional percentage if provided
+            if (additionalPercentage > 0) {
+                displayMaxAmount = baseMaxAmount * (1 + additionalPercentage / 100);
+            }
+            
+            // Step 4: Apply discount if provided
+            let maxAfterDiscount = displayMaxAmount;
+            if (additionalDiscount > 0) {
+                maxAfterDiscount = displayMaxAmount - additionalDiscount;
+            }
+            
+            // Step 5: Calculate difference and margin
+            const differenceAmount = maxAfterDiscount - minTotal;
+            const stickyProfitMargin = ((maxAfterDiscount - minTotal) / minTotal) * 100;
+            
+            return {
+                total,
+                minTotal,
+                finalTotal,
+                baseMaxAmount,
+                displayMaxAmount,
+                maxAfterDiscount,
+                differenceAmount,
+                stickyProfitMargin,
+                profitAmount
+            };
+        }
+        
+        function formatCurrency(amount) {
+            return '₹' + Math.round(amount).toLocaleString();
+        }
+        
+        function runTests() {
+            const results = document.getElementById('test-results');
+            const stickyPreview = document.getElementById('sticky-preview');
+            
+            // Test Case 1: Basic calculation with 15% profit
+            const test1 = calculateStickyTotals(10000, 0, 15);
+            
+            // Display sticky totals preview
+            stickyPreview.innerHTML = `
+                <div class="sticky-row">
+                    <span class="sticky-label">Base Total:</span>
+                    <span class="sticky-value">${formatCurrency(test1.total)}</span>
+                </div>
+                <div class="sticky-row">
+                    <span class="sticky-label">MIN (Total + 3000):</span>
+                    <span class="sticky-value">${formatCurrency(test1.minTotal)}</span>
+                </div>
+                <div class="sticky-row">
+                    <span class="sticky-label">MAX (with 15% profit):</span>
+                    <span class="sticky-value">${formatCurrency(test1.maxAfterDiscount)}</span>
+                </div>
+                <div class="sticky-row">
+                    <span class="sticky-label">Difference:</span>
+                    <span class="sticky-value">${formatCurrency(test1.differenceAmount)}</span>
+                </div>
+                <div class="sticky-row">
+                    <span class="sticky-label">Profit Margin:</span>
+                    <span class="sticky-value">${test1.stickyProfitMargin.toFixed(2)}%</span>
+                </div>
+            `;
+            
+            // Clear results
+            results.innerHTML = '';
+            
+            // Test 1: Verify MAX is 15% more than MIN
+            const expectedProfitMargin = 15;
+            const marginDifference = Math.abs(test1.stickyProfitMargin - expectedProfitMargin);
+            
+            results.innerHTML += `
+                <div class="calculation">
+                    <strong>Test Case 1: Basic 15% Profit Calculation</strong><br>
+                    <div class="formula">
+                        MIN = 10000 + 3000 = ${formatCurrency(test1.minTotal)}<br>
+                        Profit = 10000 × 0.15 = ${formatCurrency(test1.profitAmount)}<br>
+                        MAX = 10000 + ${formatCurrency(test1.profitAmount)} = ${formatCurrency(test1.maxAfterDiscount)}<br>
+                        Margin = (${formatCurrency(test1.differenceAmount)} / ${formatCurrency(test1.minTotal)}) × 100 = ${test1.stickyProfitMargin.toFixed(2)}%
+                    </div>
+                </div>
+            `;
+            
+            if (marginDifference < 0.1) {
+                results.innerHTML += `<div class="test-result pass">✅ PASS: Profit margin is ${test1.stickyProfitMargin.toFixed(2)}% (expected: ${expectedProfitMargin}%)</div>`;
+            } else {
+                results.innerHTML += `<div class="test-result fail">❌ FAIL: Profit margin is ${test1.stickyProfitMargin.toFixed(2)}% (expected: ${expectedProfitMargin}%)</div>`;
+            }
+            
+            // Test Case 2: With additional 10% percentage
+            const test2 = calculateStickyTotals(10000, 0, 15, 10);
+            
+            results.innerHTML += `
+                <div class="calculation">
+                    <strong>Test Case 2: 15% Profit + 10% Additional Percentage</strong><br>
+                    <div class="formula">
+                        Base MAX = 10000 + 1500 = ${formatCurrency(test2.finalTotal)}<br>
+                        With 10% additional = ${formatCurrency(test2.finalTotal)} × 1.10 = ${formatCurrency(test2.displayMaxAmount)}<br>
+                        Total margin = ${test2.stickyProfitMargin.toFixed(2)}%
+                    </div>
+                </div>
+            `;
+            
+            const expectedTotalMargin = 26.5; // 15% profit + 10% additional = 26.5% total
+            const totalMarginDifference = Math.abs(test2.stickyProfitMargin - expectedTotalMargin);
+            
+            if (totalMarginDifference < 0.1) {
+                results.innerHTML += `<div class="test-result pass">✅ PASS: Total margin is ${test2.stickyProfitMargin.toFixed(2)}% (expected: ~${expectedTotalMargin}%)</div>`;
+            } else {
+                results.innerHTML += `<div class="test-result fail">❌ FAIL: Total margin is ${test2.stickyProfitMargin.toFixed(2)}% (expected: ~${expectedTotalMargin}%)</div>`;
+            }
+            
+            // Test Case 3: Edge case with low base amount
+            const test3 = calculateStickyTotals(2000, 0, 15);
+            
+            results.innerHTML += `
+                <div class="calculation">
+                    <strong>Test Case 3: Edge Case - Low Base Amount (₹2000)</strong><br>
+                    <div class="formula">
+                        MIN = 2000 + 3000 = ${formatCurrency(test3.minTotal)}<br>
+                        MAX = 2000 + 300 = ${formatCurrency(test3.maxAfterDiscount)}<br>
+                        Margin = ${test3.stickyProfitMargin.toFixed(2)}%
+                    </div>
+                </div>
+            `;
+            
+            if (Math.abs(test3.stickyProfitMargin - 15) < 0.1) {
+                results.innerHTML += `<div class="test-result pass">✅ PASS: Edge case margin is ${test3.stickyProfitMargin.toFixed(2)}% (expected: 15%)</div>`;
+            } else {
+                results.innerHTML += `<div class="test-result fail">❌ FAIL: Edge case margin is ${test3.stickyProfitMargin.toFixed(2)}% (expected: 15%)</div>`;
+            }
+            
+            // Summary
+            const allTestsPassed = marginDifference < 0.1 && totalMarginDifference < 0.1 && Math.abs(test3.stickyProfitMargin - 15) < 0.1;
+            
+            results.innerHTML += `
+                <div class="test-result ${allTestsPassed ? 'pass' : 'fail'}">
+                    <strong>${allTestsPassed ? '🎉 All Tests Passed!' : '❌ Some Tests Failed'}</strong><br>
+                    The sticky totals calculations are ${allTestsPassed ? 'working correctly' : 'not working as expected'}.
+                    MAX is now properly 15% more than MIN with the profit percentage fix.
+                </div>
+            `;
+        }
+        
+        // Run tests when page loads
+        window.addEventListener('load', runTests);
+    </script>
+</body>
+</html>

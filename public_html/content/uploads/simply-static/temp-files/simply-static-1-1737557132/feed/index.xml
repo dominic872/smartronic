@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"
+	xmlns:content="http://purl.org/rss/1.0/modules/content/"
+	xmlns:wfw="http://wellformedweb.org/CommentAPI/"
+	xmlns:dc="http://purl.org/dc/elements/1.1/"
+	xmlns:atom="http://www.w3.org/2005/Atom"
+	xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+	xmlns:slash="http://purl.org/rss/1.0/modules/slash/"
+	>
+
+<channel>
+	<title>Smartronic | CCTV with Free Installation | Smart Home Automation</title>
+	<atom:link href="/feed/" rel="self" type="application/rss+xml" />
+	<link></link>
+	<description></description>
+	<lastBuildDate>Wed, 12 Jun 2024 15:30:38 +0000</lastBuildDate>
+	<language>en-US</language>
+	<sy:updatePeriod>
+	hourly	</sy:updatePeriod>
+	<sy:updateFrequency>
+	1	</sy:updateFrequency>
+	<generator>https://wordpress.org/?v=6.7.1</generator>
+
+<image>
+	<url>/wp-content/uploads/2025/01/cropped-Site-Icon-32x32.png</url>
+	<title>Smartronic | CCTV with Free Installation | Smart Home Automation</title>
+	<link></link>
+	<width>32</width>
+	<height>32</height>
+</image> 
+	<item>
+		<title>Welcome to the Gutenberg Editor</title>
+		<link>/welcome-to-the-gutenberg-editor/</link>
+					<comments>/welcome-to-the-gutenberg-editor/#respond</comments>
+		
+		<dc:creator><![CDATA[smarthome]]></dc:creator>
+		<pubDate>Wed, 12 Jun 2024 15:30:38 +0000</pubDate>
+				<category><![CDATA[Uncategorized]]></category>
+		<guid isPermaLink="false">/?p=19</guid>
+
+					<description><![CDATA[The goal of this new editor is to make adding rich content to WordPress simple and enjoyable. This whole post is composed of pieces of content—somewhat similar to LEGO bricks—that you can move around and interact with. Move your cursor around and you’ll notice the different blocks light up with outlines and arrows. Press the [&#8230;]]]></description>
+										<content:encoded><![CDATA[
+<div class="wp-block-cover alignwide is-light"><span aria-hidden="true" class="wp-block-cover__background has-background-dim"></span><img decoding="async" class="wp-block-cover__image-background" src="https://cldup.com/Fz-ASbo2s3.jpg" data-object-fit="cover"/><div class="wp-block-cover__inner-container is-layout-flow wp-block-cover-is-layout-flow">
+<p class="has-text-align-center has-white-color has-text-color has-large-font-size">Of Mountains &amp; Printing Presses</p>
+</div></div>
+
+
+
+<p>The goal of this new editor is to make adding rich content to WordPress simple and enjoyable. This whole post is composed of <em>pieces of content</em>—somewhat similar to LEGO bricks—that you can move around and interact with. Move your cursor around and you’ll notice the different blocks light up with outlines and arrows. Press the arrows to reposition blocks quickly, without fearing about losing things in the process of copying and pasting.</p>
+
+
+
+<p>What you are reading now is a <strong>text block</strong> the most basic block of all. The text block has its own controls to be moved freely around the post&#8230;</p>
+
+
+
+<p class="has-text-align-right">&#8230; like this one, which is right aligned.</p>
+
+
+
+<p>Headings are separate blocks as well, which helps with the outline and organization of your content.</p>
+
+
+
+<h2 class="wp-block-heading">A Picture is Worth a Thousand Words</h2>
+
+
+
+<p>Handling images and media with the utmost care is a primary focus of the new editor. Hopefully, you’ll find aspects of adding captions or going full-width with your pictures much easier and robust than before.</p>
+
+
+
+<figure class="wp-block-image aligncenter"><img decoding="async" src="https://cldup.com/cXyG__fTLN.jpg" alt="Beautiful landscape"/><figcaption class="wp-element-caption">If your theme supports it, you’ll see the &#8220;wide&#8221; button on the image toolbar. Give it a try.</figcaption></figure>
+
+
+
+<p>Try selecting and removing or editing the caption, now you don’t have to be careful about selecting the image or other text by mistake and ruining the presentation.</p>
+
+
+
+<h2 class="wp-block-heading">The <em>Inserter</em> Tool</h2>
+
+
+
+<p>Imagine everything that WordPress can do is available to you quickly and in the same place on the interface. No need to figure out HTML tags, classes, or remember complicated shortcode syntax. That’s the spirit behind the inserter—the <code>(+)</code> button you’ll see around the editor—which allows you to browse all available content blocks and add them into your post. Plugins and themes are able to register their own, opening up all sort of possibilities for rich editing and publishing.</p>
+
+
+
+<p>Go give it a try, you may discover things WordPress can already add into your posts that you didn’t know about. Here’s a short list of what you can currently find there:</p>
+
+
+
+<ul class="wp-block-list">
+<li>Text &amp; Headings</li>
+
+
+
+<li>Images &amp; Videos</li>
+
+
+
+<li>Galleries</li>
+
+
+
+<li>Embeds, like YouTube, Tweets, or other WordPress posts.</li>
+
+
+
+<li>Layout blocks, like Buttons, Hero Images, Separators, etc.</li>
+
+
+
+<li>And <em>Lists</em> like this one of course <img src="https://s.w.org/images/core/emoji/15.0.3/72x72/1f642.png" alt="🙂" class="wp-smiley" style="height: 1em; max-height: 1em;" /></li>
+</ul>
+
+
+
+<hr class="wp-block-separator has-css-opacity"/>
+
+
+
+<h2 class="wp-block-heading">Visual Editing</h2>
+
+
+
+<p>A huge benefit of blocks is that you can edit them in place and manipulate your content directly. Instead of having fields for editing things like the source of a quote, or the text of a button, you can directly change the content. Try editing the following quote:</p>
+
+
+
+<blockquote class="wp-block-quote is-layout-flow wp-block-quote-is-layout-flow">
+<p>The editor will endeavor to create a new page and post building experience that makes writing rich posts effortless, and has “blocks” to make it easy what today might take shortcodes, custom HTML, or “mystery meat” embed discovery.</p>
+<cite>Matt Mullenweg, 2017</cite></blockquote>
+
+
+
+<p>The information corresponding to the source of the quote is a separate text field, similar to captions under images, so the structure of the quote is protected even if you select, modify, or remove the source. It’s always easy to add it back.</p>
+
+
+
+<p>Blocks can be anything you need. For instance, you may want to add a subdued quote as part of the composition of your text, or you may prefer to display a giant stylized one. All of these options are available in the inserter.</p>
+
+
+
+<figure class="wp-block-gallery has-nested-images columns-2 is-cropped wp-block-gallery-1 is-layout-flex wp-block-gallery-is-layout-flex">
+<figure class="wp-block-image size-large"><img decoding="async" src="https://cldup.com/n0g6ME5VKC.jpg" alt=""/></figure>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" src="https://cldup.com/ZjESfxPI3R.jpg" alt=""/></figure>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" src="https://cldup.com/EKNF8xD2UM.jpg" alt=""/></figure>
+</figure>
+
+
+
+<p>You can change the amount of columns in your galleries by dragging a slider in the block inspector in the sidebar.</p>
+
+
+
+<h2 class="wp-block-heading">Media Rich</h2>
+
+
+
+<p>If you combine the new <strong>wide</strong> and <strong>full-wide</strong> alignments with galleries, you can create a very media rich layout, very quickly:</p>
+
+
+
+<figure class="wp-block-image alignfull"><img decoding="async" src="https://cldup.com/8lhI-gKnI2.jpg" alt="Accessibility is important — don’t forget image alt attribute"/></figure>
+
+
+
+<p>Sure, the full-wide image can be pretty big. But sometimes the image is worth it.</p>
+
+
+
+<figure class="wp-block-gallery alignwide has-nested-images columns-default is-cropped wp-block-gallery-2 is-layout-flex wp-block-gallery-is-layout-flex">
+<figure class="wp-block-image size-large"><img decoding="async" src="https://cldup.com/_rSwtEeDGD.jpg" alt=""/></figure>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" src="https://cldup.com/L-cC3qX2DN.jpg" alt=""/></figure>
+</figure>
+
+
+
+<p>The above is a gallery with just two images. It’s an easier way to create visually appealing layouts, without having to deal with floats. You can also easily convert the gallery back to individual images again, by using the block switcher.</p>
+
+
+
+<p>Any block can opt into these alignments. The embed block has them also, and is responsive out of the box:</p>
+
+
+
+<figure class="wp-block-embed alignwide is-type-video is-provider-vimeo wp-block-embed-vimeo wp-has-aspect-ratio wp-embed-aspect-16-9"><div class="wp-block-embed__wrapper">
+<iframe title="The Mountain" src="https://player.vimeo.com/video/22439234?dnt=1&amp;app_id=122963" width="500" height="281" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write"></iframe>
+</div></figure>
+
+
+
+<p>You can build any block you like, static or dynamic, decorative or plain. Here’s a pullquote block:</p>
+
+
+
+<figure class="wp-block-pullquote"><blockquote><p>Code is Poetry</p><cite>The WordPress community</cite></blockquote></figure>
+
+
+
+<p class="has-text-align-center">
+	<em>
+		If you want to learn more about how to build additional blocks, or if you are interested in helping with the project, head over to the <a href="https://github.com/WordPress/gutenberg">GitHub repository</a>.	</em>
+</p>
+
+
+
+<div class="wp-block-button aligncenter"><a class="wp-block-button__link wp-element-button" href="https://github.com/WordPress/gutenberg">Help build Gutenberg</a></div>
+
+
+
+<hr class="wp-block-separator has-css-opacity"/>
+
+
+
+<p class="has-text-align-center">Thanks for testing Gutenberg!</p>
+
+
+
+<p class="has-text-align-center"><img src="https://s.w.org/images/core/emoji/15.0.3/72x72/1f44b.png" alt="👋" class="wp-smiley" style="height: 1em; max-height: 1em;" /></p>
+
+
+
+<div class="wp-block-columns alignfull is-layout-flex wp-container-core-columns-is-layout-1 wp-block-columns-is-layout-flex">
+<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow" style="flex-basis:100%">
+<div class="wp-block-uagb-container uagb-block-83494d77 default uagb-is-root-container">
+<div class="wp-block-uagb-container uagb-block-eec09767">
+<div class="wp-block-uagb-info-box uagb-block-3bcc7d51 uagb-infobox__content-wrap  uagb-infobox-icon-above-title uagb-infobox-image-valign-top wp-block-uagb-info-box--has-margin"><div class="uagb-infobox-margin-wrapper"><div class="uagb-ifb-content"><div class="uagb-ifb-title-wrap"><span class="uagb-ifb-title-prefix">AWARD WINNING INTERIOR DESIGNER​​</span><h1 class="uagb-ifb-title">I&#8217;m Kyle Mills, Interior Designer.​</h1></div><p class="uagb-ifb-desc">A descriptive paragraph that tells clients how good you are and proves that you are the best choice that they’ve made. This paragraph is also for those who are looking out for a reliable interior designer.</p></div></div></div>
+
+
+
+<div class="wp-block-uagb-icon-list uagb-block-b3fc6a5e"><div class="uagb-icon-list__wrap">
+<div class="wp-block-uagb-icon-list-child uagb-block-e9edc2ef"><span class="uagb-icon-list__source-wrap"><svg xmlns="https://www.w3.org/2000/svg" viewBox="0 0 640 512"><path d="M592 224C565.5 224 544 245.5 544 272V352H96V272C96 245.5 74.51 224 48 224S0 245.5 0 272v192C0 472.8 7.164 480 16 480h64c8.836 0 15.1-7.164 15.1-16L96 448h448v16c0 8.836 7.164 16 16 16h64c8.836 0 16-7.164 16-16v-192C640 245.5 618.5 224 592 224zM128 272V320h384V272c0-38.63 27.53-70.95 64-78.38V160c0-70.69-57.31-128-128-128H191.1c-70.69 0-128 57.31-128 128L64 193.6C100.5 201.1 128 233.4 128 272z"></path></svg></span><span class="uagb-icon-list__label">400+ Projects Done​</span></div>
+
+
+
+<div class="wp-block-uagb-icon-list-child uagb-block-107758cb"><span class="uagb-icon-list__source-wrap"><svg xmlns="https://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M224 256c70.7 0 128-57.31 128-128s-57.3-128-128-128C153.3 0 96 57.31 96 128S153.3 256 224 256zM274.7 304H173.3C77.61 304 0 381.6 0 477.3c0 19.14 15.52 34.67 34.66 34.67h378.7C432.5 512 448 496.5 448 477.3C448 381.6 370.4 304 274.7 304z"></path></svg></span><span class="uagb-icon-list__label">100+ Happy Clients​</span></div>
+</div></div>
+
+
+
+<div class="wp-block-uagb-buttons uagb-buttons__outer-wrap uagb-btn__default-btn uagb-btn-tablet__default-btn uagb-btn-mobile__default-btn uagb-block-d2121323"><div class="uagb-buttons__wrap uagb-buttons-layout-wrap ">
+<div class="wp-block-uagb-buttons-child uagb-buttons__outer-wrap uagb-block-b8d37670 wp-block-button is-style-outline"><div class="uagb-button__wrapper"><a class="uagb-buttons-repeater wp-block-button__link" aria-label="" href="#" rel="follow noopener" target="_self" role="button"><div class="uagb-button__link">Read More</div><span class="uagb-button__icon uagb-button__icon-position-after"><svg xmlns="https://www.w3.org/2000/svg" viewBox="0 0 512 512" aria-hidden="true" focussable="false"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"></path></svg></span></a></div></div>
+</div></div>
+</div>
+
+
+
+<div class="wp-block-uagb-container uagb-block-bcb290f1">
+<div class="wp-block-uagb-image uagb-block-5bdb9dae wp-block-uagb-image--layout-default wp-block-uagb-image--effect-static wp-block-uagb-image--align-none"><figure class="wp-block-uagb-image__figure"><img decoding="async" srcset="/wp-content/uploads/2024/06/man-in-black-suit-jacket.jpg ,/wp-content/uploads/2024/06/man-in-black-suit-jacket.jpg 780w" sizes="auto, (max-width: 480px) 150px" src="/wp-content/uploads/2024/06/man-in-black-suit-jacket.jpg" alt="" class="uag-image-336" width="640" height="540" title="" loading="lazy" role="img"/></figure></div>
+</div>
+</div>
+</div>
+</div>
+
+
+
+<div class="wp-block-columns alignfull is-layout-flex wp-container-core-columns-is-layout-2 wp-block-columns-is-layout-flex">
+<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow" style="flex-basis:100%">
+<div class="wp-block-uagb-container uagb-block-48c4433d default uagb-is-root-container">
+<div class="wp-block-uagb-container uagb-layout-flex uagb-block-48b87611">
+<div class="wp-block-uagb-advanced-heading uagb-block-e3fc42bb"><h2 class="uagb-heading-text">Kyle Mills</h2><p class="uagb-desc-text">You can use a few enticing words and flaunt your capabilities that will attract future clients and encourage them to hire you right away.</p></div>
+
+
+
+<div class="wp-block-uagb-social-share uagb-social-share__outer-wrap uagb-social-share__layout-horizontal uagb-block-66238ad7">
+<div class="wp-block-uagb-social-share-child uagb-ss-repeater uagb-ss__wrapper uagb-block-2ed1c0e9"><span class="uagb-ss__link" data-href="https://www.facebook.com/sharer.php?u=" tabindex="0" role="button" aria-label="facebook"><span class="uagb-ss__source-wrap"><span class="uagb-ss__source-icon"><svg xmlns="https://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M504 256C504 119 393 8 256 8S8 119 8 256c0 123.8 90.69 226.4 209.3 245V327.7h-63V256h63v-54.64c0-62.15 37-96.48 93.67-96.48 27.14 0 55.52 4.84 55.52 4.84v61h-31.28c-30.8 0-40.41 19.12-40.41 38.73V256h68.78l-11 71.69h-57.78V501C413.3 482.4 504 379.8 504 256z"></path></svg></span></span></span></div>
+
+
+
+<div class="wp-block-uagb-social-share-child uagb-ss-repeater uagb-ss__wrapper uagb-block-02fb9b98"><span class="uagb-ss__link" data-href="https://twitter.com/share?url=" tabindex="0" role="button" aria-label="twitter"><span class="uagb-ss__source-wrap"><span class="uagb-ss__source-icon"><svg xmlns="https://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M459.4 151.7c.325 4.548 .325 9.097 .325 13.65 0 138.7-105.6 298.6-298.6 298.6-59.45 0-114.7-17.22-161.1-47.11 8.447 .974 16.57 1.299 25.34 1.299 49.06 0 94.21-16.57 130.3-44.83-46.13-.975-84.79-31.19-98.11-72.77 6.498 .974 12.99 1.624 19.82 1.624 9.421 0 18.84-1.3 27.61-3.573-48.08-9.747-84.14-51.98-84.14-102.1v-1.299c13.97 7.797 30.21 12.67 47.43 13.32-28.26-18.84-46.78-51.01-46.78-87.39 0-19.49 5.197-37.36 14.29-52.95 51.65 63.67 129.3 105.3 216.4 109.8-1.624-7.797-2.599-15.92-2.599-24.04 0-57.83 46.78-104.9 104.9-104.9 30.21 0 57.5 12.67 76.67 33.14 23.72-4.548 46.46-13.32 66.6-25.34-7.798 24.37-24.37 44.83-46.13 57.83 21.12-2.273 41.58-8.122 60.43-16.24-14.29 20.79-32.16 39.31-52.63 54.25z"></path></svg></span></span></span></div>
+
+
+
+<div class="wp-block-uagb-social-share-child uagb-ss-repeater uagb-ss__wrapper uagb-block-bb1603d6"><span class="uagb-ss__link" data-href="https://pinterest.com/pin/create/link/?url=" tabindex="0" role="button" aria-label="pinterest"><span class="uagb-ss__source-wrap"><span class="uagb-ss__source-icon"><svg xmlns="https://www.w3.org/2000/svg" viewBox="0 0 576 512"><path d="M549.7 124.1c-6.281-23.65-24.79-42.28-48.28-48.6C458.8 64 288 64 288 64S117.2 64 74.63 75.49c-23.5 6.322-42 24.95-48.28 48.6-11.41 42.87-11.41 132.3-11.41 132.3s0 89.44 11.41 132.3c6.281 23.65 24.79 41.5 48.28 47.82C117.2 448 288 448 288 448s170.8 0 213.4-11.49c23.5-6.321 42-24.17 48.28-47.82 11.41-42.87 11.41-132.3 11.41-132.3s0-89.44-11.41-132.3zm-317.5 213.5V175.2l142.7 81.21-142.7 81.2z"></path></svg></span></span></span></div>
+
+
+
+<div class="wp-block-uagb-social-share-child uagb-ss-repeater uagb-ss__wrapper uagb-block-9760ae7a"><span class="uagb-ss__link" data-href="https://www.linkedin.com/shareArticle?url=" tabindex="0" role="button" aria-label="linkedin"><span class="uagb-ss__source-wrap"><span class="uagb-ss__source-icon"><svg xmlns="https://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3zM135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5zm282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9V416z"></path></svg></span></span></span></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+
+<div class="wp-block-uagb-container uagb-block-129ae133 alignfull uagb-is-root-container"><div class="uagb-container-inner-blocks-wrap">
+<div class="wp-block-uagb-container uagb-block-8d446807">
+<div class="wp-block-uagb-info-box uagb-block-701721ee uagb-infobox__content-wrap  uagb-infobox-icon-above-title uagb-infobox-image-valign-top"><div class="uagb-ifb-content"><div class="uagb-ifb-title-wrap"><span class="uagb-ifb-title-prefix">WHAT I DO​</span><h2 class="uagb-ifb-title">Services​</h2></div></div></div>
+
+
+
+<div class="wp-block-uagb-buttons uagb-buttons__outer-wrap uagb-btn__default-btn uagb-btn-tablet__default-btn uagb-btn-mobile__default-btn uagb-block-b2f38049"><div class="uagb-buttons__wrap uagb-buttons-layout-wrap ">
+<div class="wp-block-uagb-buttons-child uagb-buttons__outer-wrap uagb-block-3ad4fa10 wp-block-button is-style-outline"><div class="uagb-button__wrapper"><a class="uagb-buttons-repeater wp-block-button__link" aria-label="" href="#" rel="follow noopener" target="_self" role="button"><div class="uagb-button__link">View All Services</div><span class="uagb-button__icon uagb-button__icon-position-after"><svg xmlns="https://www.w3.org/2000/svg" viewBox="0 0 512 512" aria-hidden="true" focussable="false"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"></path></svg></span></a></div></div>
+</div></div>
+</div>
+
+
+
+<div class="wp-block-uagb-container uagb-block-d72a667b">
+<div class="wp-block-uagb-info-box uagb-block-8952eeba uagb-infobox__content-wrap  uagb-infobox-icon-above-title uagb-infobox-image-valign-top"><div class="uagb-ifb-content"><div class="uagb-ifb-title-wrap"><span class="uagb-ifb-title-prefix">01.</span><h4 class="uagb-ifb-title">Interior Design​</h4></div><p class="uagb-ifb-desc">This is a short description elaborating the service you have mentioned above.​</p></div></div>
+
+
+
+<div class="wp-block-uagb-info-box uagb-block-87da22bc uagb-infobox__content-wrap  uagb-infobox-icon-above-title uagb-infobox-image-valign-top"><div class="uagb-ifb-content"><div class="uagb-ifb-title-wrap"><span class="uagb-ifb-title-prefix">02.</span><h4 class="uagb-ifb-title">Design &amp; Build​</h4></div><p class="uagb-ifb-desc">This is a short description elaborating the service you have mentioned above.​</p></div></div>
+
+
+
+<div class="wp-block-uagb-info-box uagb-block-d970ed13 uagb-infobox__content-wrap  uagb-infobox-icon-above-title uagb-infobox-image-valign-top"><div class="uagb-ifb-content"><div class="uagb-ifb-title-wrap"><span class="uagb-ifb-title-prefix">03.</span><h4 class="uagb-ifb-title">Procurement</h4></div><p class="uagb-ifb-desc">This is a short description elaborating the service you have mentioned above.​</p></div></div>
+</div>
+</div></div>
+
+
+
+<div class="wp-block-uagb-container uagb-block-12093db5 alignfull uagb-is-root-container"><div class="uagb-container-inner-blocks-wrap">
+<div class="wp-block-uagb-container uagb-block-7285015e">
+<div class="wp-block-uagb-info-box uagb-block-4269afcb uagb-infobox__content-wrap  uagb-infobox-icon-above-title uagb-infobox-image-valign-top"><div class="uagb-ifb-content"><div class="uagb-ifb-title-wrap"><span class="uagb-ifb-title-prefix">MOST RECENT​</span><h2 class="uagb-ifb-title">Projects​</h2></div><p class="uagb-ifb-desc">You can use a few enticing words and flaunt your capabilities that will attract future clients and encourage them to hire you right away.</p></div></div>
+
+
+
+<div class="wp-block-uagb-buttons uagb-buttons__outer-wrap uagb-btn__default-btn uagb-btn-tablet__default-btn uagb-btn-mobile__default-btn uagb-block-f21f630c"><div class="uagb-buttons__wrap uagb-buttons-layout-wrap ">
+<div class="wp-block-uagb-buttons-child uagb-buttons__outer-wrap uagb-block-f3f94942 wp-block-button is-style-outline"><div class="uagb-button__wrapper"><a class="uagb-buttons-repeater wp-block-button__link" aria-label="" href="#" rel="follow noopener" target="_self" role="button"><div class="uagb-button__link">View All Services</div><span class="uagb-button__icon uagb-button__icon-position-after"><svg xmlns="https://www.w3.org/2000/svg" viewBox="0 0 512 512" aria-hidden="true" focussable="false"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"></path></svg></span></a></div></div>
+</div></div>
+</div>
+
+
+
+<div class="wp-block-uagb-image uagb-block-4443778e wp-block-uagb-image--layout-default wp-block-uagb-image--effect-static wp-block-uagb-image--align-none"><figure class="wp-block-uagb-image__figure"><img decoding="async" srcset="/wp-content/uploads/2024/06/rectangular-white-coffee-table-near-brown-leather-sofa.jpg , /wp-content/uploads/2024/06/rectangular-white-coffee-table-near-brown-leather-sofa.jpg 360w" sizes="auto, (max-width: 480px) 150px" src="/wp-content/uploads/2024/06/rectangular-white-coffee-table-near-brown-leather-sofa.jpg" alt="" class="uag-image-376" width="800" height="450" title="" loading="lazy" role="img"/></figure></div>
+</div></div>
+]]></content:encoded>
+					
+					<wfw:commentRss>/welcome-to-the-gutenberg-editor/feed/</wfw:commentRss>
+			<slash:comments>0</slash:comments>
+		
+		
+			</item>
+		<item>
+		<title>Hello world!</title>
+		<link>/hello-world/</link>
+					<comments>/hello-world/#comments</comments>
+		
+		<dc:creator><![CDATA[smarthome]]></dc:creator>
+		<pubDate>Wed, 12 Jun 2024 14:51:18 +0000</pubDate>
+				<category><![CDATA[Uncategorized]]></category>
+		<guid isPermaLink="false">/?p=1</guid>
+
+					<description><![CDATA[Welcome to WordPress. This is your first post. Edit or delete it, then start writing!]]></description>
+										<content:encoded><![CDATA[
+<p>Welcome to WordPress. This is your first post. Edit or delete it, then start writing!</p>
+]]></content:encoded>
+					
+					<wfw:commentRss>/hello-world/feed/</wfw:commentRss>
+			<slash:comments>1</slash:comments>
+		
+		
+			</item>
+	</channel>
+</rss>

@@ -1,0 +1,54 @@
+{
+    "HDD": {
+        "1TB": {
+            "price": 2500,
+            "warranty": "3 years"
+        },
+        "2TB": {
+            "price": 4500,
+            "warranty": "3 years"
+        }
+    },
+    "Type": {
+        "HIKVISION": {
+            "4CH": {
+                "price": 8000,
+                "cameras": 4
+            },
+            "8CH": {
+                "price": 12000,
+                "cameras": 8
+            }
+        }
+    },
+    "WIFI": {
+        "2MP": {
+            "price": 2500,
+            "resolution": "1920x1080"
+        },
+        "5MP": {
+            "price": 4500,
+            "resolution": "2560x1920"
+        }
+    },
+    "Wireless": {
+        "Kit_A": {
+            "price": 15000,
+            "cameras": 4
+        },
+        "Kit_B": {
+            "price": 25000,
+            "cameras": 8
+        }
+    },
+    "items": {
+        "SMPS": {
+            "price": 500,
+            "description": "Power Supply"
+        },
+        "Connector": {
+            "price": 50,
+            "description": "BNC Connector"
+        }
+    }
+}

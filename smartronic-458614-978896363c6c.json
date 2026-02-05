@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "smartronic-458614",
+  "private_key_id": "978896363c6cd1ac4bd17d6107d5449f97f4d7ac",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDVwUKsIBSBDrCd\nAxUuzqz49DXUBIXRNzu8GHCcgCSfzWDbyZhZdcnYklahBAQJt5vbOzhnimUnHArq\nQqBan5DZelch7Nkk7ysfg/4tXXfP+7ADMcrzpc/Kk73cW8K72TpFQnKPR79nrOzc\n8Xz4n0fc0qrggS/YJGaxYhlcnDhzPRBLk2Ps4W6fxLoTfc9iFXX91yhyAq4ymdi6\ndQkuijDvAXnJwaIhrZyayAqh3rfuL9CP1b6qGuf2ER7VtcppypqMQ9AdZsfceyuL\nEJN37S2OqYkYHw/UqwF9T0HUnMVIG85nbcUCI+wdBmiK2bi6hJwDZRBmfWRQkzXl\nE3fmMzLtAgMBAAECggEAAjvpM208NNNMOove2g5V0pFGcCWVWqf4ebRwr6k+mL8r\nArw/5lMO+ow6MXS31q+Phn8YzXfURR0e93u3ezljm55F3ShbGaHe4iiwcwig/31U\nLA7Gasou51SPEK4SojRFdPyNjKlPJ9x8qkKwD9VZIsa+rsBMf9zbiBssHckFMjeD\n7HSTLDz8IABDsQnsx+Jg3jRu9XLsjCrMVswABHtZTSiIPQ/fpZ1ma7bAEnaI6L/X\ndNlImt1bi7nLhYd/Hu+ndxCc+72KAOT0VLXTgJe06YuTXPtw2cbUOcI+2IH+DwuH\nh2zvIQQZUNHTiywRkkgL/gA7Wg8bGWViUDzXh6gDwQKBgQDuKYBXDR9Fjqz5Yr4c\nOXZVRePMHp8Z7k2bCAfx/G03Ak6IOyAVN/cnrE7TPTLYqfRn51iDE28BobIAWL6c\nZCqA8C+j2OM9FMgP7i37MqLgH80JIjQWmgrtpl8Me3EpMjzuBcIWRWqZrYCx2OI+\nRle0iszbY9A5QskgObSdjMEvLQKBgQDlw8chkyyZdWlFM8eFyDDQjjPFd9rOhN1d\nosBbUYVQmDNFlAu/heKe5gANSQx1oczQZWLYOlAtddzsnu7AbSBG8DyYOVSQZHwZ\n41pggApVVk97GVRD6pgnNFSdV8+C9Je0nRLC2EvWvHYytLpV04fnSPhHSk2A+m93\nJ2qGqt5qwQKBgF5yquja1Vn6WPKVjBsZVqo+izY5tpLMBI7EwpHer1kvWwF/oRuJ\nFETxelkfXfi6fahvAJUKse0NuM+WYhEXUBvOJLZvnr5sbWKT7DxAOoNzWRaUL9/+\nuvLAFdWXZqsVt0AVnIDEip/jRLRC9IYJ02JP4SnoDX2H1Mco203Xsg0JAoGAAk90\nqibDtQtUMqjxoavAqeg0JxEsdxUo8K8ZRhHMyGGvakyxzYw4Gibv6zJH2Mr2t0W9\nt7TmZ36e6RY0CmVOhMgXo+Q3sHgCM3RwzTWcZP1IMVGw4jnyq7o/+5ENeiChgeRu\nct0f7hnZCmt80C4fWLkIHhdmLhzWkBkqXg5LzEECgYA9a2eTVNx1XTGqbmATjLMh\nDQfMRhiqzEfUewAGtlKS5RvW4XNpKGaa7g9AmNtA47Qloev3R9GTAeok/6P6brQJ\nUzktDe38iyhTgp/P1W3ZPJvtcPhtwkponk/LZ0I4ba34pNYnSdqAz51pqp5IHPZx\nqBZV88UQTav0ZgGKZRyLAQ==\n-----END PRIVATE KEY-----\n",
+  "client_email": "smartronic@smartronic-458614.iam.gserviceaccount.com",
+  "client_id": "115910804201678155081",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/smartronic%40smartronic-458614.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

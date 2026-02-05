@@ -1,0 +1,453 @@
+body {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
+.container {
+  max-width: 900px;
+  margin: auto;
+
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+}
+.column {
+  flex: 1;
+  min-width: 300px;
+}
+select,
+input {
+  width: 100%;
+  padding: 8px;
+  margin: 8px 0;
+}
+
+
+    
+input[type="checkbox"] {
+  appearance: auto !important;
+  background: unset;
+  width: unset;
+
+}
+#breakdown {
+  margin-top: 20px;
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 10px;
+}
+
+:root {
+  --arrow-bg: rgba(255, 255, 255, 0.3);
+  --arrow-icon: url(https://upload.wikimedia.org/wikipedia/commons/9/9d/Caret_down_font_awesome_whitevariation.svg);
+  --option-bg: white;
+  --select-bg: rgba(255, 255, 255, 0.2);
+}
+* {
+  box-sizing: border-box;
+}
+.strick {
+  text-decoration: line-through;
+}
+body {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  background: linear-gradient(35deg, red, purple);
+  width: fit-content !important;
+}
+/* <select> styles */
+select,
+input {
+  /* Reset */
+  appearance: none;
+  border: 0;
+  outline: 0;
+  font: inherit;
+  /* Personalize */
+  width: 20rem;
+  padding: 1rem 4rem 1rem 1rem;
+  background: var(--arrow-icon) no-repeat right 0.8em center / 1.4em,
+    linear-gradient(to left, var(--arrow-bg) 3em, var(--select-bg) 3em);
+  color: white;
+  border-radius: 0.25em;
+  box-shadow: 0 0 1em 0 rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  /* Remove IE arrow */
+  &::-ms-expand {
+    display: none;
+  }
+  /* Remove focus outline */
+  &:focus {
+    outline: none;
+  }
+  /* <option> colors */
+  option {
+    color: inherit;
+    background-color: var(--option-bg);
+  }
+}
+
+/* Custom select wrapper */
+select {
+  appearance: none;
+  -webkit-appearance: none; /* Safari/Chrome */
+  -moz-appearance: none;    /* Firefox */
+  
+  border: 0;
+  outline: 0;
+  font: inherit;
+  width: 20rem;
+  padding: 1rem 4rem 1rem 1rem;
+  
+  /* Custom arrow + background */
+  background: var(--arrow-icon) no-repeat right 0.8em center / 1.4em,
+              linear-gradient(to left, var(--arrow-bg) 3em, var(--select-bg) 3em);
+  
+  color: white; /* Text for the selected value */
+  border-radius: 0.25em;
+  box-shadow: 0 0 1em 0 rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+}
+
+/* Fix dropdown items */
+select option {
+  color: black; /* readable text */
+  background-color: #fff; /* dropdown background */
+}
+
+/* Optional: dark theme variant */
+select.dark {
+  color: white;
+  background: var(--arrow-icon) no-repeat right 0.8em center / 1.4em,
+              linear-gradient(to left, var(--arrow-bg, #222) 3em, var(--select-bg, #333) 3em);
+}
+
+select.dark option {
+  color: white;
+  background-color: #333;
+}
+
+
+label {
+  display: inline-block;
+  width: 200px;
+  color: rgb(201, 200, 200);
+}
+
+.border-box {
+  border: 1px solid red;
+  padding: 10px;
+  background: #fbfbd7;
+}
+
+.from-cust {
+  color: red;
+}
+
+.from-cust-disc {
+  color: red;
+}
+.whatsapp-message-box {
+  border: 1px solid red;
+  padding: 20px;
+  background: #ffffd9;
+}
+
+.whatsapp-message-box input {
+  color: black;
+}
+.whatsapp-button {
+  padding: 10px;
+}
+.copied-message {
+  position: absolute;
+  background: #4caf50;
+  color: white;
+  padding: 5px 10px;
+  font-size: 14px;
+  border-radius: 5px;
+  margin-left: 10px;
+  animation: fadeIn 0.3s ease-in-out;
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* Style for tab container */
+.tab-container {
+  width: 100%;
+  max-width: 600px;
+  margin: auto;
+}
+
+/* Style for tab buttons */
+.tab-buttons {
+  display: flex;
+  justify-content: space-around;
+  border-bottom: 2px solid #ccc;
+  padding: 10px 0;
+  width: 310px;
+  overflow: auto;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.3s;
+  border-bottom: 3px solid transparent;
+}
+
+.tab-btn.active {
+  border-bottom: 3px solid #f40009;
+  font-weight: bold;
+  color: #f40009;
+}
+
+/* Hide tab content initially */
+.tab-content {
+  display: none;
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-top: none;
+}
+
+/* Show active tab */
+.tab-content.active {
+  display: block;
+}
+.row-container {
+  display: flex; /* Makes the child elements (columns) appear in a row */
+  gap: 15px; /* Adds space between columns */
+  align-items: center; /* Aligns items vertically */
+  flex-wrap: wrap; /* Ensures responsiveness: moves to the next line if needed */
+}
+.row-container input {
+  width: 17rem;
+}
+
+.row-container .column {
+  flex: 1; /* Distributes available space equally among columns */
+  min-width: 150px; /* Prevents columns from getting too small */
+}
+
+.whatsapp-button {
+  background-color: #25d366;
+  color: white;
+  border: none;
+  padding: 18px 15px;
+  margin-top: 25px;
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 5px;
+}
+@media (max-width: 600px) {
+  .row-container {
+    flex-direction: column; /* Stacks items on small screens */
+    gap: 10px; /* Reduces space between stacked items */
+  }
+
+  .row-container input {
+    width: 100%;
+  }
+}
+
+input#perCam,
+input#limitedProfit {
+  appearance: revert;
+  box-shadow: unset;
+}
+
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f5f5f5;
+}
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+h2 {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.comments {
+    width: 25%;
+}
+.phone-number {
+    font-weight: bold;
+    color: #007bff;
+    
+}
+thead {
+    background-color: #508fc1;
+    color: #fff;
+}
+tbody tr:hover {
+    background-color: #f9f9f9;
+}
+.row-highlight {
+    background-color: #dff0d8; /* Highlighted color for rows with comments */
+}
+option.highlight {
+    background-color: #f5f5f5; /* Default color for rows */
+}
+.actions button {
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+.overlay-message {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    z-index: 1000;
+    display: none;
+}
+
+button {
+    background: none;
+    border: 0;
+    cursor: pointer;
+}
+
+
+
+.tile-container {
+    display: grid;
+    gap: 15px;
+    grid-template-columns: 1fr;
+    width: 100%;
+
+    .tile {
+      background-color: #ffffff;
+      color: #000000;
+      padding: 10px; 
+      text-align: center;
+      font-size: 1.2em;
+      border-radius: 10px;
+    }   
+    form {
+      display: inline-block;
+      text-align: right;
+    }
+    .row {
+      display: flex;
+      width: 100%;
+      text-wrap-mode: nowrap;
+      padding: 5px;
+      }
+    .row .ele {
+        flex: 1;
+        text-align: left;
+    }
+    .row .ele:last-child {
+        text-align: right;
+    }
+    .row .ele.red{
+      
+      width: 0px;
+      background: red;
+      /* border-radius: 50%; */
+      position: relative;
+      transform: rotate(-90deg);
+      top: -4px;
+      left: -30px;
+      font-size: 19px;
+      color: white;
+      text-align: right;
+      max-width: 64px;
+      font-weight: bold;
+      padding-right: 10px;
+      border-radius: 5px 0px 0px 5px;
+    }
+
+
+}
+
+input#poe {
+  display: none;
+}
+
+
+/* Tablet View (768px - 1279px) */
+@media (min-width: 768px) {
+  .tile-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Desktop View (1280px and above) */
+@media (min-width: 1280px) {
+  .tile-container {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.quote .container {
+  margin-top: 50px;
+}
+
+.quote .controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    margin: -20px;
+    width: -webkit-fill-available;
+}
+.logo-section {
+    display: flex
+;
+    align-items: center;
+    gap: 10px;
+}
+.controls h2 {
+    margin: 0;
+    font-size: 16px;
+    text-transform: uppercase;
+    position: relative;
+    top: -2px;
+    border-left: 1px solid;
+    padding-left: 30px;
+}
+user agent stylesheet
+h2 {
+    display: block;
+    font-size: 1.5em;
+    margin-block-start: 0.83em;
+    margin-block-end: 0.83em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+    unicode-bidi: isolate;
+}
+   

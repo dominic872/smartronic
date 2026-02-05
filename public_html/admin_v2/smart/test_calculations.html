@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Sticky Totals Calculations</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .pass { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .fail { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        #test-results { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Sticky Totals Calculation Test</h1>
+    <p>This test verifies that MAX is 15% more than MIN after our profit percentage fix.</p>
+    
+    <div id="test-results">
+        <div class="test-result info">Loading test data...</div>
+    </div>
+
+    <script>
+        // Test the calculation logic from scripts.js
+        function testCalculations() {
+            const results = document.getElementById('test-results');
+            results.innerHTML = '';
+            
+            // Test case 1: Basic calculation
+            const total = 10000;
+            const profitFlat = 0;
+            const profitPercentage = 15; // 15% (fixed from 0.15)
+            
+            // Calculate minTotal (base cost + 3000)
+            const minTotal = total + 3000;
+            
+            // Calculate finalTotal (with profit)
+            const totalWithFlatProfit = total + profitFlat;
+            const profitAmount = totalWithFlatProfit * (profitPercentage / 100);
+            const finalTotal = totalWithFlatProfit + profitAmount;
+            
+            // Calculate maxAfterDiscount (base max amount)
+            const baseMaxAmount = finalTotal;
+            const maxAfterDiscount = baseMaxAmount;
+            
+            // Test results
+            const expectedMax = minTotal * 1.15; // 15% more than min
+            const difference = maxAfterDiscount - minTotal;
+            const percentageIncrease = (difference / minTotal) * 100;
+            
+            // Display results
+            results.innerHTML += `
+                <div class="test-result info">
+                    <strong>Test Case 1: Basic Calculation</strong><br>
+                    Total: ₹${total.toLocaleString()}<br>
+                    Min Total: ₹${minTotal.toLocaleString()}<br>
+                    Max Total: ₹${maxAfterDiscount.toLocaleString()}<br>
+                    Difference: ₹${difference.toLocaleString()}<br>
+                    Percentage Increase: ${percentageIncrease.toFixed(2)}%
+                </div>
+            `;
+            
+            // Verify MAX is 15% more than MIN
+            if (Math.abs(percentageIncrease - 15) < 0.01) {
+                results.innerHTML += `<div class="test-result pass">✅ PASS: MAX is ${percentageIncrease.toFixed(2)}% more than MIN (expected: 15%)</div>`;
+            } else {
+                results.innerHTML += `<div class="test-result fail">❌ FAIL: MAX is ${percentageIncrease.toFixed(2)}% more than MIN (expected: 15%)</div>`;
+            }
+            
+            // Test case 2: With additional percentage
+            const additionalPercentage = 10; // 10% additional
+            const displayMaxAmount = baseMaxAmount * (1 + additionalPercentage / 100);
+            const maxWithAdditional = displayMaxAmount;
+            
+            const totalDifference = maxWithAdditional - minTotal;
+            const totalPercentageIncrease = (totalDifference / minTotal) * 100;
+            
+            results.innerHTML += `
+                <div class="test-result info">
+                    <strong>Test Case 2: With Additional 10% Percentage</strong><br>
+                    Min Total: ₹${minTotal.toLocaleString()}<br>
+                    Max Total: ₹${maxWithAdditional.toLocaleString()}<br>
+                    Total Percentage Increase: ${totalPercentageIncrease.toFixed(2)}%
+                </div>
+            `;
+            
+            // Expected: 15% base profit + 10% additional = 25% total
+            if (Math.abs(totalPercentageIncrease - 25) < 0.01) {
+                results.innerHTML += `<div class="test-result pass">✅ PASS: MAX is ${totalPercentageIncrease.toFixed(2)}% more than MIN (expected: 25%)</div>`;
+            } else {
+                results.innerHTML += `<div class="test-result fail">❌ FAIL: MAX is ${totalPercentageIncrease.toFixed(2)}% more than MIN (expected: 25%)</div>`;
+            }
+        }
+        
+        // Run tests when page loads
+        window.addEventListener('load', testCalculations);
+    </script>
+</body>
+</html>

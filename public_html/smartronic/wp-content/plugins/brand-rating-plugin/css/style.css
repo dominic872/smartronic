@@ -1,0 +1,68 @@
+#brp-header {
+    margin-top: -20px !important;
+    display: flex;
+    justify-content: flex-end;  /* Align the header text and info icon to the right */
+    font-size: 18px !important;
+}
+
+.brp-info-icon {
+    font-size: 12px;
+    color: #888;
+    margin-left: 5px !important;
+}
+
+#brp-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;  /* Aligns the entire container to the right */
+    margin-block-start: unset !important;
+    position: relative;
+    height: 30px;  /* Set a height to manage item sliding */
+    overflow: hidden;  /* Ensure items stay within the container */
+}
+#brp-container, #brp-header {
+    justify-content: center;
+    align-items: center;
+    width: 400px;
+    }
+
+    #brp-container .brp-label{
+    
+      color: rgb(0, 0, 0) !important;
+
+    }
+.brp-item {
+    display: flex;
+    justify-content: space-between;
+    position: absolute;
+    opacity: 0;  /* Start with hidden opacity */
+    top: 100px;  /* Start outside the container, below the view */
+    transition: all 0.6s ease-in-out;  /* Smooth transition for movement */
+}
+
+.brp-label {
+    flex: 1;
+    text-align: right;
+    font-size: 20px !important;
+    font-weight: 500;
+    
+}
+
+.brp-rating {
+    flex: 1;
+    text-align: right;
+    margin-top: -4px;
+    width: 200px;
+    .brp-star {
+        font-size: 25px !important;
+        margin-left: 2px;
+    }
+}
+
+
+
+/* Ensures that the active item is visible and placed correctly */
+.brp-item.active {
+    opacity: 1;
+    top: 0;  /* Bring the item to the top within the container */
+}

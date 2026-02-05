@@ -1,0 +1,44 @@
+/* gads_stats specific styles */
+.segment-btn { transition: background-color .15s, color .15s; }
+.reloading .reload-icon { animation: spin 0.9s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+
+/* Layout */
+.page-body { background: #f9fafb; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+.stats-container { width: 100%; max-width: 768px; margin: 0 auto; text-align: center; padding-left: 1rem; padding-right: 1rem; }
+@media (min-width: 640px) { .stats-container { padding-left: 1.5rem; padding-right: 1.5rem; } }
+.top-bar { display: flex; justify-content: center; margin-bottom: 1rem; }
+@media (min-width: 640px) { .top-bar { justify-content: flex-end; } }
+
+/* Reload button */
+.reload-btn { display: inline-flex; align-items: center; justify-content: center; background: #2563eb; color: #fff; border-radius: 9999px; box-shadow: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -4px rgba(0,0,0,.1); width: 3rem; height: 3rem; }
+@media (min-width: 640px) { .reload-btn { width: 3.5rem; height: 3.5rem; } }
+.reload-btn:disabled { opacity: .7; cursor: not-allowed; }
+.reload-icon { width: 1.5rem; height: 1.5rem; }
+@media (min-width: 640px) { .reload-icon { width: 1.75rem; height: 1.75rem; } }
+
+/* Title */
+.stats-title { font-size: 1.875rem; font-weight: 700; color: #1f2937; margin-bottom: 1.5rem; }
+
+/* Segmented control */
+.segmented { display: inline-flex; background: #fff; border-radius: 0.75rem; box-shadow: 0 1px 2px rgba(0,0,0,.08); border: 1px solid #e5e7eb; padding: 0.25rem; margin: 0 .5rem; }
+.segment-btn { padding: 0.5rem 0.75rem; border-radius: 0.5rem; font-size: .875rem; font-weight: 500; color: #374151; transition: background-color .15s, color .15s; }
+.segment-btn.active { background: #2563eb; color: #fff; }
+
+/* Totals */
+.total-number { margin-bottom: .5rem; font-size: 3.75rem; font-weight: 800; color: #2563eb; }
+.total-label { color: #6b7280; margin-bottom: 2rem; }
+
+/* Past days */
+.past-days { display: flex; justify-content: center; gap: 1rem; color: #4b5563; font-size: .875rem; margin-bottom: 2rem; }
+.past-day { display: flex; flex-direction: column; align-items: center; }
+
+/* Grouped grid */
+.grouped-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+@media (min-width: 640px) { .grouped-grid { grid-template-columns: repeat(3, minmax(0,1fr)); } }
+@media (min-width: 768px) { .grouped-grid { grid-template-columns: repeat(4, minmax(0,1fr)); } }
+.group-box { background: #eff6ff; border-radius: .75rem; padding: 1rem; box-shadow: 0 1px 1px rgba(0,0,0,.04); transition: background-color .2s; }
+.group-box:hover { background: #dbeafe; }
+.group-box .count { font-size: 1.875rem; font-weight: 700; color: #1d4ed8; }
+.group-box .label { color: #4b5563; font-size: .875rem; margin-top: .25rem; }

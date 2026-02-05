@@ -1,0 +1,340 @@
+.crf-form-wrapper {
+    background-color: white;
+    padding-top: 100px;
+}
+.crf-container {
+    width: 100%;
+    margin: 0 auto;
+}
+
+#cctv-requirement-form {
+    padding: 25px;
+    background: linear-gradient(to bottom, #e0e0e0 0%, #f1f2f3 100%) !important;
+    border-radius: 20px;
+
+}
+
+.wp-block-uagb-container.form-success-message {
+    display: none;
+}
+
+.form-success-message :where(.wp-block-columns) {
+    margin-bottom: 5px;
+}
+
+.form-success-message img {
+    width: 100px;
+    height: 100px;
+}
+.form-success-message .uagb-ifb-desc > p {
+    margin-top: 0;
+}
+
+.form-success-message .uagb-ifb-desc > p > small {
+    color: #999;
+    font-size: 13px;
+}
+.crf-form-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.crf-form-col {
+    width: 98%;
+    input {
+        display: block;
+
+    }
+
+    & > label {
+      font-family: "Raleway";
+      font-size: 22px;
+    }
+}
+
+.crf-form-col.description {
+    font-size: 14px;
+    color: #666;
+}
+
+.slider-input-wrapper {
+    display: block;
+    position: relative;
+    width: 100px;
+}
+.range-slider {
+    -webkit-appearance: none;
+    width: 150%;
+    height: 0px;
+    background: #181818;
+    outline: none;
+    /* opacity: 0.7; */
+    border-radius: 5px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+}
+
+.slider-input, .input {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    text-align: center;
+
+    border: 1px solid transparent;
+    border-radius: 4px;
+    /* border-radius: 5px; */
+    /* --box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);*/
+   
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    -ms-flex-line-pack: center;
+    align-content: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -ms-flex-item-align: start;
+    align-self: flex-start;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    display: -webkit-inline-box;
+    display: -ms-inline-flexbox;
+    display: inline-flex;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+    -ms-flex-flow: row nowrap;
+    flex-flow: row nowrap;
+    font-size: 16px;
+    font-weight: 500;
+    -ms-flex-pack: distribute;
+    justify-content: space-around;
+    letter-spacing: .5px;
+    line-height: 24px;
+    margin: 8px 0;
+    max-width: 380px;
+    min-height: 48px;
+    min-width: 96px;
+    overflow: hidden;
+    padding: 12px 24px 12px 24px;
+    text-align: center;
+    text-decoration: none;
+    border-bottom: 1px solid #3498db;
+}
+.input {
+    border: 1px solid #ccc;
+    align-content: start;
+    text-align: left;
+    -ms-flex-line-pack: start;
+    align-content: start;
+    -webkit-box-align: start;
+    -ms-flex-align: start;
+    align-items: start;
+    width: 250px;
+    font-size: 18px;
+    font-weight: bolder;
+}
+
+button.input {
+ 
+    padding: 24px 12px !important;
+}
+/* Mobile layout */
+@media (max-width: 768px) {
+    .crf-form-row {
+        flex-direction: column;
+    }
+
+    .crf-form-col {
+        width: 100%;
+    }
+}
+
+.fancy-radio label {
+    display: inline-flex;
+    flex-flow: row nowrap;
+    justify-content: space-around;
+    align-items: center;
+    align-self: flex-start;
+    text-align: center;
+    cursor: pointer;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 12px 24px;
+    margin: 8px 0;
+    max-width: 380px;
+    min-width: 96px;
+    min-height: 48px;
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    line-height: 24px;
+    text-decoration: none;
+    vertical-align: middle;
+    overflow: hidden;
+    transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+    -webkit-transition: background-color 0.2s, color 0.2s, -webkit-box-shadow 0.2s;
+    -o-transition: background-color 0.2s, box-shadow 0.2s, color 0.2s;
+    
+    /* Font smoothing */
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+
+    .fancy-radio label:hover {
+        box-shadow: 3px 3px 10px -4px #999;
+    }
+
+.fancy-radio input[type="radio"] {
+    display: none;
+}
+
+.fancy-radio input[type="radio"]:checked + label {
+    background-color: #3498db;
+    color: #fff;
+    border-color: #3498db;
+}
+
+/* Button styling */
+#next-button, #back-button {
+    background-color: #3498db;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 20px;
+    box-shadow: 3px 3px 10px -4px #999;
+}
+#next-button:hover {
+   
+    box-shadow: unset;
+}
+
+#next-button:disabled {
+    background-color: #e0e0e0;
+    box-shadow: unset;
+}
+
+#back-button span {
+    margin-right: 5px;
+}
+
+.wp-block-uagb-container.uagb-block-b8876bf9 {
+
+    margin-top: 20px !important;
+}
+
+.input-with-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.input-icon {
+    position: absolute;
+    left: 10px; /* Adjust the spacing as needed */
+    width: 40px; /* Icon size */
+    height: 40px;
+    fill: #25D366; /* WhatsApp's green color */
+}
+
+.input-with-icon .input {
+    padding-left: 55px; /* Add padding to make room for the icon */
+    
+   
+}
+
+
+.input {
+    border: 1px solid #ccc;
+    align-content: start;
+    text-align: left;
+    -ms-flex-line-pack: start;
+    align-content: start;
+    -webkit-box-align: start;
+    -ms-flex-align: start;
+    align-items: start;
+    width: 250px;
+    font-size: 18px;
+    font-weight: bolder;
+}
+
+
+.qr-popup {
+    display: none; /*Hidden by default */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 20px;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    z-index: 1000;
+}
+
+
+.qr-popup-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    & > p {
+        margin-bottom: 0px;
+    }
+}
+
+.qr-popup .qr-image {
+    width: 250px;
+    height: 250px;
+    margin-bottom: 10px;
+}
+.form-success-message .qr-image {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 10px;
+}
+.call-link {
+    font-size: 40px;
+    font-weight: bold;
+    color: #f40009;
+    text-decoration: none;
+
+}
+
+.call-link:hover {
+    text-decoration: underline;
+}
+
+/* Overlay to darken the background */
+.qr-popup-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+
+@media (max-width: 768px) {
+    .bg-camera { 
+        background-size: 30% !important;
+    }
+}
+
+.bg-camera { 
+    background: url(https://smartronic.online/content/uploads/2024/10/cctv-camera-on-transparent-background_16434494.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: right;
+  }
+ 

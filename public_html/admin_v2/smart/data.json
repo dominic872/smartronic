@@ -1,0 +1,603 @@
+{
+    "HDD": {
+        "Toshiba": [
+            {
+                "capacity": "500 GB",
+                "value": null,
+                "label": "500 GB"
+            },
+            {
+                "capacity": "1 TB",
+                "value": null,
+                "label": "1 TB "
+            },
+            {
+                "capacity": "2 TB",
+                "value": "6850",
+                "label": "2 TB (2Yr) - ₹6850",
+                "preferred": "true"
+            },
+            {
+                "capacity": "4 TB",
+                "value": "6850",
+                "label": "4 TB (2Yr) - ₹6850"
+            },
+            {
+                "capacity": "6 TB",
+                "value": "10500",
+                "label": "6 TB (2Yr) - ₹10500"
+            }
+        ],
+        "Consistent": [
+            {
+                "capacity": "500 GB",
+                "value": "1950",
+                "label": "500 GB Const. 2Yr 1950",
+                "preferred": "true"
+            },
+            {
+                "capacity": "1 TB",
+                "value": "3950",
+                "label": "1 TB (2Yr) - ₹3950",
+                "preferred": ""
+            },
+            {
+                "capacity": "2 TB",
+                "value": "4250",
+                "label": "2 TB (2Yr) - ₹4250"
+            },
+            {
+                "capacity": "4 TB",
+                "value": "5250",
+                "label": "4 TB (2Yr) - ₹5250",
+                "preferred": ""
+            },
+            {
+                "capacity": "6 TB",
+                "value": "8500",
+                "label": "6 TB (2Yr) - ₹8500"
+            }
+        ],
+        "SEE/WD/TOSH": [
+            {
+                "capacity": "500 GB",
+                "value": "850",
+                "label": "500 GB (1Yr) - ₹850"
+            },
+            {
+                "capacity": "1 TB",
+                "value": "1950",
+                "label": "1 TB (1Yr) - ₹1950"
+            },
+            {
+                "capacity": "2 TB",
+                "value": "2850",
+                "label": "2 TB (1Yr) - ₹2800"
+            },
+            {
+                "capacity": "4 TB",
+                "value": "5250",
+                "label": "4 TB (1Yr) - ₹5250"
+            },
+            {
+                "capacity": "6 TB",
+                "value": null,
+                "label": "6 TB (1Yr) - "
+            }
+        ],
+        "Seagate": [
+            {
+                "capacity": "2TB",
+                "value": "6100",
+                "label": "2 TB Seagate 3yr 6100",
+                "preferred": ""
+            },
+            {
+                "capacity": "1TB",
+                "value": "6650",
+                "label": "1 TB Seagate 3yr  6650",
+                "preferred": "true"
+            },
+            {
+                "capacity": "4TB",
+                "value": "8000",
+                "label": "4 TB Seagate 3yr 8000",
+                "preferred": "true"
+            },
+            {
+                "capacity": "6TB",
+                "value": "14000",
+                "label": "6 TB Seagate 3yr 14,000",
+                "preferred": "true"
+            },
+            {
+                "capacity": "8TB",
+                "value": "17500",
+                "label": "8 TB Seagate 3yr 17,500",
+                "preferred": "true"
+            }
+        ]
+    },
+    "Type": {
+        "DVR": {
+            "HIKVISION": {
+                "2MP": {
+                    "Recorder": {
+                        "4CH": [
+                            {
+                                "value": "1950",
+                                "label": "4CH"
+                            }
+                        ],
+                        "8CH": [
+                            {
+                                "value": "2850",
+                                "label": "8 CH"
+                            }
+                        ],
+                        "16CH": [
+                            {
+                                "value": "9000",
+                                "label": "16 CH"
+                            }
+                        ],
+                        "32CH": [
+                            {
+                                "value": "17750",
+                                "label": "32CH"
+                            }
+                        ]
+                    },
+                    "Camera": [
+                        {
+                            "value": "1800",
+                            "label": "Color Night - ₹1800"
+                        },
+                        {
+                            "value": "1250",
+                            "label": "HYBID Night- ₹1250"
+                        },
+                        {
+                            "value": "825",
+                            "label": "Normal Night Mic - ₹825*"
+                        },
+                        {
+                            "value": "800",
+                            "label": "Normal Night - ₹800"
+                        },
+                        {
+                            "value": "1850",
+                            "label": "2 Way DOME - ₹1850"
+                        },
+                        {
+                            "value": "1850",
+                            "label": "2 Way Bullet - ₹1850"
+                        }
+                    ]
+                },
+                "5MP": {
+                    "Recorder": {
+                        "4CH": [
+                            {
+                                "value": "2750",
+                                "label": "4CH"
+                            }
+                        ],
+                        "8CH": [
+                            {
+                                "value": "4500",
+                                "label": "8 CH"
+                            }
+                        ],
+                        "16CH": [
+                            {
+                                "value": "10000",
+                                "label": "16 CH"
+                            }
+                        ],
+                        "32CH": [
+                            {
+                                "value": "21500",
+                                "label": "32CH"
+                            }
+                        ]
+                    },
+                    "Camera": [
+                        {
+                            "value": "2180",
+                            "label": "Color Night 3K - ₹2180"
+                        },
+                        {
+                            "value": "1450",
+                            "label": "HYBID Night 3K - ₹1450"
+                        },
+                        {
+                            "value": "1150",
+                            "label": "Normal Night - ₹1150*"
+                        }
+                    ]
+                }
+            },
+            "CP PLUS": {
+                "2MP": {
+                    "Recorder": {
+                        "4CH": [
+                            {
+                                "value": "1875",
+                                "label": "4CH - ₹1875+"
+                            }
+                        ],
+                        "8CH": [
+                            {
+                                "value": "2825",
+                                "label": "8CH - ₹2825"
+                            }
+                        ],
+                        "16CH": [
+                            {
+                                "value": null,
+                                "label": "16CH"
+                            }
+                        ],
+                        "32CH": [
+                            {
+                                "value": null,
+                                "label": "32CH"
+                            }
+                        ]
+                    },
+                    "Camera": [
+                        {
+                            "value": "700",
+                            "label": "Normal NV - 650+"
+                        },
+                        {
+                            "value": "1075",
+                            "label": "HYBRID - ₹1025"
+                        },
+                        {
+                            "value": "1225",
+                            "label": "FULL COLOUR - ₹1225"
+                        }
+                    ]
+                },
+                "5MP": {
+                    "Recorder": {
+                        "4CH": [
+                            {
+                                "value": "2825",
+                                "label": "4CH - ₹2825"
+                            }
+                        ],
+                        "8CH": [
+                            {
+                                "value": "4050",
+                                "label": "8CH - ₹4050"
+                            }
+                        ],
+                        "16CH": [
+                            {
+                                "value": null,
+                                "label": "16CH - 000"
+                            }
+                        ],
+                        "32CH": [
+                            {
+                                "value": null,
+                                "label": "32CH - 00"
+                            }
+                        ]
+                    },
+                    "Camera": [
+                        {
+                            "value": "1025",
+                            "label": "Normal NV - 1075"
+                        },
+                        {
+                            "value": "1400",
+                            "label": "HYBRID - ₹1400"
+                        },
+                        {
+                            "value": "1750",
+                            "label": "FULL COLOUR - ₹1750"
+                        }
+                    ]
+                }
+            },
+            "DAHUA": {
+                "2MP": {
+                    "Recorder": {
+                        "4CH": [
+                            {
+                                "value": "1975",
+                                "label": "4CH - ₹1975"
+                            }
+                        ],
+                        "8CH": [
+                            {
+                                "value": "2875",
+                                "label": "8CH - ₹2875"
+                            }
+                        ],
+                        "16CH": [
+                            {
+                                "value": null,
+                                "label": "16CH"
+                            }
+                        ],
+                        "32CH": [
+                            {
+                                "value": null,
+                                "label": "32CH"
+                            }
+                        ]
+                    },
+                    "Camera": [
+                        {
+                            "value": "750",
+                            "label": "Normal NV- ₹750+"
+                        },
+                        {
+                            "value": "1050",
+                            "label": "HYBRID - ₹1050"
+                        },
+                        {
+                            "value": "1275",
+                            "label": "FULL COLOUR - ₹1275"
+                        }
+                    ]
+                },
+                "5MP": {
+                    "Recorder": {
+                        "4CH": [
+                            {
+                                "value": "2850",
+                                "label": "4CH - ₹2850"
+                            }
+                        ],
+                        "8CH": [
+                            {
+                                "value": "4650",
+                                "label": "8CH - ₹4650"
+                            }
+                        ],
+                        "16CH": [
+                            {
+                                "value": null,
+                                "label": "16CH"
+                            }
+                        ],
+                        "32CH": [
+                            {
+                                "value": null,
+                                "label": "32CH"
+                            }
+                        ]
+                    },
+                    "Camera": [
+                        {
+                            "value": "1050",
+                            "label": "Normal NV - ₹1050+"
+                        },
+                        {
+                            "value": "1350",
+                            "label": "HYBRID - ₹1350"
+                        },
+                        {
+                            "value": "1650",
+                            "label": "FULL COLOUR - ₹1650"
+                        }
+                    ]
+                }
+            }
+        },
+        "NVR": {
+            "HIKVISION": {
+                "Recorder": {
+                    "4CH": [
+                        {
+                            "value": "2850",
+                            "label": "4CH - ₹2850"
+                        }
+                    ],
+                    "8CH": [
+                        {
+                            "value": "3390",
+                            "label": "8 CH - ₹3390"
+                        }
+                    ],
+                    "16CH": [
+                        {
+                            "value": "4950",
+                            "label": "16 CH - ₹4950"
+                        }
+                    ],
+                    "32 CH": [
+                        {
+                            "value": "11050",
+                            "label": "32CH - ₹11050"
+                        }
+                    ]
+                },
+                "Camera": {
+                    "2MP": [
+                        {
+                            "value": "2700",
+                            "label": "Normal NV - ₹2700"
+                        }
+                    ],
+                    "4MP": [
+                        {
+                            "value": "3550",
+                            "label": "4MP - ₹3550"
+                        },
+                        {
+                            "value": "4550",
+                            "label": "HYBRID- ₹4550"
+                        }
+                    ],
+                    "6MP": [
+                        {
+                            "value": "4850",
+                            "label": "6MP - ₹4850"
+                        }
+                    ]
+                }
+            },
+            "CP PLUS": {
+                "Recorder": {
+                    "4CH": [
+                        {
+                            "value": null,
+                            "label": "4CH - 0000"
+                        }
+                    ],
+                    "8CH": [
+                        {
+                            "value": "3350",
+                            "label": "8 CH - ₹3350+"
+                        }
+                    ],
+                    "16CH": [
+                        {
+                            "value": null,
+                            "label": "16 CH - 0000"
+                        }
+                    ],
+                    "32 CH": [
+                        {
+                            "value": null,
+                            "label": "32CH - 0000"
+                        }
+                    ]
+                },
+                "Camera": {
+                    "5MP": [
+                        {
+                            "value": null,
+                            "label": "Normal NV - 000"
+                        },
+                        {
+                            "value": "3350",
+                            "label": "HYBRID - ₹3350+"
+                        }
+                    ]
+                }
+            },
+            "DAHUA": []
+        },
+        "WIFI": {
+            "Outdoor": [],
+            "Indoor": [],
+            "Camera": {
+                "4MP": {
+                    "HIKVISION": [
+                        {
+                            "value": "2750",
+                            "label": "H6C - ₹2750+"
+                        }
+                    ]
+                },
+                "5MP": {
+                    "IMOU": [
+                        {
+                            "value": "4750",
+                            "label": "5MP + 5MP - ₹4750+"
+                        }
+                    ]
+                },
+                "3MP": {
+                    "IMOU": [
+                        {
+                            "value": "4450",
+                            "label": "3MP + 3MP - ₹4450+"
+                        }
+                    ]
+                },
+                "2MP": {
+                    "CP PLUS": [
+                        {
+                            "value": "1250",
+                            "label": "P23 - ₹1250+"
+                        },
+                        {
+                            "value": "1750",
+                            "label": "E48A - ₹1750+"
+                        }
+                    ]
+                }
+            }
+        },
+        "Wireless": {
+            "HIKVISION": {
+                "NVR": {
+                    "Recorder": [
+                        {
+                            "value": "4350",
+                            "label": "EZVIZ CS-X5S-8W 8 CH - ₹4350+"
+                        }
+                    ],
+                    "Camera": [
+                        {
+                            "value": "2750",
+                            "label": "EZVIZ H6C 4MP - ₹2750+"
+                        },
+                        {
+                            "value": "3050",
+                            "label": "EZVIZ C3WN - ₹3050+"
+                        }
+                    ]
+                }
+            },
+            "CP PLUS": [
+                "5MP"
+            ],
+            "DAHUA": [
+                "5MP"
+            ]
+        },
+        "items": {
+            "SMPS 4": {
+                "value": "400",
+                "label": "SMPS 4CH - ₹400"
+            },
+            "SMPS 8": {
+                "value": "600",
+                "label": "SMPS 8CH - ₹400"
+            },
+            "BNC WIRED": {
+                "value": "20",
+                "label": "BNC Wired - ₹20"
+            },
+            "DC": {
+                "value": "8",
+                "label": "DC Connector - ₹8"
+            },
+            "BACK BOX": {
+                "value": "20",
+                "label": "Back Box - ₹20"
+            },
+            "Dlink 3+1": {
+                "value": "975",
+                "label": "Dlink 3+1 Cable - ₹875"
+            },
+            "Rack 1U": {
+                "value": "650",
+                "label": "Rack 1U - ₹650"
+            },
+            "Frontech 19\"": {
+                "value": "1750",
+                "label": "Frontech 19\" Monitor - ₹1650"
+            }
+        }
+    },
+    "additionalItems": {
+        "profit": {
+            "value": 3000
+        },
+        "profitPercentage": {
+            "value": 15
+        }
+    },
+    "items": []
+}

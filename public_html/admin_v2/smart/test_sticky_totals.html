@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Sticky Totals Calculation</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .result { font-weight: bold; margin: 10px 0; }
+        .pass { color: green; }
+        .fail { color: red; }
+        .calculation { background: #f5f5f5; padding: 10px; margin: 5px 0; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>Sticky Totals Calculation Test</h1>
+    
+    <div class="test-section">
+        <h3>Test Case 1: Basic Calculation</h3>
+        <div class="calculation" id="test1"></div>
+        <div class="result" id="result1"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test Case 2: With Percentage Addition</h3>
+        <div class="calculation" id="test2"></div>
+        <div class="result" id="result2"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test Case 3: Edge Case - Low Profit</h3>
+        <div class="calculation" id="test3"></div>
+        <div class="result" id="result3"></div>
+    </div>
+
+    <script>
+        function formatINR(amount) {
+            return '₹' + amount.toLocaleString('en-IN');
+        }
+        
+        function testStickyTotalsCalculation(total, finalTotal, additionalPercentage = 0, additionalDiscount = 0) {
+            // MIN = total + 3000
+            const minTotal = total + 3000;
+            
+            // MAX = finalTotal (base amount)
+            const baseMaxAmount = finalTotal;
+            
+            // If percentage is applied, calculate increased MAX
+            let displayMaxAmount = baseMaxAmount;
+            if (additionalPercentage > 0) {
+                const percentageIncrease = baseMaxAmount * (additionalPercentage / 100);
+                displayMaxAmount = baseMaxAmount + percentageIncrease;
+            }
+            
+            // Apply discount to display MAX amount
+            const maxAfterDiscount = displayMaxAmount - additionalDiscount;
+            
+            return {
+                minTotal,
+                maxAfterDiscount,
+                baseMaxAmount,
+                displayMaxAmount
+            };
+        }
+        
+        // Test Case 1: Basic calculation with proper profit
+        const test1Total = 100000; // subtotal + GST + installation
+        const test1FinalTotal = 115450; // total + 15% profit
+        const test1Result = testStickyTotalsCalculation(test1Total, test1FinalTotal);
+        
+        document.getElementById('test1').innerHTML = `
+            Total (subtotal + GST + installation): ${formatINR(test1Total)}<br>
+            FinalTotal (with 15% profit): ${formatINR(test1FinalTotal)}<br>
+            MIN (total + 3000): ${formatINR(test1Result.minTotal)}<br>
+            MAX (finalTotal): ${formatINR(test1Result.maxAfterDiscount)}
+        `;
+        
+        document.getElementById('result1').innerHTML = 
+            test1Result.maxAfterDiscount > test1Result.minTotal 
+                ? `<span class="pass">✓ PASS: MAX (${formatINR(test1Result.maxAfterDiscount)}) > MIN (${formatINR(test1Result.minTotal)})</span>`
+                : `<span class="fail">✗ FAIL: MAX (${formatINR(test1Result.maxAfterDiscount)}) ≤ MIN (${formatINR(test1Result.minTotal)})</span>`;
+        
+        // Test Case 2: With additional percentage
+        const test2Result = testStickyTotalsCalculation(test1Total, test1FinalTotal, 10);
+        
+        document.getElementById('test2').innerHTML = `
+            Total: ${formatINR(test1Total)}<br>
+            FinalTotal: ${formatINR(test1FinalTotal)}<br>
+            Additional Percentage: 10%<br>
+            MIN: ${formatINR(test2Result.minTotal)}<br>
+            MAX (with +10%): ${formatINR(test2Result.maxAfterDiscount)}
+        `;
+        
+        document.getElementById('result2').innerHTML = 
+            test2Result.maxAfterDiscount > test2Result.minTotal 
+                ? `<span class="pass">✓ PASS: MAX (${formatINR(test2Result.maxAfterDiscount)}) > MIN (${formatINR(test2Result.minTotal)})</span>`
+                : `<span class="fail">✗ FAIL: MAX (${formatINR(test2Result.maxAfterDiscount)}) ≤ MIN (${formatINR(test2Result.minTotal)})</span>`;
+        
+        // Test Case 3: Edge case with very low profit (old bug scenario)
+        const test3Total = 100000;
+        const test3FinalTotal = 100150; // Only 0.15% profit (old bug)
+        const test3Result = testStickyTotalsCalculation(test3Total, test3FinalTotal, 5);
+        
+        document.getElementById('test3').innerHTML = `
+            Total: ${formatINR(test3Total)}<br>
+            FinalTotal (with 0.15% profit): ${formatINR(test3FinalTotal)}<br>
+            Additional Percentage: 5%<br>
+            MIN: ${formatINR(test3Result.minTotal)}<br>
+            MAX (with +5%): ${formatINR(test3Result.maxAfterDiscount)}
+        `;
+        
+        document.getElementById('result3').innerHTML = 
+            test3Result.maxAfterDiscount > test3Result.minTotal 
+                ? `<span class="pass">✓ PASS: MAX (${formatINR(test3Result.maxAfterDiscount)}) > MIN (${formatINR(test3Result.minTotal)})</span>`
+                : `<span class="fail">✗ FAIL: MAX (${formatINR(test3Result.maxAfterDiscount)}) ≤ MIN (${formatINR(test3Result.minTotal)}) - This shows the old bug!</span>`;
+    </script>
+</body>
+</html>

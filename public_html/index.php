@@ -1,0 +1,1619 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8WDFCD4S8D"></script>
+
+
+
+    <script>  
+
+
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-8WDFCD4S8D');
+      function gtagSendEvent(url) {
+        var callback = function () {
+          if (typeof url === 'string') {
+            console.log('Quotation registered in GA');
+          }
+        };
+        gtag('event', 'conversion_event_request_quote', {
+          'event_callback': callback,
+          'event_timeout': 2000,
+          // <event_parameters>
+        });
+        return false;
+      }
+    </script> 
+
+
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="max-image-preview:large">
+  <meta property="og:title" content="Free Indoor Wi-Fi Camera or LED Monitor with Smartronic Installation!" />
+  <meta property="og:description" content="Book your Smartronic CCTV installation this month and choose between a FREE Indoor Wi-Fi Camera or a FREE LED Monitor. Offer valid for a limited time!" />
+  <meta property="og:image" content="https://smartronic.online/content/uploads/2025/01/offer.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:url" content="https://smartronic.online" />
+  <meta property="og:type" content="website" />
+
+	<style>img:is([sizes="auto" i], [sizes^="auto," i]) { contain-intrinsic-size: 3000px 1500px }</style>
+	<title>Smartronic | CCTV with Free Installation | Smart Home Automation</title>
+<link rel="dns-prefetch" href="//fonts.googleapis.com">
+<link rel="alternate" type="application/rss+xml" title="Smartronic | CCTV with Free Installation | Smart Home Automation &raquo; Feed" href="/feed/">
+<link rel="alternate" type="application/rss+xml" title="Smartronic | CCTV with Free Installation | Smart Home Automation &raquo; Comments Feed" href="/comments/feed/">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css">
+
+<script>
+window._wpemojiSettings = {"baseUrl":"https:\/\/s.w.org\/images\/core\/emoji\/15.0.3\/72x72\/","ext":".png","svgUrl":"https:\/\/s.w.org\/images\/core\/emoji\/15.0.3\/svg\/","svgExt":".svg","source":{"concatemoji":"\includes\/js\emoji-release.min.js?ver=6.7.1"}};
+/*! This file is auto-generated */
+!function(i,n){var o,s,e;function c(e){try{var t={supportTests:e,timestamp:(new Date).valueOf()};sessionStorage.setItem(o,JSON.stringify(t))}catch(e){}}function p(e,t,n){e.clearRect(0,0,e.canvas.width,e.canvas.height),e.fillText(t,0,0);var t=new Uint32Array(e.getImageData(0,0,e.canvas.width,e.canvas.height).data),r=(e.clearRect(0,0,e.canvas.width,e.canvas.height),e.fillText(n,0,0),new Uint32Array(e.getImageData(0,0,e.canvas.width,e.canvas.height).data));return t.every(function(e,t){return e===r[t]})}function u(e,t,n){switch(t){case"flag":return n(e,"🏳️‍⚧️","🏳️​⚧️")?!1:!n(e,"🇺🇳","🇺​🇳")&&!n(e,"🏴󠁧󠁢󠁥󠁮󠁧󠁿","🏴​󠁧​󠁢​󠁥​󠁮​󠁧​󠁿");case"emoji":return!n(e,"🐦‍⬛","🐦​⬛")}return!1}function f(e,t,n){var r="undefined"!=typeof WorkerGlobalScope&&self instanceof WorkerGlobalScope?new OffscreenCanvas(300,150):i.createElement("canvas"),a=r.getContext("2d",{willReadFrequently:!0}),o=(a.textBaseline="top",a.font="600 32px Arial",{});return e.forEach(function(e){o[e]=t(a,e,n)}),o}function t(e){var t=i.createElement("script");t.src=e,t.defer=!0,i.head.appendChild(t)}"undefined"!=typeof Promise&&(o="wpEmojiSettingsSupports",s=["flag","emoji"],n.supports={everything:!0,everythingExceptFlag:!0},e=new Promise(function(e){i.addEventListener("DOMContentLoaded",e,{once:!0})}),new Promise(function(t){var n=function(){try{var e=JSON.parse(sessionStorage.getItem(o));if("object"==typeof e&&"number"==typeof e.timestamp&&(new Date).valueOf()<e.timestamp+604800&&"object"==typeof e.supportTests)return e.supportTests}catch(e){}return null}();if(!n){if("undefined"!=typeof Worker&&"undefined"!=typeof OffscreenCanvas&&"undefined"!=typeof URL&&URL.createObjectURL&&"undefined"!=typeof Blob)try{var e="postMessage("+f.toString()+"("+[JSON.stringify(s),u.toString(),p.toString()].join(",")+"));",r=new Blob([e],{type:"text/javascript"}),a=new Worker(URL.createObjectURL(r),{name:"wpTestEmojiSupports"});return void(a.onmessage=function(e){c(n=e.data),a.terminate(),t(n)})}catch(e){}c(n=f(s,u,p))}t(n)}).then(function(e){for(var t in e)n.supports[t]=e[t],n.supports.everything=n.supports.everything&&n.supports[t],"flag"!==t&&(n.supports.everythingExceptFlag=n.supports.everythingExceptFlag&&n.supports[t]);n.supports.everythingExceptFlag=n.supports.everythingExceptFlag&&!n.supports.flag,n.DOMReady=!1,n.readyCallback=function(){n.DOMReady=!0}}).then(function(){return e}).then(function(){var e;n.supports.everything||(n.readyCallback(),(e=n.source||{}).concatemoji?t(e.concatemoji):e.wpemoji&&e.twemoji&&(t(e.twemoji),t(e.wpemoji)))}))}((window,document),window._wpemojiSettings);
+</script>
+<style id="wp-block-site-logo-inline-css">.wp-block-site-logo{box-sizing:border-box;line-height:0}.wp-block-site-logo a{display:inline-block;line-height:0}.wp-block-site-logo.is-default-size img{height:auto;width:120px}.wp-block-site-logo img{height:auto;max-width:100%}.wp-block-site-logo a,.wp-block-site-logo img{border-radius:inherit}.wp-block-site-logo.aligncenter{margin-left:auto;margin-right:auto;text-align:center}:root :where(.wp-block-site-logo.is-style-rounded){border-radius:9999px}</style>
+<style id="wp-block-group-inline-css">.wp-block-group{box-sizing:border-box}:where(.wp-block-group.wp-block-group-is-layout-constrained){position:relative}</style>
+<style id="wp-block-navigation-link-inline-css">.wp-block-navigation .wp-block-navigation-item__label{overflow-wrap:break-word}.wp-block-navigation .wp-block-navigation-item__description{display:none}.link-ui-tools{border-top:1px solid #f0f0f0;padding:8px}.link-ui-block-inserter{padding-top:8px}.link-ui-block-inserter__back{margin-left:8px;text-transform:uppercase}
+
+				.is-style-arrow-link .wp-block-navigation-item__label:after {
+					content: "\2197";
+					padding-inline-start: 0.25rem;
+					vertical-align: middle;
+					text-decoration: none;
+					display: inline-block;
+				}
+</style>
+<style id="wp-block-button-inline-css">.wp-block-button__link{box-sizing:border-box;cursor:pointer;display:inline-block;text-align:center;word-break:break-word}.wp-block-button__link.aligncenter{text-align:center}.wp-block-button__link.alignright{text-align:right}:where(.wp-block-button__link){border-radius:9999px;box-shadow:none;padding:calc(.667em + 2px) calc(1.333em + 2px);text-decoration:none}.wp-block-button[style*=text-decoration] .wp-block-button__link{text-decoration:inherit}.wp-block-buttons>.wp-block-button.has-custom-width{max-width:none}.wp-block-buttons>.wp-block-button.has-custom-width .wp-block-button__link{width:100%}.wp-block-buttons>.wp-block-button.has-custom-font-size .wp-block-button__link{font-size:inherit}.wp-block-buttons>.wp-block-button.wp-block-button__width-25{width:calc(25% - var(--wp--style--block-gap, .5em)*.75)}.wp-block-buttons>.wp-block-button.wp-block-button__width-50{width:calc(50% - var(--wp--style--block-gap, .5em)*.5)}.wp-block-buttons>.wp-block-button.wp-block-button__width-75{width:calc(75% - var(--wp--style--block-gap, .5em)*.25)}.wp-block-buttons>.wp-block-button.wp-block-button__width-100{flex-basis:100%;width:100%}.wp-block-buttons.is-vertical>.wp-block-button.wp-block-button__width-25{width:25%}.wp-block-buttons.is-vertical>.wp-block-button.wp-block-button__width-50{width:50%}.wp-block-buttons.is-vertical>.wp-block-button.wp-block-button__width-75{width:75%}.wp-block-button.is-style-squared,.wp-block-button__link.wp-block-button.is-style-squared{border-radius:0}.wp-block-button.no-border-radius,.wp-block-button__link.no-border-radius{border-radius:0!important}:root :where(.wp-block-button .wp-block-button__link.is-style-outline),:root :where(.wp-block-button.is-style-outline>.wp-block-button__link){border:2px solid;padding:.667em 1.333em}:root :where(.wp-block-button .wp-block-button__link.is-style-outline:not(.has-text-color)),:root :where(.wp-block-button.is-style-outline>.wp-block-button__link:not(.has-text-color)){color:currentColor}:root :where(.wp-block-button .wp-block-button__link.is-style-outline:not(.has-background)),:root :where(.wp-block-button.is-style-outline>.wp-block-button__link:not(.has-background)){background-color:initial;background-image:none}</style>
+<style id="twentytwentyfour-button-style-outline-inline-css">.wp-block-button.is-style-outline
+	> .wp-block-button__link:not(.has-text-color, .has-background):hover {
+	background-color: var(--wp--preset--color--contrast-2, var(--wp--preset--color--contrast, transparent));
+	color: var(--wp--preset--color--base);
+	border-color: var(--wp--preset--color--contrast-2, var(--wp--preset--color--contrast, currentColor));
+}</style>
+<style id="wp-block-buttons-inline-css">.wp-block-buttons.is-vertical{flex-direction:column}.wp-block-buttons.is-vertical>.wp-block-button:last-child{margin-bottom:0}.wp-block-buttons>.wp-block-button{display:inline-block;margin:0}.wp-block-buttons.is-content-justification-left{justify-content:flex-start}.wp-block-buttons.is-content-justification-left.is-vertical{align-items:flex-start}.wp-block-buttons.is-content-justification-center{justify-content:center}.wp-block-buttons.is-content-justification-center.is-vertical{align-items:center}.wp-block-buttons.is-content-justification-right{justify-content:flex-end}.wp-block-buttons.is-content-justification-right.is-vertical{align-items:flex-end}.wp-block-buttons.is-content-justification-space-between{justify-content:space-between}.wp-block-buttons.aligncenter{text-align:center}.wp-block-buttons:not(.is-content-justification-space-between,.is-content-justification-right,.is-content-justification-left,.is-content-justification-center) .wp-block-button.aligncenter{margin-left:auto;margin-right:auto;width:100%}.wp-block-buttons[style*=text-decoration] .wp-block-button,.wp-block-buttons[style*=text-decoration] .wp-block-button__link{text-decoration:inherit}.wp-block-buttons.has-custom-font-size .wp-block-button__link{font-size:inherit}.wp-block-button.aligncenter{text-align:center}</style>
+<link rel="stylesheet" id="wp-block-navigation-css" href="includes/blocks/navigation/style.min.css?ver=6.7.1" media="all">
+<style id="wp-block-columns-inline-css">.wp-block-columns{align-items:normal!important;box-sizing:border-box;display:flex;flex-wrap:wrap!important}@media (min-width:782px){.wp-block-columns{flex-wrap:nowrap!important}}.wp-block-columns.are-vertically-aligned-top{align-items:flex-start}.wp-block-columns.are-vertically-aligned-center{align-items:center}.wp-block-columns.are-vertically-aligned-bottom{align-items:flex-end}@media (max-width:781px){.wp-block-columns:not(.is-not-stacked-on-mobile)>.wp-block-column{flex-basis:100%!important}}@media (min-width:782px){.wp-block-columns:not(.is-not-stacked-on-mobile)>.wp-block-column{flex-basis:0;flex-grow:1}.wp-block-columns:not(.is-not-stacked-on-mobile)>.wp-block-column[style*=flex-basis]{flex-grow:0}}.wp-block-columns.is-not-stacked-on-mobile{flex-wrap:nowrap!important}.wp-block-columns.is-not-stacked-on-mobile>.wp-block-column{flex-basis:0;flex-grow:1}.wp-block-columns.is-not-stacked-on-mobile>.wp-block-column[style*=flex-basis]{flex-grow:0}:where(.wp-block-columns){margin-bottom:1.75em}:where(.wp-block-columns.has-background){padding:1.25em 2.375em}.wp-block-column{flex-grow:1;min-width:0;overflow-wrap:break-word;word-break:break-word}.wp-block-column.is-vertically-aligned-top{align-self:flex-start}.wp-block-column.is-vertically-aligned-center{align-self:center}.wp-block-column.is-vertically-aligned-bottom{align-self:flex-end}.wp-block-column.is-vertically-aligned-stretch{align-self:stretch}.wp-block-column.is-vertically-aligned-bottom,.wp-block-column.is-vertically-aligned-center,.wp-block-column.is-vertically-aligned-top{width:100%}</style>
+<style id="wp-block-paragraph-inline-css">.is-small-text{font-size:.875em}.is-regular-text{font-size:1em}.is-large-text{font-size:2.25em}.is-larger-text{font-size:3em}.has-drop-cap:not(:focus):first-letter{float:left;font-size:8.4em;font-style:normal;font-weight:100;line-height:.68;margin:.05em .1em 0 0;text-transform:uppercase}body.rtl .has-drop-cap:not(:focus):first-letter{float:none;margin-left:.1em}p.has-drop-cap.has-background{overflow:hidden}:root :where(p.has-background){padding:1.25em 2.375em}:where(p.has-text-color:not(.has-link-color)) a{color:inherit}p.has-text-align-left[style*="writing-mode:vertical-lr"],p.has-text-align-right[style*="writing-mode:vertical-rl"]{rotate:180deg}</style>
+<style id="wp-block-image-inline-css">.wp-block-image a{display:inline-block}.wp-block-image img{box-sizing:border-box;height:auto;max-width:100%;vertical-align:bottom}@media (prefers-reduced-motion:no-preference){.wp-block-image img.hide{visibility:hidden}.wp-block-image img.show{animation:show-content-image .4s}}.wp-block-image[style*=border-radius] img,.wp-block-image[style*=border-radius]>a{border-radius:inherit}.wp-block-image.has-custom-border img{box-sizing:border-box}.wp-block-image.aligncenter{text-align:center}.wp-block-image.alignfull a,.wp-block-image.alignwide a{width:100%}.wp-block-image.alignfull img,.wp-block-image.alignwide img{height:auto;width:100%}.wp-block-image .aligncenter,.wp-block-image .alignleft,.wp-block-image .alignright,.wp-block-image.aligncenter,.wp-block-image.alignleft,.wp-block-image.alignright{display:table}.wp-block-image .aligncenter>figcaption,.wp-block-image .alignleft>figcaption,.wp-block-image .alignright>figcaption,.wp-block-image.aligncenter>figcaption,.wp-block-image.alignleft>figcaption,.wp-block-image.alignright>figcaption{caption-side:bottom;display:table-caption}.wp-block-image .alignleft{float:left;margin:.5em 1em .5em 0}.wp-block-image .alignright{float:right;margin:.5em 0 .5em 1em}.wp-block-image .aligncenter{margin-left:auto;margin-right:auto}.wp-block-image :where(figcaption){margin-bottom:1em;margin-top:.5em}.wp-block-image.is-style-circle-mask img{border-radius:9999px}@supports ((-webkit-mask-image:none) or (mask-image:none)) or (-webkit-mask-image:none){.wp-block-image.is-style-circle-mask img{border-radius:0;-webkit-mask-image:url('data:image/svg+xml;utf8,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="50"/></svg>');mask-image:url('data:image/svg+xml;utf8,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="50"/></svg>');mask-mode:alpha;-webkit-mask-position:center;mask-position:center;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:contain;mask-size:contain}}:root :where(.wp-block-image.is-style-rounded img,.wp-block-image .is-style-rounded img){border-radius:9999px}.wp-block-image figure{margin:0}.wp-lightbox-container{display:flex;flex-direction:column;position:relative}.wp-lightbox-container img{cursor:zoom-in}.wp-lightbox-container img:hover+button{opacity:1}.wp-lightbox-container button{align-items:center;-webkit-backdrop-filter:blur(16px) saturate(180%);backdrop-filter:blur(16px) saturate(180%);background-color:#5a5a5a40;border:none;border-radius:4px;cursor:zoom-in;display:flex;height:20px;justify-content:center;opacity:0;padding:0;position:absolute;right:16px;text-align:center;top:16px;transition:opacity .2s ease;width:20px;z-index:100}.wp-lightbox-container button:focus-visible{outline:3px auto #5a5a5a40;outline:3px auto -webkit-focus-ring-color;outline-offset:3px}.wp-lightbox-container button:hover{cursor:pointer;opacity:1}.wp-lightbox-container button:focus{opacity:1}.wp-lightbox-container button:focus,.wp-lightbox-container button:hover,.wp-lightbox-container button:not(:hover):not(:active):not(.has-background){background-color:#5a5a5a40;border:none}.wp-lightbox-overlay{box-sizing:border-box;cursor:zoom-out;height:100vh;left:0;overflow:hidden;position:fixed;top:0;visibility:hidden;width:100%;z-index:100000}.wp-lightbox-overlay .close-button{align-items:center;cursor:pointer;display:flex;justify-content:center;min-height:40px;min-width:40px;padding:0;position:absolute;right:calc(env(safe-area-inset-right) + 16px);top:calc(env(safe-area-inset-top) + 16px);z-index:5000000}.wp-lightbox-overlay .close-button:focus,.wp-lightbox-overlay .close-button:hover,.wp-lightbox-overlay .close-button:not(:hover):not(:active):not(.has-background){background:none;border:none}.wp-lightbox-overlay .lightbox-image-container{height:var(--wp--lightbox-container-height);left:50%;overflow:hidden;position:absolute;top:50%;transform:translate(-50%,-50%);transform-origin:top left;width:var(--wp--lightbox-container-width);z-index:9999999999}.wp-lightbox-overlay .wp-block-image{align-items:center;box-sizing:border-box;display:flex;height:100%;justify-content:center;margin:0;position:relative;transform-origin:0 0;width:100%;z-index:3000000}.wp-lightbox-overlay .wp-block-image img{height:var(--wp--lightbox-image-height);min-height:var(--wp--lightbox-image-height);min-width:var(--wp--lightbox-image-width);width:var(--wp--lightbox-image-width)}.wp-lightbox-overlay .wp-block-image figcaption{display:none}.wp-lightbox-overlay button{background:none;border:none}.wp-lightbox-overlay .scrim{background-color:#fff;height:100%;opacity:.9;position:absolute;width:100%;z-index:2000000}.wp-lightbox-overlay.active{animation:turn-on-visibility .25s both;visibility:visible}.wp-lightbox-overlay.active img{animation:turn-on-visibility .35s both}.wp-lightbox-overlay.show-closing-animation:not(.active){animation:turn-off-visibility .35s both}.wp-lightbox-overlay.show-closing-animation:not(.active) img{animation:turn-off-visibility .25s both}@media (prefers-reduced-motion:no-preference){.wp-lightbox-overlay.zoom.active{animation:none;opacity:1;visibility:visible}.wp-lightbox-overlay.zoom.active .lightbox-image-container{animation:lightbox-zoom-in .4s}.wp-lightbox-overlay.zoom.active .lightbox-image-container img{animation:none}.wp-lightbox-overlay.zoom.active .scrim{animation:turn-on-visibility .4s forwards}.wp-lightbox-overlay.zoom.show-closing-animation:not(.active){animation:none}.wp-lightbox-overlay.zoom.show-closing-animation:not(.active) .lightbox-image-container{animation:lightbox-zoom-out .4s}.wp-lightbox-overlay.zoom.show-closing-animation:not(.active) .lightbox-image-container img{animation:none}.wp-lightbox-overlay.zoom.show-closing-animation:not(.active) .scrim{animation:turn-off-visibility .4s forwards}}@keyframes show-content-image{0%{visibility:hidden}99%{visibility:hidden}to{visibility:visible}}@keyframes turn-on-visibility{0%{opacity:0}to{opacity:1}}@keyframes turn-off-visibility{0%{opacity:1;visibility:visible}99%{opacity:0;visibility:visible}to{opacity:0;visibility:hidden}}@keyframes lightbox-zoom-in{0%{transform:translate(calc((-100vw + var(--wp--lightbox-scrollbar-width))/2 + var(--wp--lightbox-initial-left-position)),calc(-50vh + var(--wp--lightbox-initial-top-position))) scale(var(--wp--lightbox-scale))}to{transform:translate(-50%,-50%) scale(1)}}@keyframes lightbox-zoom-out{0%{transform:translate(-50%,-50%) scale(1);visibility:visible}99%{visibility:visible}to{transform:translate(calc((-100vw + var(--wp--lightbox-scrollbar-width))/2 + var(--wp--lightbox-initial-left-position)),calc(-50vh + var(--wp--lightbox-initial-top-position))) scale(var(--wp--lightbox-scale));visibility:hidden}}</style>
+<style id="wp-block-post-content-inline-css">.wp-block-post-content{display:flow-root}</style>
+<style id="wp-block-site-title-inline-css">.wp-block-site-title{box-sizing:border-box}.wp-block-site-title :where(a){color:inherit;font-family:inherit;font-size:inherit;font-style:inherit;font-weight:inherit;letter-spacing:inherit;line-height:inherit;text-decoration:inherit}</style>
+<style id="wp-block-site-tagline-inline-css">.wp-block-site-tagline{box-sizing:border-box}</style>
+<style id="wp-block-heading-inline-css">h1.has-background,h2.has-background,h3.has-background,h4.has-background,h5.has-background,h6.has-background{padding:1.25em 2.375em}h1.has-text-align-left[style*=writing-mode]:where([style*=vertical-lr]),h1.has-text-align-right[style*=writing-mode]:where([style*=vertical-rl]),h2.has-text-align-left[style*=writing-mode]:where([style*=vertical-lr]),h2.has-text-align-right[style*=writing-mode]:where([style*=vertical-rl]),h3.has-text-align-left[style*=writing-mode]:where([style*=vertical-lr]),h3.has-text-align-right[style*=writing-mode]:where([style*=vertical-rl]),h4.has-text-align-left[style*=writing-mode]:where([style*=vertical-lr]),h4.has-text-align-right[style*=writing-mode]:where([style*=vertical-rl]),h5.has-text-align-left[style*=writing-mode]:where([style*=vertical-lr]),h5.has-text-align-right[style*=writing-mode]:where([style*=vertical-rl]),h6.has-text-align-left[style*=writing-mode]:where([style*=vertical-lr]),h6.has-text-align-right[style*=writing-mode]:where([style*=vertical-rl]){rotate:180deg}
+
+				.is-style-asterisk:before {
+					content: '';
+					width: 1.5rem;
+					height: 3rem;
+					background: var(--wp--preset--color--contrast-2, currentColor);
+					clip-path: path('M11.93.684v8.039l5.633-5.633 1.216 1.23-5.66 5.66h8.04v1.737H13.2l5.701 5.701-1.23 1.23-5.742-5.742V21h-1.737v-8.094l-5.77 5.77-1.23-1.217 5.743-5.742H.842V9.98h8.162l-5.701-5.7 1.23-1.231 5.66 5.66V.684h1.737Z');
+					display: block;
+				}
+
+				/* Hide the asterisk if the heading has no content, to avoid using empty headings to display the asterisk only, which is an A11Y issue */
+				.is-style-asterisk:empty:before {
+					content: none;
+				}
+
+				.is-style-asterisk:-moz-only-whitespace:before {
+					content: none;
+				}
+
+				.is-style-asterisk.has-text-align-center:before {
+					margin: 0 auto;
+				}
+
+				.is-style-asterisk.has-text-align-right:before {
+					margin-left: auto;
+				}
+
+				.rtl .is-style-asterisk.has-text-align-left:before {
+					margin-right: auto;
+				}</style>
+<style id="wp-block-library-inline-css">:root{--wp-admin-theme-color:#007cba;--wp-admin-theme-color--rgb:0,124,186;--wp-admin-theme-color-darker-10:#006ba1;--wp-admin-theme-color-darker-10--rgb:0,107,161;--wp-admin-theme-color-darker-20:#005a87;--wp-admin-theme-color-darker-20--rgb:0,90,135;--wp-admin-border-width-focus:2px;--wp-block-synced-color:#7a00df;--wp-block-synced-color--rgb:122,0,223;--wp-bound-block-color:var(--wp-block-synced-color)}@media (min-resolution:192dpi){:root{--wp-admin-border-width-focus:1.5px}}.wp-element-button{cursor:pointer}:root{--wp--preset--font-size--normal:16px;--wp--preset--font-size--huge:42px}:root .has-very-light-gray-background-color{background-color:#eee}:root .has-very-dark-gray-background-color{background-color:#313131}:root .has-very-light-gray-color{color:#eee}:root .has-very-dark-gray-color{color:#313131}:root .has-vivid-green-cyan-to-vivid-cyan-blue-gradient-background{background:linear-gradient(135deg,#00d084,#0693e3)}:root .has-purple-crush-gradient-background{background:linear-gradient(135deg,#34e2e4,#4721fb 50%,#ab1dfe)}:root .has-hazy-dawn-gradient-background{background:linear-gradient(135deg,#faaca8,#dad0ec)}:root .has-subdued-olive-gradient-background{background:linear-gradient(135deg,#fafae1,#67a671)}:root .has-atomic-cream-gradient-background{background:linear-gradient(135deg,#fdd79a,#004a59)}:root .has-nightshade-gradient-background{background:linear-gradient(135deg,#330968,#31cdcf)}:root .has-midnight-gradient-background{background:linear-gradient(135deg,#020381,#2874fc)}.has-regular-font-size{font-size:1em}.has-larger-font-size{font-size:2.625em}.has-normal-font-size{font-size:var(--wp--preset--font-size--normal)}.has-huge-font-size{font-size:var(--wp--preset--font-size--huge)}.has-text-align-center{text-align:center}.has-text-align-left{text-align:left}.has-text-align-right{text-align:right}#end-resizable-editor-section{display:none}.aligncenter{clear:both}.items-justified-left{justify-content:flex-start}.items-justified-center{justify-content:center}.items-justified-right{justify-content:flex-end}.items-justified-space-between{justify-content:space-between}.screen-reader-text{border:0;clip:rect(1px,1px,1px,1px);clip-path:inset(50%);height:1px;margin:-1px;overflow:hidden;padding:0;position:absolute;width:1px;word-wrap:normal!important}.screen-reader-text:focus{background-color:#ddd;clip:auto!important;clip-path:none;color:#444;display:block;font-size:1em;height:auto;left:5px;line-height:normal;padding:15px 23px 14px;text-decoration:none;top:5px;width:auto;z-index:100000}html :where(.has-border-color){border-style:solid}html :where([style*=border-top-color]){border-top-style:solid}html :where([style*=border-right-color]){border-right-style:solid}html :where([style*=border-bottom-color]){border-bottom-style:solid}html :where([style*=border-left-color]){border-left-style:solid}html :where([style*=border-width]){border-style:solid}html :where([style*=border-top-width]){border-top-style:solid}html :where([style*=border-right-width]){border-right-style:solid}html :where([style*=border-bottom-width]){border-bottom-style:solid}html :where([style*=border-left-width]){border-left-style:solid}html :where(img[class*=wp-image-]){height:auto;max-width:100%}:where(figure){margin:0 0 1em}html :where(.is-position-sticky){--wp-admin--admin-bar--position-offset:var(--wp-admin--admin-bar--height,0px)}@media screen and (max-width:600px){html :where(.is-position-sticky){--wp-admin--admin-bar--position-offset:0px}}</style>
+<style id="global-styles-inline-css">:root{--wp--preset--aspect-ratio--square: 1;--wp--preset--aspect-ratio--4-3: 4/3;--wp--preset--aspect-ratio--3-4: 3/4;--wp--preset--aspect-ratio--3-2: 3/2;--wp--preset--aspect-ratio--2-3: 2/3;--wp--preset--aspect-ratio--16-9: 16/9;--wp--preset--aspect-ratio--9-16: 9/16;--wp--preset--color--black: #000000;--wp--preset--color--cyan-bluish-gray: #abb8c3;--wp--preset--color--white: #ffffff;--wp--preset--color--pale-pink: #f78da7;--wp--preset--color--vivid-red: #cf2e2e;--wp--preset--color--luminous-vivid-orange: #ff6900;--wp--preset--color--luminous-vivid-amber: #fcb900;--wp--preset--color--light-green-cyan: #7bdcb5;--wp--preset--color--vivid-green-cyan: #00d084;--wp--preset--color--pale-cyan-blue: #8ed1fc;--wp--preset--color--vivid-cyan-blue: #0693e3;--wp--preset--color--vivid-purple: #9b51e0;--wp--preset--color--base: #f9f9f9;--wp--preset--color--base-2: #ffffff;--wp--preset--color--contrast: #111111;--wp--preset--color--contrast-2: #636363;--wp--preset--color--contrast-3: #A4A4A4;--wp--preset--color--accent: #cfcabe;--wp--preset--color--accent-2: #c2a990;--wp--preset--color--accent-3: #d8613c;--wp--preset--color--accent-4: #b1c5a4;--wp--preset--color--accent-5: #b5bdbc;--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple: linear-gradient(135deg,rgba(6,147,227,1) 0%,rgb(155,81,224) 100%);--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan: linear-gradient(135deg,rgb(122,220,180) 0%,rgb(0,208,130) 100%);--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange: linear-gradient(135deg,rgba(252,185,0,1) 0%,rgba(255,105,0,1) 100%);--wp--preset--gradient--luminous-vivid-orange-to-vivid-red: linear-gradient(135deg,rgba(255,105,0,1) 0%,rgb(207,46,46) 100%);--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray: linear-gradient(135deg,rgb(238,238,238) 0%,rgb(169,184,195) 100%);--wp--preset--gradient--cool-to-warm-spectrum: linear-gradient(135deg,rgb(74,234,220) 0%,rgb(151,120,209) 20%,rgb(207,42,186) 40%,rgb(238,44,130) 60%,rgb(251,105,98) 80%,rgb(254,248,76) 100%);--wp--preset--gradient--blush-light-purple: linear-gradient(135deg,rgb(255,206,236) 0%,rgb(152,150,240) 100%);--wp--preset--gradient--blush-bordeaux: linear-gradient(135deg,rgb(254,205,165) 0%,rgb(254,45,45) 50%,rgb(107,0,62) 100%);--wp--preset--gradient--luminous-dusk: linear-gradient(135deg,rgb(255,203,112) 0%,rgb(199,81,192) 50%,rgb(65,88,208) 100%);--wp--preset--gradient--pale-ocean: linear-gradient(135deg,rgb(255,245,203) 0%,rgb(182,227,212) 50%,rgb(51,167,181) 100%);--wp--preset--gradient--electric-grass: linear-gradient(135deg,rgb(202,248,128) 0%,rgb(113,206,126) 100%);--wp--preset--gradient--midnight: linear-gradient(135deg,rgb(2,3,129) 0%,rgb(40,116,252) 100%);--wp--preset--gradient--gradient-1: linear-gradient(to bottom, #cfcabe 0%, #F9F9F9 100%);--wp--preset--gradient--gradient-2: linear-gradient(to bottom, #C2A990 0%, #F9F9F9 100%);--wp--preset--gradient--gradient-3: linear-gradient(to bottom, #D8613C 0%, #F9F9F9 100%);--wp--preset--gradient--gradient-4: linear-gradient(to bottom, #B1C5A4 0%, #F9F9F9 100%);--wp--preset--gradient--gradient-5: linear-gradient(to bottom, #B5BDBC 0%, #F9F9F9 100%);--wp--preset--gradient--gradient-6: linear-gradient(to bottom, #A4A4A4 0%, #F9F9F9 100%);--wp--preset--gradient--gradient-7: linear-gradient(to bottom, #cfcabe 50%, #F9F9F9 50%);--wp--preset--gradient--gradient-8: linear-gradient(to bottom, #C2A990 50%, #F9F9F9 50%);--wp--preset--gradient--gradient-9: linear-gradient(to bottom, #D8613C 50%, #F9F9F9 50%);--wp--preset--gradient--gradient-10: linear-gradient(to bottom, #B1C5A4 50%, #F9F9F9 50%);--wp--preset--gradient--gradient-11: linear-gradient(to bottom, #B5BDBC 50%, #F9F9F9 50%);--wp--preset--gradient--gradient-12: linear-gradient(to bottom, #A4A4A4 50%, #F9F9F9 50%);--wp--preset--font-size--small: 0.9rem;--wp--preset--font-size--medium: 1.05rem;--wp--preset--font-size--large: clamp(1.39rem, 1.39rem + ((1vw - 0.2rem) * 0.767), 1.85rem);--wp--preset--font-size--x-large: clamp(1.85rem, 1.85rem + ((1vw - 0.2rem) * 1.083), 2.5rem);--wp--preset--font-size--xx-large: clamp(2.5rem, 2.5rem + ((1vw - 0.2rem) * 1.283), 3.27rem);--wp--preset--font-family--body: "Inter", sans-serif;--wp--preset--font-family--heading: Cardo;--wp--preset--font-family--system-sans-serif: -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Cantarell, Ubuntu, roboto, noto, arial, sans-serif;--wp--preset--font-family--system-serif: Iowan Old Style, Apple Garamond, Baskerville, Times New Roman, Droid Serif, Times, Source Serif Pro, serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol;--wp--preset--spacing--20: min(1.5rem, 2vw);--wp--preset--spacing--30: min(2.5rem, 3vw);--wp--preset--spacing--40: min(4rem, 5vw);--wp--preset--spacing--50: min(6.5rem, 8vw);--wp--preset--spacing--60: min(10.5rem, 13vw);--wp--preset--spacing--70: 3.38rem;--wp--preset--spacing--80: 5.06rem;--wp--preset--spacing--10: 1rem;--wp--preset--shadow--natural: 6px 6px 9px rgba(0, 0, 0, 0.2);--wp--preset--shadow--deep: 12px 12px 50px rgba(0, 0, 0, 0.4);--wp--preset--shadow--sharp: 6px 6px 0px rgba(0, 0, 0, 0.2);--wp--preset--shadow--outlined: 6px 6px 0px -3px rgba(255, 255, 255, 1), 6px 6px rgba(0, 0, 0, 1);--wp--preset--shadow--crisp: 6px 6px 0px rgba(0, 0, 0, 1);}:root { --wp--style--global--content-size: 620px;--wp--style--global--wide-size: 1280px; }:where(body) { margin: 0; }.wp-site-blocks { padding-top: var(--wp--style--root--padding-top); padding-bottom: var(--wp--style--root--padding-bottom); }.has-global-padding { padding-right: var(--wp--style--root--padding-right); padding-left: var(--wp--style--root--padding-left); }.has-global-padding > .alignfull { margin-right: calc(var(--wp--style--root--padding-right) * -1); margin-left: calc(var(--wp--style--root--padding-left) * -1); }.has-global-padding :where(:not(.alignfull.is-layout-flow) > .has-global-padding:not(.wp-block-block, .alignfull)) { padding-right: 0; padding-left: 0; }.has-global-padding :where(:not(.alignfull.is-layout-flow) > .has-global-padding:not(.wp-block-block, .alignfull)) > .alignfull { margin-left: 0; margin-right: 0; }.wp-site-blocks > .alignleft { float: left; margin-right: 2em; }.wp-site-blocks > .alignright { float: right; margin-left: 2em; }.wp-site-blocks > .aligncenter { justify-content: center; margin-left: auto; margin-right: auto; }:where(.wp-site-blocks) > * { margin-block-start: 1.2rem; margin-block-end: 0; }:where(.wp-site-blocks) > :first-child { margin-block-start: 0; }:where(.wp-site-blocks) > :last-child { margin-block-end: 0; }:root { --wp--style--block-gap: 1.2rem; }:root :where(.is-layout-flow) > :first-child{margin-block-start: 0;}:root :where(.is-layout-flow) > :last-child{margin-block-end: 0;}:root :where(.is-layout-flow) > *{margin-block-start: 1.2rem;margin-block-end: 0;}:root :where(.is-layout-constrained) > :first-child{margin-block-start: 0;}:root :where(.is-layout-constrained) > :last-child{margin-block-end: 0;}:root :where(.is-layout-constrained) > *{margin-block-start: 1.2rem;margin-block-end: 0;}:root :where(.is-layout-flex){gap: 1.2rem;}:root :where(.is-layout-grid){gap: 1.2rem;}.is-layout-flow > .alignleft{float: left;margin-inline-start: 0;margin-inline-end: 2em;}.is-layout-flow > .alignright{float: right;margin-inline-start: 2em;margin-inline-end: 0;}.is-layout-flow > .aligncenter{margin-left: auto !important;margin-right: auto !important;}.is-layout-constrained > .alignleft{float: left;margin-inline-start: 0;margin-inline-end: 2em;}.is-layout-constrained > .alignright{float: right;margin-inline-start: 2em;margin-inline-end: 0;}.is-layout-constrained > .aligncenter{margin-left: auto !important;margin-right: auto !important;}.is-layout-constrained > :where(:not(.alignleft):not(.alignright):not(.alignfull)){max-width: var(--wp--style--global--content-size);margin-left: auto !important;margin-right: auto !important;}.is-layout-constrained > .alignwide{max-width: var(--wp--style--global--wide-size);}body .is-layout-flex{display: flex;}.is-layout-flex{flex-wrap: wrap;align-items: center;}.is-layout-flex > :is(*, div){margin: 0;}body .is-layout-grid{display: grid;}.is-layout-grid > :is(*, div){margin: 0;}body{background-color: var(--wp--preset--color--base);color: var(--wp--preset--color--contrast);font-family: var(--wp--preset--font-family--body);font-size: var(--wp--preset--font-size--medium);font-style: normal;font-weight: 400;line-height: 1.55;--wp--style--root--padding-top: 0px;--wp--style--root--padding-right: var(--wp--preset--spacing--50);--wp--style--root--padding-bottom: 0px;--wp--style--root--padding-left: var(--wp--preset--spacing--50);}a:where(:not(.wp-element-button)){color: var(--wp--preset--color--contrast);text-decoration: underline;}:root :where(a:where(:not(.wp-element-button)):hover){text-decoration: none;}h1, h2, h3, h4, h5, h6{color: var(--wp--preset--color--contrast);font-family: var(--wp--preset--font-family--heading);font-weight: 400;line-height: 1.2;}h1{font-size: var(--wp--preset--font-size--xx-large);line-height: 1.15;}h2{font-size: var(--wp--preset--font-size--x-large);}h3{font-size: var(--wp--preset--font-size--large);}h4{font-size: clamp(1.1rem, 1.1rem + ((1vw - 0.2rem) * 0.767), 1.5rem);}h5{font-size: var(--wp--preset--font-size--medium);}h6{font-size: var(--wp--preset--font-size--small);}:root :where(.wp-element-button, .wp-block-button__link){background-color: var(--wp--preset--color--contrast);border-radius: .33rem;border-color: var(--wp--preset--color--contrast);border-width: 0;color: var(--wp--preset--color--base);font-family: inherit;font-size: var(--wp--preset--font-size--small);font-style: normal;font-weight: 500;line-height: inherit;padding-top: 0.6rem;padding-right: 1rem;padding-bottom: 0.6rem;padding-left: 1rem;text-decoration: none;}:root :where(.wp-element-button:hover, .wp-block-button__link:hover){background-color: var(--wp--preset--color--contrast-2);border-color: var(--wp--preset--color--contrast-2);color: var(--wp--preset--color--base);}:root :where(.wp-element-button:focus, .wp-block-button__link:focus){background-color: var(--wp--preset--color--contrast-2);border-color: var(--wp--preset--color--contrast-2);color: var(--wp--preset--color--base);outline-color: var(--wp--preset--color--contrast);outline-offset: 2px;}:root :where(.wp-element-button:active, .wp-block-button__link:active){background-color: var(--wp--preset--color--contrast);color: var(--wp--preset--color--base);}:root :where(.wp-element-caption, .wp-block-audio figcaption, .wp-block-embed figcaption, .wp-block-gallery figcaption, .wp-block-image figcaption, .wp-block-table figcaption, .wp-block-video figcaption){color: var(--wp--preset--color--contrast-2);font-family: var(--wp--preset--font-family--body);font-size: 0.8rem;}.has-black-color{color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-color{color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-color{color: var(--wp--preset--color--white) !important;}.has-pale-pink-color{color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-color{color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-color{color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-color{color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-color{color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-color{color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-color{color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-color{color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-color{color: var(--wp--preset--color--vivid-purple) !important;}.has-base-color{color: var(--wp--preset--color--base) !important;}.has-base-2-color{color: var(--wp--preset--color--base-2) !important;}.has-contrast-color{color: var(--wp--preset--color--contrast) !important;}.has-contrast-2-color{color: var(--wp--preset--color--contrast-2) !important;}.has-contrast-3-color{color: var(--wp--preset--color--contrast-3) !important;}.has-accent-color{color: var(--wp--preset--color--accent) !important;}.has-accent-2-color{color: var(--wp--preset--color--accent-2) !important;}.has-accent-3-color{color: var(--wp--preset--color--accent-3) !important;}.has-accent-4-color{color: var(--wp--preset--color--accent-4) !important;}.has-accent-5-color{color: var(--wp--preset--color--accent-5) !important;}.has-black-background-color{background-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-background-color{background-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-background-color{background-color: var(--wp--preset--color--white) !important;}.has-pale-pink-background-color{background-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-background-color{background-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-background-color{background-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-background-color{background-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-background-color{background-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-background-color{background-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-background-color{background-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-background-color{background-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-background-color{background-color: var(--wp--preset--color--vivid-purple) !important;}.has-base-background-color{background-color: var(--wp--preset--color--base) !important;}.has-base-2-background-color{background-color: var(--wp--preset--color--base-2) !important;}.has-contrast-background-color{background-color: var(--wp--preset--color--contrast) !important;}.has-contrast-2-background-color{background-color: var(--wp--preset--color--contrast-2) !important;}.has-contrast-3-background-color{background-color: var(--wp--preset--color--contrast-3) !important;}.has-accent-background-color{background-color: var(--wp--preset--color--accent) !important;}.has-accent-2-background-color{background-color: var(--wp--preset--color--accent-2) !important;}.has-accent-3-background-color{background-color: var(--wp--preset--color--accent-3) !important;}.has-accent-4-background-color{background-color: var(--wp--preset--color--accent-4) !important;}.has-accent-5-background-color{background-color: var(--wp--preset--color--accent-5) !important;}.has-black-border-color{border-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-border-color{border-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-border-color{border-color: var(--wp--preset--color--white) !important;}.has-pale-pink-border-color{border-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-border-color{border-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-border-color{border-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-border-color{border-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-border-color{border-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-border-color{border-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-border-color{border-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-border-color{border-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-border-color{border-color: var(--wp--preset--color--vivid-purple) !important;}.has-base-border-color{border-color: var(--wp--preset--color--base) !important;}.has-base-2-border-color{border-color: var(--wp--preset--color--base-2) !important;}.has-contrast-border-color{border-color: var(--wp--preset--color--contrast) !important;}.has-contrast-2-border-color{border-color: var(--wp--preset--color--contrast-2) !important;}.has-contrast-3-border-color{border-color: var(--wp--preset--color--contrast-3) !important;}.has-accent-border-color{border-color: var(--wp--preset--color--accent) !important;}.has-accent-2-border-color{border-color: var(--wp--preset--color--accent-2) !important;}.has-accent-3-border-color{border-color: var(--wp--preset--color--accent-3) !important;}.has-accent-4-border-color{border-color: var(--wp--preset--color--accent-4) !important;}.has-accent-5-border-color{border-color: var(--wp--preset--color--accent-5) !important;}.has-vivid-cyan-blue-to-vivid-purple-gradient-background{background: var(--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple) !important;}.has-light-green-cyan-to-vivid-green-cyan-gradient-background{background: var(--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan) !important;}.has-luminous-vivid-amber-to-luminous-vivid-orange-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange) !important;}.has-luminous-vivid-orange-to-vivid-red-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-orange-to-vivid-red) !important;}.has-very-light-gray-to-cyan-bluish-gray-gradient-background{background: var(--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray) !important;}.has-cool-to-warm-spectrum-gradient-background{background: var(--wp--preset--gradient--cool-to-warm-spectrum) !important;}.has-blush-light-purple-gradient-background{background: var(--wp--preset--gradient--blush-light-purple) !important;}.has-blush-bordeaux-gradient-background{background: var(--wp--preset--gradient--blush-bordeaux) !important;}.has-luminous-dusk-gradient-background{background: var(--wp--preset--gradient--luminous-dusk) !important;}.has-pale-ocean-gradient-background{background: var(--wp--preset--gradient--pale-ocean) !important;}.has-electric-grass-gradient-background{background: var(--wp--preset--gradient--electric-grass) !important;}.has-midnight-gradient-background{background: var(--wp--preset--gradient--midnight) !important;}.has-gradient-1-gradient-background{background: var(--wp--preset--gradient--gradient-1) !important;}.has-gradient-2-gradient-background{background: var(--wp--preset--gradient--gradient-2) !important;}.has-gradient-3-gradient-background{background: var(--wp--preset--gradient--gradient-3) !important;}.has-gradient-4-gradient-background{background: var(--wp--preset--gradient--gradient-4) !important;}.has-gradient-5-gradient-background{background: var(--wp--preset--gradient--gradient-5) !important;}.has-gradient-6-gradient-background{background: var(--wp--preset--gradient--gradient-6) !important;}.has-gradient-7-gradient-background{background: var(--wp--preset--gradient--gradient-7) !important;}.has-gradient-8-gradient-background{background: var(--wp--preset--gradient--gradient-8) !important;}.has-gradient-9-gradient-background{background: var(--wp--preset--gradient--gradient-9) !important;}.has-gradient-10-gradient-background{background: var(--wp--preset--gradient--gradient-10) !important;}.has-gradient-11-gradient-background{background: var(--wp--preset--gradient--gradient-11) !important;}.has-gradient-12-gradient-background{background: var(--wp--preset--gradient--gradient-12) !important;}.has-small-font-size{font-size: var(--wp--preset--font-size--small) !important;}.has-medium-font-size{font-size: var(--wp--preset--font-size--medium) !important;}.has-large-font-size{font-size: var(--wp--preset--font-size--large) !important;}.has-x-large-font-size{font-size: var(--wp--preset--font-size--x-large) !important;}.has-xx-large-font-size{font-size: var(--wp--preset--font-size--xx-large) !important;}.has-body-font-family{font-family: var(--wp--preset--font-family--body) !important;}.has-heading-font-family{font-family: var(--wp--preset--font-family--heading) !important;}.has-system-sans-serif-font-family{font-family: var(--wp--preset--font-family--system-sans-serif) !important;}.has-system-serif-font-family{font-family: var(--wp--preset--font-family--system-serif) !important;}
+:root :where(.wp-block-buttons-is-layout-flow) > :first-child{margin-block-start: 0;}:root :where(.wp-block-buttons-is-layout-flow) > :last-child{margin-block-end: 0;}:root :where(.wp-block-buttons-is-layout-flow) > *{margin-block-start: 0.7rem;margin-block-end: 0;}:root :where(.wp-block-buttons-is-layout-constrained) > :first-child{margin-block-start: 0;}:root :where(.wp-block-buttons-is-layout-constrained) > :last-child{margin-block-end: 0;}:root :where(.wp-block-buttons-is-layout-constrained) > *{margin-block-start: 0.7rem;margin-block-end: 0;}:root :where(.wp-block-buttons-is-layout-flex){gap: 0.7rem;}:root :where(.wp-block-buttons-is-layout-grid){gap: 0.7rem;}
+:root :where(.wp-block-navigation){font-weight: 500;}
+:root :where(.wp-block-navigation a:where(:not(.wp-element-button))){text-decoration: none;}
+:root :where(.wp-block-navigation a:where(:not(.wp-element-button)):hover){text-decoration: underline;}
+:root :where(.wp-block-site-tagline){color: var(--wp--preset--color--contrast-2);font-size: var(--wp--preset--font-size--small);}
+:root :where(.wp-block-site-title){font-family: var(--wp--preset--font-family--body);font-size: clamp(0.875rem, 0.875rem + ((1vw - 0.2rem) * 0.542), 1.2rem);font-style: normal;font-weight: 600;}
+:root :where(.wp-block-site-title a:where(:not(.wp-element-button))){text-decoration: none;}
+:root :where(.wp-block-site-title a:where(:not(.wp-element-button)):hover){text-decoration: none;}</style>
+<style id="block-style-variation-styles-inline-css">:root :where(.wp-block-image.is-style-rounded--2 img,.wp-block-image.is-style-rounded--2  .wp-block-image__crop-area,.wp-block-image.is-style-rounded--2  .components-placeholder){border-radius: var(--wp--preset--spacing--20);}</style>
+<style id="wp-emoji-styles-inline-css">img.wp-smiley, img.emoji {
+		display: inline !important;
+		border: none !important;
+		box-shadow: none !important;
+		height: 1em !important;
+		width: 1em !important;
+		margin: 0 0.07em !important;
+		vertical-align: -0.1em !important;
+		background: none !important;
+		padding: 0 !important;
+	}</style>
+<style id="core-block-supports-inline-css">.wp-container-core-group-is-layout-1 > *{margin-block-start:0;margin-block-end:0;}.wp-container-core-group-is-layout-1 > * + *{margin-block-start:0px;margin-block-end:0;}.wp-container-core-group-is-layout-2{gap:var(--wp--preset--spacing--20);}.wp-container-core-navigation-is-layout-1{gap:var(--wp--preset--spacing--20);justify-content:flex-end;}.wp-container-core-group-is-layout-3{justify-content:flex-start;}.wp-container-core-group-is-layout-4{justify-content:space-between;}.wp-container-core-columns-is-layout-1{flex-wrap:nowrap;}.wp-container-core-columns-is-layout-2{flex-wrap:nowrap;}.wp-container-core-columns-is-layout-3{flex-wrap:nowrap;}.wp-container-core-columns-is-layout-4{flex-wrap:nowrap;gap:var(--wp--preset--spacing--10) var(--wp--preset--spacing--50);}.wp-elements-c38e9cc3f693cd83ea67487e6beff3f0 a:where(:not(.wp-element-button)){color:var(--wp--preset--color--contrast);}.wp-elements-0c786f16f9a6ada6b5c28405b78ef0f8 a:where(:not(.wp-element-button)){color:var(--wp--preset--color--base-2);}.wp-container-core-group-is-layout-7{flex-direction:column;align-items:flex-start;}.wp-elements-2cab3a8c50f47de48c80841beb5f4fd0 a:where(:not(.wp-element-button)){color:var(--wp--preset--color--base-2);}.wp-elements-bafc843aa5ea509c384c589e98a73adf a:where(:not(.wp-element-button)){color:var(--wp--preset--color--base-2);}.wp-container-core-group-is-layout-8{flex-direction:column;align-items:stretch;}.wp-elements-ebce97e9b1ce6e64933d1285a78de5f1 a:where(:not(.wp-element-button)){color:var(--wp--preset--color--base-2);}.wp-elements-b3dfd3800d7e944a14ad64468c2df74a a:where(:not(.wp-element-button)){color:var(--wp--preset--color--base-2);}.wp-container-core-group-is-layout-9{flex-direction:column;align-items:stretch;}.wp-elements-0563e95aa783ae1fdd2f1e4282b2ecdd a:where(:not(.wp-element-button)){color:var(--wp--preset--color--base-2);}.wp-elements-b126e96bf3cccd151b34939c69c92a87 a:where(:not(.wp-element-button)){color:var(--wp--preset--color--base-2);}.wp-container-core-group-is-layout-10{flex-direction:column;align-items:stretch;}.wp-container-core-group-is-layout-11{justify-content:space-between;align-items:flex-start;}.wp-container-core-columns-is-layout-5{flex-wrap:nowrap;}.wp-elements-a5cf571c8c89a9f4336b62fad62440a5 a:where(:not(.wp-element-button)){color:var(--wp--preset--color--base-2);}.wp-duotone-unset-3.wp-block-image img, .wp-duotone-unset-3.wp-block-image .components-placeholder{filter:unset;}</style>
+<style id="wp-block-template-skip-link-inline-css">.skip-link.screen-reader-text {
+			border: 0;
+			clip: rect(1px,1px,1px,1px);
+			clip-path: inset(50%);
+			height: 1px;
+			margin: -1px;
+			overflow: hidden;
+			padding: 0;
+			position: absolute !important;
+			width: 1px;
+			word-wrap: normal !important;
+		}
+
+		.skip-link.screen-reader-text:focus {
+			background-color: #eee;
+			clip: auto !important;
+			clip-path: none;
+			color: #444;
+			display: block;
+			font-size: 1em;
+			height: auto;
+			left: 5px;
+			line-height: normal;
+			padding: 15px 23px 14px;
+			text-decoration: none;
+			top: 5px;
+			width: auto;
+			z-index: 100000;
+		}
+    .background-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: transparent;
+    z-index: -1;}
+
+    @keyframes blink {
+    0% { opacity: 1; }
+    20% { opacity: 0; } /* Blinks for 0.25s (25% of 1s) */
+    25% { opacity: 1; } /* Image reappears */
+    100% { opacity: 1; } /* Stays visible for 1 second */
+    }
+
+    .blinking-image {
+        animation: blink 1.75s infinite;
+    }
+
+  .shimmer-text {
+  
+
+  /* shimmer gradient */
+  background: linear-gradient(
+    90deg,
+#1558d6 0%,
+#f1f1f1  3.5%,
+#1558d6 7%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 7.2s infinite linear;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
+}
+    </style>
+<link rel="stylesheet" id="brp-style-css" href="content/plugins/brand-rating-plugin/css/style.css?ver=6.7.1" media="all">
+<link rel="stylesheet" id="crf-form-style-css" href="content/plugins/cctv-requirement-form/assets/form-style.css?ver=6.7.1" media="all">
+<link rel="stylesheet" id="uagb-block-positioning-css-css" href="content/plugins/ultimate-addons-for-gutenberg/assets/css/spectra-block-positioning.min.css?ver=2.13.5" media="all">
+<link rel="stylesheet" id="uagb-aos-css-css" href="content/plugins/ultimate-addons-for-gutenberg/assets/css/aos.min.css?ver=2.13.5" media="all">
+<link rel="stylesheet" id="uagb-slick-css-css" href="content/plugins/ultimate-addons-for-gutenberg/assets/css/slick.min.css?ver=2.13.5" media="all">
+<link rel="stylesheet" id="uagb-swiper-css-css" href="content/plugins/ultimate-addons-for-gutenberg/assets/css/swiper-bundle.min.css?ver=2.13.5" media="all">
+<link rel="stylesheet" id="uag-google-fonts-382-css" href="//fonts.googleapis.com/css?family=Raleway%3A400%2C400italic%7CRoboto+Flex%3A500%2C400%2C500italic%2C400italic&#038;subset=latin&#038;display=fallback&#038;ver=2.13.5" media="all">
+<link rel="stylesheet" id="uag-style-382-css" href="content/uploads/uag-plugin/assets/0/uag-css-382.css?ver=1737555549" media="all">
+<link rel="stylesheet" id="custom-css-css" href="content/themes/twentytwentyfour/style.css?ver=6.7.1" media="all">
+<script src="includes/js/jquery/jquery.min.js?ver=3.7.1" id="jquery-core-js"></script>
+<script src="includes/js/jquery/jquery-migrate.min.js?ver=3.4.1" id="jquery-migrate-js"></script>
+<link rel="https://api.w.org/" href="/wp-json/">
+<link rel="alternate" title="JSON" type="application/json" href="/wp-json/wp/v2/pages/382">
+<link rel="EditURI" type="application/rsd+xml" title="RSD" href="/xmlrpc.php?rsd">
+<meta name="generator" content="WordPress 6.7.1">
+<link rel="canonical" href="/">
+<link rel="shortlink" href="/">
+<link rel="alternate" title="oEmbed (JSON)" type="application/json+oembed" href="/wp-json/oembed/1.0/embed?url=%2F">
+<link rel="alternate" title="oEmbed (XML)" type="text/xml+oembed" href="/wp-json/oembed/1.0/embed?url=%2F#038;format=xml">
+<script type="importmap" id="wp-importmap">{
+  "imports": {
+    "@wordpress/interactivity": "/includes/js/dist/script-modules/interactivity/index.min.js?ver=06b8f695ef48ab2d9277"
+  }
+}</script>
+<script type="module" src="/includes/js/dist/script-modules/block-library/navigation/view.min.js?ver=8ff192874fc8910a284c" id="@wordpress/block-library/navigation/view-js-module"></script>
+<link rel="modulepreload" href="/includes/js/dist/script-modules/interactivity/index.min.js?ver=06b8f695ef48ab2d9277" id="@wordpress/interactivity-js-modulepreload">
+<style class="wp-fonts-local">@font-face{font-family:Inter;font-style:normal;font-weight:300 900;font-display:fallback;src:url('content/themes/twentytwentyfour/assets/fonts/inter/Inter-VariableFont_slnt,wght.woff2') format('woff2');font-stretch:normal;}
+@font-face{font-family:Cardo;font-style:normal;font-weight:400;font-display:fallback;src:url('content/themes/twentytwentyfour/assets/fonts/cardo/cardo_normal_400.woff2') format('woff2');}
+@font-face{font-family:Cardo;font-style:italic;font-weight:400;font-display:fallback;src:url('content/themes/twentytwentyfour/assets/fonts/cardo/cardo_italic_400.woff2') format('woff2');}
+@font-face{font-family:Cardo;font-style:normal;font-weight:700;font-display:fallback;src:url('content/themes/twentytwentyfour/assets/fonts/cardo/cardo_normal_700.woff2') format('woff2');}</style>
+<style id="uagb-style-conditional-extension">@media (min-width: 1025px){body .uag-hide-desktop.uagb-google-map__wrap,body .uag-hide-desktop{display:none !important}}@media (min-width: 768px) and (max-width: 1024px){body .uag-hide-tab.uagb-google-map__wrap,body .uag-hide-tab{display:none !important}}@media (max-width: 767px){body .uag-hide-mob.uagb-google-map__wrap,body .uag-hide-mob{display:none !important}}</style>
+<link rel="icon" href="content/uploads/2025/01/cropped-Site-Icon-32x32.png" sizes="32x32">
+<link rel="icon" href="content/uploads/2025/01/cropped-Site-Icon-192x192.png" sizes="192x192">
+<link rel="apple-touch-icon" href="content/uploads/2025/01/cropped-Site-Icon-180x180.png">
+<meta name="msapplication-TileImage" content="content/uploads/2025/01/cropped-Site-Icon-270x270.png">
+
+</head>
+
+<body class="home page-template-default page page-id-382 wp-custom-logo wp-embed-responsive">
+
+<div class="wp-site-blocks">
+<header class="wp-block-template-part">
+<div class="wp-block-group alignwide main-menu-navigation nav-link has-base-background-color has-background has-global-padding is-layout-constrained wp-block-group-is-layout-constrained" style="padding-top:10px;padding-bottom:10px">
+<div class="wp-block-group alignwide is-content-justification-space-between is-layout-flex wp-container-core-group-is-layout-4 wp-block-group-is-layout-flex">
+<div class="wp-block-group is-layout-flex wp-container-core-group-is-layout-2 wp-block-group-is-layout-flex">
+<div class="wp-block-site-logo"><a href="/" class="custom-logo-link" rel="home" aria-current="page"><img width="200" height="49" src="content/uploads/2025/01/smarthome-black2.svg" class="custom-logo" alt="Smartronic | CCTV with Free Installation | Smart Home Automation" decoding="async"></a></div>
+
+
+<div class="wp-block-group is-layout-flow wp-container-core-group-is-layout-1 wp-block-group-is-layout-flow"></div>
+</div>
+
+
+
+<div class="wp-block-group is-content-justification-left is-layout-flex wp-container-core-group-is-layout-3 wp-block-group-is-layout-flex"><nav class="is-responsive items-justified-right wp-block-navigation is-horizontal is-content-justification-right is-layout-flex wp-container-core-navigation-is-layout-1 wp-block-navigation-is-layout-flex" aria-label="Navigation" data-wp-interactive="core/navigation" data-wp-context='{"overlayOpenedBy":{"click":false,"hover":false,"focus":false},"type":"overlay","roleAttribute":"","ariaLabel":"Menu"}'><button aria-haspopup="dialog" aria-label="Open menu" class="wp-block-navigation__responsive-container-open " data-wp-on-async--click="actions.openMenuOnClick" data-wp-on--keydown="actions.handleMenuKeydown"><svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4" y="7.5" width="16" height="1.5"></rect><rect x="4" y="15" width="16" height="1.5"></rect></svg></button>
+				<div class="wp-block-navigation__responsive-container  " id="modal-1" data-wp-class--has-modal-open="state.isMenuOpen" data-wp-class--is-menu-open="state.isMenuOpen" data-wp-watch="callbacks.initMenu" data-wp-on--keydown="actions.handleMenuKeydown" data-wp-on-async--focusout="actions.handleMenuFocusout" tabindex="-1">
+					<div class="wp-block-navigation__responsive-close" tabindex="-1">
+						<div class="wp-block-navigation__responsive-dialog" data-wp-bind--aria-modal="state.ariaModal" data-wp-bind--aria-label="state.ariaLabel" data-wp-bind--role="state.roleAttribute">
+							<button aria-label="Close menu" class="wp-block-navigation__responsive-container-close" data-wp-on-async--click="actions.closeMenuOnClick"><svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="m13.06 12 6.47-6.47-1.06-1.06L12 10.94 5.53 4.47 4.47 5.53 10.94 12l-6.47 6.47 1.06 1.06L12 13.06l6.47 6.47 1.06-1.06L13.06 12Z"></path></svg></button>
+							<div class="wp-block-navigation__responsive-container-content" data-wp-watch="callbacks.focusFirstElement" id="modal-1-content">
+								<ul class="wp-block-navigation__container is-responsive items-justified-right wp-block-navigation"><li style="font-style:normal;font-weight:400;" class=" wp-block-navigation-item current-menu-item wp-block-navigation-link"><a class="wp-block-navigation-item__content" href="#quotation" aria-current="page"><span class="wp-block-navigation-item__label">Home</span></a></li></ul>
+<ul class="wp-block-navigation__container is-responsive items-justified-right wp-block-navigation">
+<li style="font-size:clamp(14px, 0.875rem + ((1vw - 3.2px) * 0.104), 15px);font-style:normal;font-weight:400;" class=" wp-block-navigation-item wp-block-navigation-link has-raleway-font-family"><a class="wp-block-navigation-item__content" href="#services"><span class="wp-block-navigation-item__label">Services</span></a></li>
+<li style="font-size:clamp(14px, 0.875rem + ((1vw - 3.2px) * 0.104), 15px);font-style:normal;font-weight:400;" class=" wp-block-navigation-item current-menu-item wp-block-navigation-link has-raleway-font-family"><a class="wp-block-navigation-item__content" href="#success-stories" aria-current="page"><span class="wp-block-navigation-item__label">Success Stories</span></a></li>
+<li style="font-size:clamp(14px, 0.875rem + ((1vw - 3.2px) * 0.104), 15px);font-style:normal;font-weight:400;" class=" wp-block-navigation-item current-menu-item wp-block-navigation-link has-raleway-font-family"><a class="wp-block-navigation-item__content" href="#faq" aria-current="page"><span class="wp-block-navigation-item__label">FAQ</span></a></li>
+<li style="font-size:clamp(14px, 0.875rem + ((1vw - 3.2px) * 0.104), 15px);font-style:normal;font-weight:400;" class=" wp-block-navigation-item current-menu-item wp-block-navigation-link has-raleway-font-family"><a class="wp-block-navigation-item__content" href="https://smartronic.online/invoice/terms.php" aria-current="page"><span class="wp-block-navigation-item__label">Terms of Service</span></a></li>
+<li style="font-size:clamp(14px, 0.875rem + ((1vw - 3.2px) * 0.104), 15px);font-style:normal;font-weight:400;" class=" wp-block-navigation-item current-menu-item wp-block-navigation-link has-raleway-font-family"><a class="wp-block-navigation-item__content" href="#contact" aria-current="page"><span class="wp-block-navigation-item__label">Contact</span></a></li>
+</ul> 
+<div class="wp-block-buttons is-layout-flex wp-block-buttons-is-layout-flex">
+<div class="wp-block-button has-custom-width wp-block-button__width-100 has-custom-font-size has-raleway-font-family has-small-font-size" style="font-style:normal;font-weight:700"><a class="wp-block-button__link has-base-color has-text-color has-background has-link-color wp-element-button" style="background-color:#f40009" id="call-now-btn"><strong>CALL NOW</strong></a></div>
+</div>
+
+							</div>
+						</div>
+					</div>
+				</div></nav></div>
+</div>
+</div>
+</header>
+
+
+<main class="wp-block-group is-layout-flow wp-block-group-is-layout-flow"><div class="entry-content wp-block-post-content has-global-padding is-layout-constrained wp-block-post-content-is-layout-constrained">
+
+
+
+<?php
+// Detect if the URL contains ?gads=13k
+$is_gads_13k = isset($_GET['gads']) && $_GET['gads'] === '13k';
+?>
+
+<div id="quotation" class="wp-block-uagb-container crf-form-wrapper inpage-section uagb-block-c19de64c alignfull uagb-is-root-container">
+  <div class="uagb-container-inner-blocks-wrap">
+
+    <div class="wp-block-uagb-info-box uagb-block-298b74ff uagb-infobox__content-wrap uagb-infobox-icon-above-title uagb-infobox-image-valign-top">
+      <div class="uagb-ifb-content">
+        <div class="uagb-ifb-title-wrap">
+          <?php if ($is_gads_13k): ?>
+            <h2 class="uagb-ifb-title">
+              Get 4 CP Plus CCTV Cameras <span class="hl">Installed Free for ₹13,390</span> Only
+            </h2>
+          <?php else: ?>
+            <h2 class="uagb-ifb-title">
+              Get Your <span class="hl">CCTV Installation Quote Instantly</span>
+            </h2>
+          <?php endif; ?>
+        </div>
+
+        <div class="uagb-ifb-desc gads-text">
+          <?php if ($is_gads_13k): ?>
+            <span class="shimmer-text">Includes 500GB Hard Disk | Free Installation | 2-Year Warranty + 5-Year Camera Replacement</span>
+            <div class="gads-desc">
+              Secure your home or office with the CP Plus 4-Camera Combo for just ₹13,390. 
+              Comes with motion detection, night vision, AMC, free installation, and 2 years full warranty — 
+              trusted by thousands of satisfied customers.
+            </div>
+          <?php else: ?>
+            <span class="shimmer-text">Free Installation | 2-Year Service Warranty + 5-Year Free Camera Replacement with AMC |
+            
+            Also Get Now 20% Off with Free Setup</span>
+            <div class="gads-desc">
+              Act now to protect your property with advanced CCTV from Smartronic. Free installation, 2-year warranty, and 5-year replacement — <strong>book your quote today before the offer ends!</strong>
+            </div>
+          <?php endif; ?>
+        </div>
+
+      </div>
+    </div>
+
+
+
+
+
+
+
+<div class="wp-block-uagb-container form-success-message uagb-block-3ea4ca0e">
+<div class="wp-block-columns is-layout-flex wp-container-core-columns-is-layout-2 wp-block-columns-is-layout-flex">
+<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow" style="flex-basis:60%">
+<div class="wp-block-uagb-advanced-heading uagb-block-68c87d78 is-style-default"><h2 class="uagb-heading-text">Thank you!</h2></div>
+
+
+<p>Thanks for submitting your requirements. We have successfully received it.<br>One of our representatives will contact you soon on WhatsApp.</p>
+
+</div>
+
+
+
+<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow" style="border-left-color:var(--wp--preset--color--accent-4);border-left-style:dashed;flex-basis:1px"></div>
+
+
+
+<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow" style="flex-basis:40%">
+<div class="wp-block-uagb-info-box uagb-block-174b2c13 uagb-infobox__content-wrap  uagb-infobox-icon-left uagb-infobox-left uagb-infobox-stacked-tablet uagb-infobox-image-valign-middle wp-block-uagb-info-box--has-margin"><div class="uagb-infobox-margin-wrapper">
+<!--
+  <div class="uagb-ifb-image-content"><img decoding="async" src="content/uploads/2025/01/adobe-express-qr-code-1.svg" alt="" width="100" height="100" loading="lazy"></div>
+-->
+<div class="uagb-ifb-image-content">
+ <img decoding="async" class="blinking-image" src="content/uploads/2025/01/today1500off.png" alt="offer" >
+</div>
+<div class="uagb-ifb-content">
+<div class="uagb-ifb-title-wrap"></div>
+<div class="uagb-ifb-desc">
+<p>
+    Schedule your CCTV installation today and enjoy a  <span class="hl">₹1500 discount </span> on your final payment! <br /> <small>Offer valid on all orders with 8 cameras or more.</small></p>
+<!--
+  <p class="has-small-font-size">
+    For Dimmediate assistance, <br>simply scan the QR code or call us at <br>
+      <strong><a href="tel:8884831000">888-483-1000</a></strong>
+    </p>
+
+-->
+</div>
+</div>
+</div></div>
+</div>
+</div>
+</div>
+
+
+
+<div class="wp-block-uagb-container uagb-block-a752a79e">
+<div class="wp-block-columns is-layout-flex wp-container-core-columns-is-layout-3 wp-block-columns-is-layout-flex">
+<div class="wp-block-column form-holder is-layout-flow wp-block-column-is-layout-flow">    <div class="crf-container">
+        <form id="cctv-requirement-form" class="crf-form">
+            <!-- No of Dome and Bullet Cameras -->
+            <div class="crf-form-row bg-camera">
+                <div class="crf-form-col">
+                    <label for="num-cameras">Cameras You Need?</label>
+                    <div class="slider-input-wrapper">
+                        <input type="range" id="num-cameras" class="range-slider" min="1" max="32" value="6">
+                        <input type="number" id="num-cameras-input" class="slider-input" min="1" max="32" value="6">
+                    </div>
+    
+                        <small>Enter total number of cameras required.</small>
+                </div>
+                
+            </div>
+
+            <!-- Type of DVR needed -->
+            <div class="crf-form-row">
+                <div class="crf-form-col">
+                    <label>Type of DVR Needed</label>
+                    <div class="fancy-radio">
+                        <input type="radio" id="dvr" name="dvr-type" value="DVR">
+                        <label for="dvr">DVR</label>
+
+                        <input type="radio" id="nvr" name="dvr-type" value="NVR">
+                        <label for="nvr">NVR</label>
+
+                        <input type="radio" id="dont-know" name="dvr-type" value="dont-know" checked>
+                        <label for="dont-know">Don&#8217;t Know</label>
+
+                    </div>
+                    <small>Select the DVR/ NVR above or Leave it as Don&#8217;t Know.</small>
+                </div>
+               
+            </div>
+
+            <!-- Hard Disk Size -->
+            <div class="crf-form-row">
+                <div class="crf-form-col">
+                    <label>Hard Disk Size</label>
+                    <div class="fancy-radio">
+                        <input type="radio" id="500gb" name="hdd-size" value="500GB">
+                        <label for="500gb"> 500 GB</label>
+
+                        <input type="radio" id="1tb" name="hdd-size" value="1TB" checked>
+                        <label for="1tb"> 1 TB</label>
+
+                        <input type="radio" id="2tb" name="hdd-size" value="2TB">
+                        <label for="2tb"> 2 TB</label>
+
+                        <input type="radio" id="3tb" name="hdd-size" value="3TB">
+                        <label for="3tb"> 3 TB</label>
+
+                        <input type="radio" id="4tb" name="hdd-size" value="4TB">
+                        <label for="4tb"> 4 TB</label>
+                        <input type="radio" id="dntb" name="hdd-size" value="dont-know" checked>
+                        <label for="dntb"> Don&#8217;t know</label>
+
+                    </div>
+                    <small>The greater value you select, the longer storage it can hold.</small>
+                </div>
+            </div>
+
+            <!-- Camera Resolution -->
+            <div class="crf-form-row">
+                <div class="crf-form-col">
+                    <label>Camera Resolution</label>
+                    <div class="fancy-radio">
+
+
+                        <input type="radio" id="2mp" name="camera-resolution" value="2 MP">
+                        <label for="2mp">2 MP</label>
+
+                        <input type="radio" id="5mp" name="camera-resolution" value="5 MP">
+                        <label for="5mp">5 MP</label>
+                        <input type="radio" id="dnmp" name="camera-resolution" value="dont-know" checked>
+                        <label for="dnmp">Don&#8217;t Know</label>
+
+                    </div>
+                    <small>The greater value you select, the clearer you get.</small>
+                </div>
+                
+            </div>
+            <!-- Quotation Section -->
+            <div class="crf-form-row">
+                <div class="crf-form-col">
+                    <label for="num-whatsapp">WhatsApp number to receive the quotation</label>
+                    <div class="slider-input-wrapper input-with-icon">
+                    <svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 448 512" class="input-icon">
+                        <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7 .9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z">
+
+                        </path>
+                    </svg>
+                        <input type="tel" id="num-whatsapp" class="input" placeholder="Your WhatsApp number">
+                    </div>
+                    <small>We send the quote here, in a few minutes ..</small>
+                </div>
+
+                
+            </div>
+
+            <button type="submit" id="next-button" class="input">Submit</button>
+
+
+        </form>
+    </div>
+    
+</div>
+
+
+
+<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow">
+<div class="wp-block-uagb-container uagb-block-3fitwshn">
+
+<div data-aos="none" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-info-box uagb-block-49853o0l uagb-infobox__content-wrap  uagb-infobox-icon-left-title uagb-infobox-left uagb-infobox-image-valign-middle wp-block-uagb-info-box--has-margin"><div class="uagb-infobox-margin-wrapper"><div class="uagb-ifb-content">
+  <div class="uagb-ifb-left-title-image">
+    
+    <div class="uagb-ifb-title-wrap">
+      <img src="content/uploads/2025/01/review.png" class="g-review">
+    </div>
+  </div>
+
+<div class="uagb-ifb-separator"></div>
+</div></div></div>
+
+
+<div data-aos="none" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-info-box uagb-block-49853o0l uagb-infobox__content-wrap  uagb-infobox-icon-left-title uagb-infobox-left uagb-infobox-image-valign-middle wp-block-uagb-info-box--has-margin"><div class="uagb-infobox-margin-wrapper"><div class="uagb-ifb-content">
+<div class="uagb-ifb-left-title-image">
+<div class="uagb-ifb-icon-wrap"><svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 512 512"><path d="M489.1 363.3l-24.03 41.59c-6.635 11.48-21.33 15.41-32.82 8.78l-129.1-74.56V488c0 13.25-10.75 24-24.02 24H231.1c-13.27 0-24.02-10.75-24.02-24v-148.9L78.87 413.7c-11.49 6.629-26.19 2.698-32.82-8.78l-24.03-41.59c-6.635-11.48-2.718-26.14 8.774-32.77L159.9 256L30.8 181.5C19.3 174.8 15.39 160.2 22.02 148.7l24.03-41.59c6.635-11.48 21.33-15.41 32.82-8.781l129.1 74.56L207.1 24c0-13.25 10.75-24 24.02-24h48.04c13.27 0 24.02 10.75 24.02 24l.0005 148.9l129.1-74.56c11.49-6.629 26.19-2.698 32.82 8.78l24.02 41.59c6.637 11.48 2.718 26.14-8.774 32.77L352.1 256l129.1 74.53C492.7 337.2 496.6 351.8 489.1 363.3z"></path></svg></div>
+<div class="uagb-ifb-title-wrap"><h3 class="uagb-ifb-title">5 Years Free Camera Replacement</h3></div>
+</div>
+<p class="uagb-ifb-desc">Enjoy peace of mind with free replacements for defective cameras under our annual maintenance plan.</p>
+<div class="uagb-ifb-separator"></div>
+</div></div></div>
+
+
+
+<div data-aos="none" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-info-box uagb-block-76d23187 uagb-infobox__content-wrap  uagb-infobox-icon-left-title uagb-infobox-left uagb-infobox-image-valign-middle wp-block-uagb-info-box--has-margin"><div class="uagb-infobox-margin-wrapper"><div class="uagb-ifb-content">
+<div class="uagb-ifb-left-title-image">
+<div class="uagb-ifb-icon-wrap"><svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 512 512"><path d="M331.8 224.1c28.29 0 54.88 10.99 74.86 30.97l19.59 19.59c40.01-17.74 71.25-53.3 81.62-96.65c5.725-23.92 5.34-47.08 .2148-68.4c-2.613-10.88-16.43-14.51-24.34-6.604l-68.9 68.9h-75.6V97.2l68.9-68.9c7.912-7.912 4.275-21.73-6.604-24.34c-21.32-5.125-44.48-5.51-68.4 .2148c-55.3 13.23-98.39 60.22-107.2 116.4C224.5 128.9 224.2 137 224.3 145l82.78 82.86C315.2 225.1 323.5 224.1 331.8 224.1zM384 278.6c-23.16-23.16-57.57-27.57-85.39-13.9L191.1 158L191.1 95.99l-127.1-95.99L0 63.1l96 127.1l62.04 .0077l106.7 106.6c-13.67 27.82-9.251 62.23 13.91 85.39l117 117.1c14.62 14.5 38.21 14.5 52.71-.0016l52.75-52.75c14.5-14.5 14.5-38.08-.0016-52.71L384 278.6zM227.9 307L168.7 247.9l-148.9 148.9c-26.37 26.37-26.37 69.08 0 95.45C32.96 505.4 50.21 512 67.5 512s34.54-6.592 47.72-19.78l119.1-119.1C225.5 352.3 222.6 329.4 227.9 307zM64 472c-13.25 0-24-10.75-24-24c0-13.26 10.75-24 24-24S88 434.7 88 448C88 461.3 77.25 472 64 472z"></path></svg></div>
+<div class="uagb-ifb-title-wrap"><h3 class="uagb-ifb-title">Free Professional Installation</h3></div>
+</div>
+<p class="uagb-ifb-desc">Experience seamless and precise CCTV installation by certified professionals, ensuring unmatched security tailored to your needs</p>
+<div class="uagb-ifb-separator"></div>
+</div></div></div>
+
+
+
+<div data-aos="none" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-info-box uagb-block-4a64a531 uagb-infobox__content-wrap  uagb-infobox-icon-left-title uagb-infobox-left uagb-infobox-image-valign-middle wp-block-uagb-info-box--has-margin"><div class="uagb-infobox-margin-wrapper"><div class="uagb-ifb-content">
+<div class="uagb-ifb-left-title-image">
+<div class="uagb-ifb-icon-wrap"><svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 512 512"><path d="M191.1 224c0-17.72-14.34-32.04-32-32.04L144 192c-35.34 0-64 28.66-64 64.08v47.79C80 339.3 108.7 368 144 368H160c17.66 0 32-14.36 32-32.06L191.1 224zM256 0C112.9 0 4.583 119.1 .0208 256L0 296C0 309.3 10.75 320 23.1 320S48 309.3 48 296V256c0-114.7 93.34-207.8 208-207.8C370.7 48.2 464 141.3 464 256v144c0 22.09-17.91 40-40 40h-110.7C305 425.7 289.7 416 272 416H241.8c-23.21 0-44.5 15.69-48.87 38.49C187 485.2 210.4 512 239.1 512H272c17.72 0 33.03-9.711 41.34-24H424c48.6 0 88-39.4 88-88V256C507.4 119.1 399.1 0 256 0zM368 368c35.34 0 64-28.7 64-64.13V256.1C432 220.7 403.3 192 368 192l-16 0c-17.66 0-32 14.34-32 32.04L320 335.9C320 353.7 334.3 368 352 368H368z"></path></svg></div>
+<div class="uagb-ifb-title-wrap"><h3 class="uagb-ifb-title">Customer Support</h3></div>
+</div>
+<p class="uagb-ifb-desc">Get all 7-day assistance for all your CCTV and security needs.</p>
+<div class="uagb-ifb-separator"></div>
+</div></div></div>
+
+
+
+<div data-aos="none" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-info-box uagb-block-28c3903e uagb-infobox__content-wrap  uagb-infobox-icon-left-title uagb-infobox-left uagb-infobox-image-valign-middle wp-block-uagb-info-box--has-margin"><div class="uagb-infobox-margin-wrapper"><div class="uagb-ifb-content">
+<div class="uagb-ifb-left-title-image">
+<div class="uagb-ifb-icon-wrap"><svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 512 512"><path d="M256 512C114.6 512 0 397.4 0 256C0 114.6 114.6 0 256 0C397.4 0 512 114.6 512 256C512 397.4 397.4 512 256 512zM232 256C232 264 236 271.5 242.7 275.1L338.7 339.1C349.7 347.3 364.6 344.3 371.1 333.3C379.3 322.3 376.3 307.4 365.3 300L280 243.2V120C280 106.7 269.3 96 255.1 96C242.7 96 231.1 106.7 231.1 120L232 256z"></path></svg></div>
+<div class="uagb-ifb-title-wrap"><h3 class="uagb-ifb-title">Annual Maintenance Plan</h3></div>
+</div>
+<p class="uagb-ifb-desc">Ensure your security system stays up-to-date and functional with our comprehensive service.</p>
+<div class="uagb-ifb-separator"></div>
+</div></div></div>
+
+
+
+<div data-aos="none" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-info-box uagb-block-b0b834a5 uagb-infobox__content-wrap  uagb-infobox-icon-left-title uagb-infobox-left uagb-infobox-image-valign-middle wp-block-uagb-info-box--has-margin"><div class="uagb-infobox-margin-wrapper"><div class="uagb-ifb-content">
+<div class="uagb-ifb-left-title-image">
+<div class="uagb-ifb-icon-wrap"><svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 448 512"><path d="M367.1 448H79.97c-26.51 0-48.01 21.49-48.01 47.1C31.96 504.8 39.13 512 47.96 512h352c8.838 0 16-7.163 16-16C416 469.5 394.5 448 367.1 448zM416.1 160h-160V112h16.01c17.6 0 31.98-14.4 31.98-32C303.1 62.4 289.6 48 272 48h-16.01V32C256 14.4 241.6 0 223.1 0C206.4 0 191.1 14.4 191.1 32.01V48H175.1c-17.6 0-32.01 14.4-32.01 32C143.1 97.6 158.4 112 175.1 112h16.01V160h-160C17.34 160 0 171.5 0 192C0 195.2 .4735 198.4 1.437 201.5L74.46 416h299.1l73.02-214.5C447.5 198.4 448 195.2 448 192C448 171.6 430.1 160 416.1 160z"></path></svg></div>
+<div class="uagb-ifb-title-wrap"><h3 class="uagb-ifb-title">Priority Service</h3></div>
+</div>
+<p class="uagb-ifb-desc">Receive prompt repairs and replacements under our priority customer program.</p>
+<div class="uagb-ifb-separator"></div>
+</div></div></div>
+
+
+
+<div data-aos="none" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-info-box uagb-block-3b049601 uagb-infobox__content-wrap  uagb-infobox-icon-left-title uagb-infobox-left uagb-infobox-image-valign-middle"><div class="uagb-ifb-content">
+<div class="uagb-ifb-left-title-image">
+<div class="uagb-ifb-icon-wrap"><svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 320 512"><path d="M.0022 64C.0022 46.33 14.33 32 32 32H288C305.7 32 320 46.33 320 64C320 81.67 305.7 96 288 96H231.8C241.4 110.4 248.5 126.6 252.4 144H288C305.7 144 320 158.3 320 176C320 193.7 305.7 208 288 208H252.4C239.2 266.3 190.5 311.2 130.3 318.9L274.6 421.1C288.1 432.2 292.3 452.2 282 466.6C271.8 480.1 251.8 484.3 237.4 474L13.4 314C2.083 305.1-2.716 291.5 1.529 278.2C5.774 264.1 18.09 256 32 256H112C144.8 256 173 236.3 185.3 208H32C14.33 208 .0022 193.7 .0022 176C.0022 158.3 14.33 144 32 144H185.3C173 115.7 144.8 96 112 96H32C14.33 96 .0022 81.67 .0022 64V64z"></path></svg></div>
+<div class="uagb-ifb-title-wrap"><h3 class="uagb-ifb-title">Advanced CCTV at the Best Price</h3></div>
+</div>
+<p class="uagb-ifb-desc">Get advanced CCTV solutions at competitive prices, combining cutting-edge technology with unbeatable value</p>
+<div class="uagb-ifb-separator"></div>
+</div></div>
+</div>
+</div>
+</div>
+</div>
+</div></div>
+
+
+
+<div id="services" class="wp-block-uagb-container inpage-section uagb-block-dw6jubdp alignfull uagb-is-root-container"><div class="uagb-container-inner-blocks-wrap">
+<div class="wp-block-uagb-info-box uagb-block-mkesrdkd uagb-infobox__content-wrap  uagb-infobox-icon-above-title uagb-infobox-image-valign-top"><div class="uagb-ifb-content">
+<div class="uagb-ifb-title-wrap"><h2 class="uagb-ifb-title">Advanced Features for Ultimate Security</h2></div>
+<p class="uagb-ifb-desc">Experience the future of surveillance with professional installations, automatic night vision, and smart motion tracking. Stay protected day and night with cutting-edge technology designed for your safety.</p>
+</div></div>
+
+
+
+<div class="wp-block-uagb-container uagb-block-klrgbgmq">
+<div data-aos="fade-up" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-container uagb-block-pctfrvnu">
+<div class="wp-block-uagb-image alignleft uagb-block-hk68lj39 wp-block-uagb-image--layout-default wp-block-uagb-image--effect-static wp-block-uagb-image--align-left"><figure class="wp-block-uagb-image__figure"><img decoding="async" srcset="content/uploads/2024/10/install-1024x576.jpeg ,content/uploads/2024/10/install.jpeg 780w, content/uploads/2024/10/install.jpeg 360w" sizes="auto, (max-width: 480px) 150px" src="content/uploads/2024/10/install-1024x576.jpeg" alt="" class="uag-image-717" width="1024" height="683" title="install" loading="lazy" role="img"></figure></div>
+
+
+
+<div data-aos="fade" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-info-box uagb-block-bwdituo4 uagb-infobox__content-wrap  uagb-infobox-icon-above-title uagb-infobox-image-valign-top highlight-line"><div class="uagb-ifb-content">
+<div class="uagb-ifb-title-wrap"><h3 class="uagb-ifb-title"><strong><mark style="background-color:rgba(0, 0, 0, 0)" class="has-inline-color has-accent-3-color">Professional</mark> Installs</strong></h3></div>
+<p class="uagb-ifb-desc">Our certified technicians provide professional installation to guarantee your CCTV system works perfectly. From expert cabling to setup, we ensure every detail is handled so you can have peace of mind knowing your property is secure.</p>
+</div></div>
+</div>
+
+
+
+<div data-aos="fade-up" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-container uagb-block-vnlnqd7y">
+<div class="wp-block-uagb-image alignleft uagb-block-235d46e3 wp-block-uagb-image--layout-default wp-block-uagb-image--effect-static wp-block-uagb-image--align-left"><figure class="wp-block-uagb-image__figure"><img decoding="async" srcset="content/uploads/2024/10/city-cctv-1024x576.jpeg ,content/uploads/2024/10/city-cctv.jpeg 780w, content/uploads/2024/10/city-cctv.jpeg 360w" sizes="auto, (max-width: 480px) 150px" src="content/uploads/2024/10/city-cctv-1024x576.jpeg" alt="" class="uag-image-719" width="1024" height="683" title="city-cctv" loading="lazy" role="img"></figure></div>
+
+
+
+<div data-aos="fade" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-info-box uagb-block-0da9c61f uagb-infobox__content-wrap  uagb-infobox-icon-above-title uagb-infobox-image-valign-top highlight-line"><div class="uagb-ifb-content">
+<div class="uagb-ifb-title-wrap"><h3 class="uagb-ifb-title"><strong>Automatic <mark style="background-color:rgba(0, 0, 0, 0)" class="has-inline-color has-accent-3-color">Night Vision</mark></strong></h3></div>
+<p class="uagb-ifb-desc">Rest easy knowing your CCTV system works around the clock. With automatic night vision, your cameras adjust to low-light conditions, ensuring clear, reliable footage even in complete darkness.</p>
+</div></div>
+</div>
+
+
+
+<div data-aos="fade-up" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-container uagb-block-rx1jyjyo">
+<div class="wp-block-uagb-image alignleft uagb-block-1fkzm3il wp-block-uagb-image--layout-default wp-block-uagb-image--effect-static wp-block-uagb-image--align-left"><figure class="wp-block-uagb-image__figure"><img decoding="async" srcset="content/uploads/2024/10/motion-tracking-1024x576.jpeg ,content/uploads/2024/10/motion-tracking.jpeg 780w, content/uploads/2024/10/motion-tracking.jpeg 360w" sizes="auto, (max-width: 480px) 150px" src="content/uploads/2024/10/motion-tracking-1024x576.jpeg" alt="" class="uag-image-715" width="1024" height="683" title="motion-tracking" loading="lazy" role="img"></figure></div>
+
+
+
+<div data-aos="fade" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-info-box uagb-block-xiq7jcap uagb-infobox__content-wrap  uagb-infobox-icon-above-title uagb-infobox-image-valign-top highlight-line"><div class="uagb-ifb-content">
+<div class="uagb-ifb-title-wrap"><h3 class="uagb-ifb-title"><strong>Smart <mark style="background-color:rgba(0, 0, 0, 0)" class="has-inline-color has-accent-3-color">Motion Tracking</mark></strong></h3></div>
+<p class="uagb-ifb-desc">Our cameras feature smart motion tracking, automatically detecting movement and alerting you to any unusual activity. This advanced feature helps you monitor key areas more effectively and respond quickly.</p>
+</div></div>
+</div>
+</div>
+</div></div>
+
+
+
+<div class="wp-block-uagb-container inpage-section service-solution uagb-block-a11946f7 alignfull uagb-is-root-container"><div class="uagb-container-inner-blocks-wrap">
+<div class="wp-block-uagb-container uagb-block-b324654b">
+<div class="wp-block-uagb-container uagb-block-e25279db">
+<div class="wp-block-uagb-info-box uagb-block-16f4c2d4 uagb-infobox__content-wrap  uagb-infobox-icon-above-title uagb-infobox-image-valign-top wp-block-uagb-info-box--has-margin"><div class="uagb-infobox-margin-wrapper"><div class="uagb-ifb-content">
+<div class="uagb-ifb-icon-wrap"><svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 512 512"><path d="M320 64C320 99.35 291.3 128 256 128C220.7 128 192 99.35 192 64C192 28.65 220.7 0 256 0C291.3 0 320 28.65 320 64zM288 160C323.3 160 352 188.7 352 224V272C352 289.7 337.7 304 320 304H318.2L307.2 403.5C305.4 419.7 291.7 432 275.4 432H236.6C220.3 432 206.6 419.7 204.8 403.5L193.8 304H192C174.3 304 160 289.7 160 272V224C160 188.7 188.7 160 224 160H288zM63.27 414.7C60.09 416.3 57.47 417.8 55.33 419.2C51.7 421.6 51.72 426.4 55.34 428.8C64.15 434.6 78.48 440.6 98.33 446.1C137.7 456.1 193.5 464 256 464C318.5 464 374.3 456.1 413.7 446.1C433.5 440.6 447.9 434.6 456.7 428.8C460.3 426.4 460.3 421.6 456.7 419.2C454.5 417.8 451.9 416.3 448.7 414.7C433.4 406.1 409.9 399.8 379.7 394.2C366.6 391.8 358 379.3 360.4 366.3C362.8 353.3 375.3 344.6 388.3 347C420.8 352.9 449.2 361.2 470.3 371.8C480.8 377.1 490.6 383.5 498 391.4C505.6 399.5 512 410.5 512 424C512 445.4 496.5 460.1 482.9 469C468.2 478.6 448.6 486.3 426.4 492.4C381.8 504.7 321.6 512 256 512C190.4 512 130.2 504.7 85.57 492.4C63.44 486.3 43.79 478.6 29.12 469C15.46 460.1 0 445.4 0 424C0 410.5 6.376 399.5 13.96 391.4C21.44 383.5 31.24 377.1 41.72 371.8C62.75 361.2 91.24 352.9 123.7 347C136.7 344.6 149.2 353.3 151.6 366.3C153.1 379.3 145.4 391.8 132.3 394.2C102.1 399.8 78.57 406.1 63.27 414.7H63.27z"></path></svg></div>
+<div class="uagb-ifb-title-wrap"></div>
+<p class="uagb-ifb-desc">Motion Tracking<br>Night Vision<br>Smart Viewing</p>
+</div></div></div>
+</div>
+
+
+
+<div class="wp-block-uagb-container uagb-block-386c4a3e">
+<div class="wp-block-uagb-info-box uagb-block-bfa5fc9d uagb-infobox__content-wrap  uagb-infobox-icon-above-title uagb-infobox-image-valign-top wp-block-uagb-info-box--has-margin"><div class="uagb-infobox-margin-wrapper"><div class="uagb-ifb-content">
+<div class="uagb-ifb-icon-wrap"><svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 512 512"><path d="M320 96H192L144.6 24.88C137.5 14.24 145.1 0 157.9 0H354.1C366.9 0 374.5 14.24 367.4 24.88L320 96zM192 128H320C323.8 130.5 328.1 133.3 332.1 136.4C389.7 172.7 512 250.9 512 416C512 469 469 512 416 512H96C42.98 512 0 469 0 416C0 250.9 122.3 172.7 179 136.4C183.9 133.3 188.2 130.5 192 128V128zM276.1 224C276.1 212.9 267.1 203.9 255.1 203.9C244.9 203.9 235.9 212.9 235.9 224V230C230.3 231.2 224.1 232.9 220 235.1C205.1 241.9 192.1 254.5 188.9 272.8C187.1 283 188.1 292.9 192.3 301.8C196.5 310.6 203 316.8 209.6 321.3C221.2 329.2 236.5 333.8 248.2 337.3L250.4 337.9C264.4 342.2 273.8 345.3 279.7 349.6C282.2 351.4 283.1 352.8 283.4 353.7C283.8 354.5 284.4 356.3 283.7 360.3C283.1 363.8 281.2 366.8 275.7 369.1C269.6 371.7 259.7 373 246.9 371C240.9 370 230.2 366.4 220.7 363.2C218.5 362.4 216.3 361.7 214.3 361C203.8 357.5 192.5 363.2 189 373.7C185.5 384.2 191.2 395.5 201.7 398.1C202.9 399.4 204.4 399.9 206.1 400.5C213.1 403.2 226.4 407.4 235.9 409.6V416C235.9 427.1 244.9 436.1 255.1 436.1C267.1 436.1 276.1 427.1 276.1 416V410.5C281.4 409.5 286.6 407.1 291.4 405.9C307.2 399.2 319.8 386.2 323.1 367.2C324.9 356.8 324.1 346.8 320.1 337.7C316.2 328.7 309.9 322.1 303.2 317.3C291.1 308.4 274.9 303.6 262.8 299.9L261.1 299.7C247.8 295.4 238.2 292.4 232.1 288.2C229.5 286.4 228.7 285.2 228.5 284.7C228.3 284.3 227.7 283.1 228.3 279.7C228.7 277.7 230.2 274.4 236.5 271.6C242.1 268.7 252.9 267.1 265.1 268.1C269.5 269.7 283 272.3 286.9 273.3C297.5 276.2 308.5 269.8 311.3 259.1C314.2 248.5 307.8 237.5 297.1 234.7C292.7 233.5 282.7 231.5 276.1 230.3L276.1 224z"></path></svg></div>
+<div class="uagb-ifb-title-wrap"></div>
+<p class="uagb-ifb-desc">5-Years FREE replacement <br>with AMC</p>
+</div></div></div>
+</div>
+</div>
+
+
+
+<div class="wp-block-uagb-container uagb-block-f7bb54e7">
+<div data-aos="fade-up" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-info-box uagb-block-1b0a1e2e uagb-infobox__content-wrap  uagb-infobox-icon-above-title uagb-infobox-image-valign-top wp-block-uagb-info-box--has-margin"><div class="uagb-infobox-margin-wrapper"><div class="uagb-ifb-content">
+<div class="uagb-ifb-title-wrap"><h4 class="uagb-ifb-title">Innovative CCTV Solutions for Every Need</h4></div>
+<p class="uagb-ifb-desc"><strong>Residential Installations</strong><br>Protect your home with affordable CCTV systems designed for 24/7 safety and peace of mind.<br><br><strong>Commercial Installations</strong><br>Secure your business with advanced surveillance setups tailored for offices and workplaces.<br><br><strong>Smart Monitoring Systems</strong><br>Stay connected with real-time mobile access and seamless remote monitoring anytime, anywhere.<br><br><strong>Annual Maintenance Plans</strong><br>Enjoy worry-free security with lifetime free camera replacement and comprehensive service plans.</p>
+</div></div></div>
+
+
+
+<div data-aos="fade" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-marketing-button uagb-marketing-btn__align-left uagb-marketing-btn__align-text-right uagb-marketing-btn__icon-after uagb-block-cd967bfc wp-block-button hero-marketing-btn"><a href="#quotation" class="uagb-marketing-btn__link wp-block-button__link" target="" rel="noopener noreferrer"><span class="uagb-marketing-btn__title">GET FREE CONSULTATION NOW</span><svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 512 512"><path d="M384 320c-17.67 0-32 14.33-32 32v96H64V160h96c17.67 0 32-14.32 32-32s-14.33-32-32-32L64 96c-35.35 0-64 28.65-64 64V448c0 35.34 28.65 64 64 64h288c35.35 0 64-28.66 64-64v-96C416 334.3 401.7 320 384 320zM488 0H352c-12.94 0-24.62 7.797-29.56 19.75c-4.969 11.97-2.219 25.72 6.938 34.88L370.8 96L169.4 297.4c-12.5 12.5-12.5 32.75 0 45.25C175.6 348.9 183.8 352 192 352s16.38-3.125 22.62-9.375L416 141.3l41.38 41.38c9.156 9.141 22.88 11.84 34.88 6.938C504.2 184.6 512 172.9 512 160V24C512 10.74 501.3 0 488 0z"></path></svg><p class="uagb-marketing-btn__prefix">Enjoy a 2-Year Extended Warranty!</p></a></div>
+</div>
+</div></div>
+
+
+
+<div class="wp-block-uagb-container inpage-section uagb-block-f0ae1aad alignfull uagb-is-root-container"><div class="uagb-container-inner-blocks-wrap">
+<div class="wp-block-uagb-info-box uagb-block-6816f3df uagb-infobox__content-wrap  uagb-infobox-icon-above-title uagb-infobox-image-valign-top"><div class="uagb-ifb-content">
+<div class="uagb-ifb-title-wrap"><h2 class="uagb-ifb-title">Effortless Security, Anytime, Anywhere</h2></div>
+<p class="uagb-ifb-desc">From expert consultation to smart viewing on your smartphone, we provide complete CCTV solutions for seamless protection and total control.</p>
+</div></div>
+
+
+
+<div class="wp-block-uagb-container uagb-block-b074227b">
+<div class="wp-block-uagb-container uagb-block-a1d2f27e">
+<div data-aos="fade-up" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-image alignleft uagb-block-f5f5e3e7 wp-block-uagb-image--layout-default wp-block-uagb-image--effect-static wp-block-uagb-image--align-left"><figure class="wp-block-uagb-image__figure"><img decoding="async" srcset="content/uploads/2024/10/checklist-1-1024x576.jpeg ,content/uploads/2024/10/checklist-1.jpeg 780w, content/uploads/2024/10/checklist-1.jpeg 360w" sizes="auto, (max-width: 480px) 150px" src="content/uploads/2024/10/checklist-1-1024x576.jpeg" alt="" class="uag-image-802" width="1024" height="683" title="checklist" loading="lazy" role="img"></figure></div>
+
+
+
+<div data-aos="fade" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-info-box uagb-block-d298ed18 uagb-infobox__content-wrap  uagb-infobox-icon-above-title uagb-infobox-image-valign-top highlight-line"><div class="uagb-ifb-content">
+<div class="uagb-ifb-title-wrap"><h3 class="uagb-ifb-title"><strong><mark style="background-color:rgba(0, 0, 0, 0)" class="has-inline-color has-accent-3-color">Complete</mark> Service</strong></h3></div>
+<p class="uagb-ifb-desc">We offer a complete CCTV service that covers everything from consultation to installation. Whether it’s a home or business, our experts help you choose the best system for your needs and ensure a seamless, hassle-free experience.</p>
+</div></div>
+</div>
+
+
+
+<div class="wp-block-uagb-container uagb-block-65537cf2">
+<div data-aos="fade-up" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-image alignleft uagb-block-4af1339e wp-block-uagb-image--layout-default wp-block-uagb-image--effect-static wp-block-uagb-image--align-left"><figure class="wp-block-uagb-image__figure"><img decoding="async" srcset="content/uploads/2024/10/devices-1-1024x576.jpeg ,content/uploads/2024/10/devices-1.jpeg 780w, content/uploads/2024/10/devices-1.jpeg 360w" sizes="auto, (max-width: 480px) 150px" src="content/uploads/2024/10/devices-1-1024x576.jpeg" alt="" class="uag-image-806" width="1024" height="683" title="devices" loading="lazy" role="img"></figure></div>
+
+
+
+<div data-aos="fade" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-info-box uagb-block-0e48179c uagb-infobox__content-wrap  uagb-infobox-icon-above-title uagb-infobox-image-valign-top highlight-line"><div class="uagb-ifb-content">
+<div class="uagb-ifb-title-wrap"><h3 class="uagb-ifb-title"><strong>Smart <mark style="background-color:rgba(0, 0, 0, 0)" class="has-inline-color has-accent-3-color">Viewing</mark></strong></h3></div>
+<p class="uagb-ifb-desc">Stay connected with your security system no matter where you are. Our smart viewing options allow you to monitor live footage from your smartphone, giving you control and visibility at all times.</p>
+</div></div>
+</div>
+
+
+
+<div class="wp-block-uagb-container uagb-block-76deea86">
+<div data-aos="fade-up" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-image alignleft uagb-block-da6fe1fb wp-block-uagb-image--layout-default wp-block-uagb-image--effect-static wp-block-uagb-image--align-left"><figure class="wp-block-uagb-image__figure"><img decoding="async" srcset="content/uploads/2024/10/mobile-app-1-1024x576.jpeg ,content/uploads/2024/10/mobile-app-1.jpeg 780w, content/uploads/2024/10/mobile-app-1.jpeg 360w" sizes="auto, (max-width: 480px) 150px" src="content/uploads/2024/10/mobile-app-1-1024x576.jpeg" alt="" class="uag-image-805" width="1024" height="683" title="mobile-app" loading="lazy" role="img"></figure></div>
+
+
+
+<div data-aos="fade" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-info-box uagb-block-8dd634ab uagb-infobox__content-wrap  uagb-infobox-icon-above-title uagb-infobox-image-valign-top highlight-line"><div class="uagb-ifb-content">
+<div class="uagb-ifb-title-wrap"><h3 class="uagb-ifb-title"><strong>CCTV from a <mark style="background-color:rgba(0, 0, 0, 0)" class="has-inline-color has-accent-3-color">Smartphone</mark></strong></h3></div>
+<p class="uagb-ifb-desc">Our easy-to-use mobile app lets you control and view your CCTV cameras from your smartphone, anytime, anywhere. Whether at home, at work, or on the go, you’ll always have your security in your hands.</p>
+</div></div>
+</div>
+</div>
+</div></div>
+
+
+
+<div class="wp-block-uagb-container inpage-section uagb-block-94dacbb1 alignfull uagb-is-root-container"><div class="uagb-container-inner-blocks-wrap">
+<div class="wp-block-columns alignwide are-vertically-aligned-center is-layout-flex wp-container-core-columns-is-layout-4 wp-block-columns-is-layout-flex">
+<div class="wp-block-column is-vertically-aligned-center is-layout-flow wp-block-column-is-layout-flow" style="flex-basis:50%">
+<div class="wp-block-uagb-advanced-heading uagb-block-5ab8f36e"><h2 class="uagb-heading-text">Simple, Fast, and Hassle-Free Installation</h2></div>
+
+
+
+<p>Getting your CCTV system installed has never been easier! From understanding your needs to expert setup, our seamless 5-step process ensures your property is secure in no time. Trust our certified professionals to handle everything while you enjoy peace of mind.</p>
+
+
+
+<div class="wp-block-uagb-advanced-heading uagb-block-9d6cf6a9"><h3 class="uagb-heading-text">5 Easy Steps</h3></div>
+
+
+
+<div class="wp-block-uagb-icon-list uagb-block-b31a6804 is-style-checkmark-list"><div class="uagb-icon-list__wrap">
+<div data-aos="fade-right" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-icon-list-child uagb-block-df72de88">
+<span class="uagb-icon-list__source-wrap"><svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 256 512"><path d="M256 448c0 17.67-14.33 32-32 32H32c-17.67 0-32-14.33-32-32s14.33-32 32-32h64V123.8L49.75 154.6C35.02 164.5 15.19 160.4 5.375 145.8C-4.422 131.1-.4531 111.2 14.25 101.4l96-64c9.828-6.547 22.45-7.187 32.84-1.594C153.5 41.37 160 52.22 160 64.01v352h64C241.7 416 256 430.3 256 448z"></path></svg></span><span class="uagb-icon-list__label">Free Consultation</span>
+</div>
+
+
+
+<div data-aos="fade-right" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-icon-list-child uagb-block-791d002a">
+<span class="uagb-icon-list__source-wrap"><svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 320 512"><path d="M320 448c0 17.67-14.33 32-32 32H32c-13.08 0-24.83-7.953-29.7-20.09c-4.859-12.12-1.859-26 7.594-35.03l193.6-185.1c31.36-30.17 33.95-80 5.812-113.4c-14.91-17.69-35.86-28.12-58.97-29.38C127.4 95.83 105.3 103.9 88.53 119.9L53.52 151.7c-13.08 11.91-33.33 10.89-45.2-2.172C-3.563 136.5-2.594 116.2 10.48 104.3l34.45-31.3c28.67-27.34 68.39-42.11 108.9-39.88c40.33 2.188 78.39 21.16 104.4 52.03c49.8 59.05 45.2 147.3-10.45 200.8l-136 130H288C305.7 416 320 430.3 320 448z"></path></svg></span><span class="uagb-icon-list__label">Custom Quote</span>
+</div>
+
+
+
+<div data-aos="fade-right" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-icon-list-child uagb-block-45f28823">
+<span class="uagb-icon-list__source-wrap"><svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 320 512"><path d="M320 344c0 74.98-61.02 136-136 136H103.6c-46.34 0-87.31-29.53-101.1-73.48c-5.594-16.77 3.484-34.88 20.25-40.47c16.75-5.609 34.89 3.484 40.47 20.25c5.922 17.77 22.48 29.7 41.23 29.7H184c39.7 0 72-32.3 72-72s-32.3-72-72-72H80c-13.2 0-25.05-8.094-29.83-20.41C45.39 239.3 48.66 225.3 58.38 216.4l131.4-120.4H32c-17.67 0-32-14.33-32-32s14.33-32 32-32h240c13.2 0 25.05 8.094 29.83 20.41c4.781 12.3 1.516 26.27-8.203 35.19l-131.4 120.4H184C258.1 208 320 269 320 344z"></path></svg></span><span class="uagb-icon-list__label">Schedule Installation</span>
+</div>
+
+
+
+<div data-aos="fade-right" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-icon-list-child uagb-block-a1faffb8">
+<span class="uagb-icon-list__source-wrap"><svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 384 512"><path d="M384 334.2c0 17.67-14.33 32-32 32h-32v81.78c0 17.67-14.33 32-32 32s-32-14.33-32-32v-81.78H32c-10.97 0-21.17-5.625-27.05-14.89c-5.859-9.266-6.562-20.89-1.875-30.81l128-270.2C138.6 34.33 157.8 27.56 173.7 35.09c15.97 7.562 22.78 26.66 15.22 42.63L82.56 302.2H256V160c0-17.67 14.33-32 32-32s32 14.33 32 32v142.2h32C369.7 302.2 384 316.6 384 334.2z"></path></svg></span><span class="uagb-icon-list__label">Professional Setup</span>
+</div>
+
+
+
+<div data-aos="fade-right" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-icon-list-child uagb-block-3870131a">
+<span class="uagb-icon-list__source-wrap"><svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 320 512"><path d="M320 344.6c0 74.66-60.73 135.4-135.4 135.4H104.7c-46.81 0-88.22-29.83-103-74.23c-5.594-16.77 3.469-34.89 20.23-40.48c16.83-5.625 34.91 3.469 40.48 20.23c6.078 18.23 23.08 30.48 42.3 30.48h79.95c39.36 0 71.39-32.03 71.39-71.39s-32.03-71.38-71.39-71.38H32c-9.484 0-18.47-4.203-24.56-11.48C1.359 254.5-1.172 244.9 .5156 235.6l32-177.2C35.27 43.09 48.52 32.01 64 32.01l192 .0049c17.67 0 32 14.33 32 32s-14.33 32-32 32H90.73L70.3 209.2h114.3C259.3 209.2 320 269.1 320 344.6z"></path></svg></span><span class="uagb-icon-list__label">Post-Installation Support</span>
+</div>
+</div></div>
+
+
+
+<div data-aos="fade" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-marketing-button uagb-marketing-btn__align-left uagb-marketing-btn__align-text-right uagb-marketing-btn__icon-after uagb-block-78e25b5d wp-block-button hero-marketing-btn"><a href="#quotation" class="uagb-marketing-btn__link wp-block-button__link" target="" rel="noopener noreferrer"><span class="uagb-marketing-btn__title">GET FREE CONSULTATION NOW</span><svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 512 512"><path d="M384 320c-17.67 0-32 14.33-32 32v96H64V160h96c17.67 0 32-14.32 32-32s-14.33-32-32-32L64 96c-35.35 0-64 28.65-64 64V448c0 35.34 28.65 64 64 64h288c35.35 0 64-28.66 64-64v-96C416 334.3 401.7 320 384 320zM488 0H352c-12.94 0-24.62 7.797-29.56 19.75c-4.969 11.97-2.219 25.72 6.938 34.88L370.8 96L169.4 297.4c-12.5 12.5-12.5 32.75 0 45.25C175.6 348.9 183.8 352 192 352s16.38-3.125 22.62-9.375L416 141.3l41.38 41.38c9.156 9.141 22.88 11.84 34.88 6.938C504.2 184.6 512 172.9 512 160V24C512 10.74 501.3 0 488 0z"></path></svg><p class="uagb-marketing-btn__prefix">Enjoy a 2-Year Extended Warranty!</p></a></div>
+</div>
+
+
+
+<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow"></div>
+
+
+
+<div class="wp-block-column is-vertically-aligned-center is-layout-flow wp-block-column-is-layout-flow" style="flex-basis:50%">
+<figure class="wp-block-image size-full has-custom-border is-style-rounded wp-duotone-unset-3 is-style-rounded--2"><img fetchpriority="high" decoding="async" width="1280" height="1280" src="content/uploads/2025/01/WhatsApp-Image-2025-01-21-at-14.37.48-1.jpeg" alt="" class="wp-image-973" style="border-radius:10px" srcset="content/uploads/2025/01/WhatsApp-Image-2025-01-21-at-14.37.48-1.jpeg 1280w, content/uploads/2025/01/WhatsApp-Image-2025-01-21-at-14.37.48-1-300x300.jpeg 300w, content/uploads/2025/01/WhatsApp-Image-2025-01-21-at-14.37.48-1-1024x1024.jpeg 1024w, content/uploads/2025/01/WhatsApp-Image-2025-01-21-at-14.37.48-1-150x150.jpeg 150w, content/uploads/2025/01/WhatsApp-Image-2025-01-21-at-14.37.48-1-768x768.jpeg 768w" sizes="(max-width: 1280px) 100vw, 1280px"></figure>
+</div>
+</div>
+</div></div>
+
+
+<div id="faq" class="wp-block-uagb-container inpage-section uagb-block-cqngloty alignfull uagb-is-root-container"><div class="uagb-container-inner-blocks-wrap">
+<div class="wp-block-uagb-advanced-heading uagb-block-pqky1kef">
+<h2 class="uagb-heading-text">Frequently Asked Questions</h2>
+<p class="uagb-desc-text">Find answers to commonly asked questions about our products and services.</p>
+</div>
+
+
+
+<div class="wp-block-uagb-container uagb-block-fv4i6w2q">
+<div class="wp-block-uagb-faq uagb-faq__outer-wrap uagb-block-ye6sos5e uagb-faq-icon-row-reverse uagb-faq-layout-accordion uagb-faq-expand-first-false uagb-faq-inactive-other-true uagb-faq__wrap uagb-buttons-layout-wrap uagb-faq-equal-height     " data-faqtoggle="true" role="tablist">
+<div data-aos="null" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-faq-child uagb-faq-child__outer-wrap uagb-faq-item uagb-block-eurhwciy " role="tab" tabindex="0">
+<div class="uagb-faq-questions-button uagb-faq-questions">			<span class="uagb-icon uagb-faq-icon-wrap">
+								<svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 448 512"><path d="M432 256c0 17.69-14.33 32.01-32 32.01H256v144c0 17.69-14.33 31.99-32 31.99s-32-14.3-32-31.99v-144H48c-17.67 0-32-14.32-32-32.01s14.33-31.99 32-31.99H192v-144c0-17.69 14.33-32.01 32-32.01s32 14.32 32 32.01v144h144C417.7 224 432 238.3 432 256z"></path></svg>
+							</span>
+						<span class="uagb-icon-active uagb-faq-icon-wrap">
+								<svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 448 512"><path d="M400 288h-352c-17.69 0-32-14.32-32-32.01s14.31-31.99 32-31.99h352c17.69 0 32 14.3 32 31.99S417.7 288 400 288z"></path></svg>
+							</span>
+			<p class="uagb-question">Do you offer FREE CCTV installation services?</p>
+</div>
+<div class="uagb-faq-content"><p>Yes, our certified technicians ensure professional installation with optimal camera placement and seamless system functionality, all included at no additional cost.</p></div>
+</div>
+<div data-aos="null" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-faq-child uagb-faq-child__outer-wrap uagb-faq-item uagb-block-chngw0k3 " role="tab" tabindex="0">
+<div class="uagb-faq-questions-button uagb-faq-questions">			<span class="uagb-icon uagb-faq-icon-wrap">
+								<svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 448 512"><path d="M432 256c0 17.69-14.33 32.01-32 32.01H256v144c0 17.69-14.33 31.99-32 31.99s-32-14.3-32-31.99v-144H48c-17.67 0-32-14.32-32-32.01s14.33-31.99 32-31.99H192v-144c0-17.69 14.33-32.01 32-32.01s32 14.32 32 32.01v144h144C417.7 224 432 238.3 432 256z"></path></svg>
+							</span>
+						<span class="uagb-icon-active uagb-faq-icon-wrap">
+								<svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 448 512"><path d="M400 288h-352c-17.69 0-32-14.32-32-32.01s14.31-31.99 32-31.99h352c17.69 0 32 14.3 32 31.99S417.7 288 400 288z"></path></svg>
+							</span>
+			<p class="uagb-question">Is there a warranty on the CCTV systems?</p>
+</div>
+<div class="uagb-faq-content"><p>All our CCTV systems come with a manufacturer’s warranty, and we also offer extended service packages for added peace of mind.</p></div>
+</div>
+<div data-aos="null" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-faq-child uagb-faq-child__outer-wrap uagb-faq-item uagb-block-hb3yypee " role="tab" tabindex="0">
+<div class="uagb-faq-questions-button uagb-faq-questions">			<span class="uagb-icon uagb-faq-icon-wrap">
+								<svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 448 512"><path d="M432 256c0 17.69-14.33 32.01-32 32.01H256v144c0 17.69-14.33 31.99-32 31.99s-32-14.3-32-31.99v-144H48c-17.67 0-32-14.32-32-32.01s14.33-31.99 32-31.99H192v-144c0-17.69 14.33-32.01 32-32.01s32 14.32 32 32.01v144h144C417.7 224 432 238.3 432 256z"></path></svg>
+							</span>
+						<span class="uagb-icon-active uagb-faq-icon-wrap">
+								<svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 448 512"><path d="M400 288h-352c-17.69 0-32-14.32-32-32.01s14.31-31.99 32-31.99h352c17.69 0 32 14.3 32 31.99S417.7 288 400 288z"></path></svg>
+							</span>
+			<p class="uagb-question">Do you provide Annual Maintenance Services?</p>
+</div>
+<div class="uagb-faq-content"><p>Yes, we offer comprehensive Annual Maintenance Services, including regular system checks and prompt repairs, to keep your CCTV system running smoothly.</p></div>
+</div>
+<div data-aos="null" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-faq-child uagb-faq-child__outer-wrap uagb-faq-item uagb-block-xpw0tvhx " role="tab" tabindex="0">
+<div class="uagb-faq-questions-button uagb-faq-questions">			<span class="uagb-icon uagb-faq-icon-wrap">
+								<svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 448 512"><path d="M432 256c0 17.69-14.33 32.01-32 32.01H256v144c0 17.69-14.33 31.99-32 31.99s-32-14.3-32-31.99v-144H48c-17.67 0-32-14.32-32-32.01s14.33-31.99 32-31.99H192v-144c0-17.69 14.33-32.01 32-32.01s32 14.32 32 32.01v144h144C417.7 224 432 238.3 432 256z"></path></svg>
+							</span>
+						<span class="uagb-icon-active uagb-faq-icon-wrap">
+								<svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 448 512"><path d="M400 288h-352c-17.69 0-32-14.32-32-32.01s14.31-31.99 32-31.99h352c17.69 0 32 14.3 32 31.99S417.7 288 400 288z"></path></svg>
+							</span>
+			<p class="uagb-question">How long does the installation process take?</p>
+</div>
+<div class="uagb-faq-content"><p>Most installations are completed within a single day, although the exact timeline depends on the project’s scope and site conditions.</p></div>
+</div>
+<div data-aos="null" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-faq-child uagb-faq-child__outer-wrap uagb-faq-item uagb-block-f39d2c7b " role="tab" tabindex="0">
+<div class="uagb-faq-questions-button uagb-faq-questions">			<span class="uagb-icon uagb-faq-icon-wrap">
+								<svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 448 512"><path d="M432 256c0 17.69-14.33 32.01-32 32.01H256v144c0 17.69-14.33 31.99-32 31.99s-32-14.3-32-31.99v-144H48c-17.67 0-32-14.32-32-32.01s14.33-31.99 32-31.99H192v-144c0-17.69 14.33-32.01 32-32.01s32 14.32 32 32.01v144h144C417.7 224 432 238.3 432 256z"></path></svg>
+							</span>
+						<span class="uagb-icon-active uagb-faq-icon-wrap">
+								<svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 448 512"><path d="M400 288h-352c-17.69 0-32-14.32-32-32.01s14.31-31.99 32-31.99h352c17.69 0 32 14.3 32 31.99S417.7 288 400 288z"></path></svg>
+							</span>
+			<p class="uagb-question">How do I get started with purchasing the CCTV?</p>
+</div>
+<div class="uagb-faq-content"><p>Simply <a href="#quotation" target="_blank">fill out the get quotation form</a> or <a href="tel:8884831000">call us</a> to schedule a free consultation. Our experts will assess your security needs and recommend the best solution for you.</p></div>
+</div>
+<div data-aos="null" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-faq-child uagb-faq-child__outer-wrap uagb-faq-item uagb-block-5482d46b " role="tab" tabindex="0">
+<div class="uagb-faq-questions-button uagb-faq-questions">			<span class="uagb-icon uagb-faq-icon-wrap">
+								<svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 448 512"><path d="M432 256c0 17.69-14.33 32.01-32 32.01H256v144c0 17.69-14.33 31.99-32 31.99s-32-14.3-32-31.99v-144H48c-17.67 0-32-14.32-32-32.01s14.33-31.99 32-31.99H192v-144c0-17.69 14.33-32.01 32-32.01s32 14.32 32 32.01v144h144C417.7 224 432 238.3 432 256z"></path></svg>
+							</span>
+						<span class="uagb-icon-active uagb-faq-icon-wrap">
+								<svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 448 512"><path d="M400 288h-352c-17.69 0-32-14.32-32-32.01s14.31-31.99 32-31.99h352c17.69 0 32 14.3 32 31.99S417.7 288 400 288z"></path></svg>
+							</span>
+			<p class="uagb-question">What is included in the annual maintenance plan?</p>
+</div>
+<div class="uagb-faq-content"><p>Our annual maintenance plan covers routine system checks, necessary repairs, and lifetime free replacements for defective cameras.</p></div>
+</div>
+</div>
+
+<div class="wp-block-uagb-faq uagb-faq__outer-wrap uagb-block-7n5vm20q uagb-faq-icon-row-reverse uagb-faq-layout-accordion uagb-faq-expand-first-false uagb-faq-inactive-other-true uagb-faq__wrap uagb-buttons-layout-wrap uagb-faq-equal-height     " data-faqtoggle="true" role="tablist">
+<div data-aos="null" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-faq-child uagb-faq-child__outer-wrap uagb-faq-item uagb-block-1ea0b58c " role="tab" tabindex="0">
+<div class="uagb-faq-questions-button uagb-faq-questions">			<span class="uagb-icon uagb-faq-icon-wrap">
+								<svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 448 512"><path d="M432 256c0 17.69-14.33 32.01-32 32.01H256v144c0 17.69-14.33 31.99-32 31.99s-32-14.3-32-31.99v-144H48c-17.67 0-32-14.32-32-32.01s14.33-31.99 32-31.99H192v-144c0-17.69 14.33-32.01 32-32.01s32 14.32 32 32.01v144h144C417.7 224 432 238.3 432 256z"></path></svg>
+							</span>
+						<span class="uagb-icon-active uagb-faq-icon-wrap">
+								<svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 448 512"><path d="M400 288h-352c-17.69 0-32-14.32-32-32.01s14.31-31.99 32-31.99h352c17.69 0 32 14.3 32 31.99S417.7 288 400 288z"></path></svg>
+							</span>
+			<p class="uagb-question">What about CCTV privacy concerns?</p>
+</div>
+<div class="uagb-faq-content"><p>We prioritize your privacy and ensure that all installations comply with local privacy laws. Additionally, our systems include features like access control, password protection, and encryption to safeguard your data and footage.</p></div>
+</div>
+<div data-aos="null" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-faq-child uagb-faq-child__outer-wrap uagb-faq-item uagb-block-o4ctzeda " role="tab" tabindex="0">
+<div class="uagb-faq-questions-button uagb-faq-questions">			<span class="uagb-icon uagb-faq-icon-wrap">
+								<svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 448 512"><path d="M432 256c0 17.69-14.33 32.01-32 32.01H256v144c0 17.69-14.33 31.99-32 31.99s-32-14.3-32-31.99v-144H48c-17.67 0-32-14.32-32-32.01s14.33-31.99 32-31.99H192v-144c0-17.69 14.33-32.01 32-32.01s32 14.32 32 32.01v144h144C417.7 224 432 238.3 432 256z"></path></svg>
+							</span>
+						<span class="uagb-icon-active uagb-faq-icon-wrap">
+								<svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 448 512"><path d="M400 288h-352c-17.69 0-32-14.32-32-32.01s14.31-31.99 32-31.99h352c17.69 0 32 14.3 32 31.99S417.7 288 400 288z"></path></svg>
+							</span>
+			<p class="uagb-question">Can I monitor the CCTV footage remotely?</p>
+</div>
+<div class="uagb-faq-content"><p>Absolutely! Our systems support remote monitoring via smartphone or computer, allowing you to view live footage from anywhere at any time.</p></div>
+</div>
+<div data-aos="null" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-faq-child uagb-faq-child__outer-wrap uagb-faq-item uagb-block-z8yop8ao " role="tab" tabindex="0">
+<div class="uagb-faq-questions-button uagb-faq-questions">			<span class="uagb-icon uagb-faq-icon-wrap">
+								<svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 448 512"><path d="M432 256c0 17.69-14.33 32.01-32 32.01H256v144c0 17.69-14.33 31.99-32 31.99s-32-14.3-32-31.99v-144H48c-17.67 0-32-14.32-32-32.01s14.33-31.99 32-31.99H192v-144c0-17.69 14.33-32.01 32-32.01s32 14.32 32 32.01v144h144C417.7 224 432 238.3 432 256z"></path></svg>
+							</span>
+						<span class="uagb-icon-active uagb-faq-icon-wrap">
+								<svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 448 512"><path d="M400 288h-352c-17.69 0-32-14.32-32-32.01s14.31-31.99 32-31.99h352c17.69 0 32 14.3 32 31.99S417.7 288 400 288z"></path></svg>
+							</span>
+			<p class="uagb-question">What is the difference between DVR and NVR?</p>
+</div>
+<div class="uagb-faq-content"><p>DVR is best suited for analog cameras, while NVR is designed for IP cameras. If you’re unsure, our team will guide you to the right choice based on your requirements.</p></div>
+</div>
+<div data-aos="null" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-faq-child uagb-faq-child__outer-wrap uagb-faq-item uagb-block-c1qojuw1 " role="tab" tabindex="0">
+<div class="uagb-faq-questions-button uagb-faq-questions">			<span class="uagb-icon uagb-faq-icon-wrap">
+								<svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 448 512"><path d="M432 256c0 17.69-14.33 32.01-32 32.01H256v144c0 17.69-14.33 31.99-32 31.99s-32-14.3-32-31.99v-144H48c-17.67 0-32-14.32-32-32.01s14.33-31.99 32-31.99H192v-144c0-17.69 14.33-32.01 32-32.01s32 14.32 32 32.01v144h144C417.7 224 432 238.3 432 256z"></path></svg>
+							</span>
+						<span class="uagb-icon-active uagb-faq-icon-wrap">
+								<svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 448 512"><path d="M400 288h-352c-17.69 0-32-14.32-32-32.01s14.31-31.99 32-31.99h352c17.69 0 32 14.3 32 31.99S417.7 288 400 288z"></path></svg>
+							</span>
+			<p class="uagb-question">How do I decide the number of cameras I need?</p>
+</div>
+<div class="uagb-faq-content"><p>Our experts will evaluate your property and recommend the ideal number of cameras to ensure complete coverage and optimal security.</p></div>
+</div>
+<div data-aos="null" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-faq-child uagb-faq-child__outer-wrap uagb-faq-item uagb-block-2iybnqnz " role="tab" tabindex="0">
+<div class="uagb-faq-questions-button uagb-faq-questions">			<span class="uagb-icon uagb-faq-icon-wrap">
+								<svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 448 512"><path d="M432 256c0 17.69-14.33 32.01-32 32.01H256v144c0 17.69-14.33 31.99-32 31.99s-32-14.3-32-31.99v-144H48c-17.67 0-32-14.32-32-32.01s14.33-31.99 32-31.99H192v-144c0-17.69 14.33-32.01 32-32.01s32 14.32 32 32.01v144h144C417.7 224 432 238.3 432 256z"></path></svg>
+							</span>
+						<span class="uagb-icon-active uagb-faq-icon-wrap">
+								<svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 448 512"><path d="M400 288h-352c-17.69 0-32-14.32-32-32.01s14.31-31.99 32-31.99h352c17.69 0 32 14.3 32 31.99S417.7 288 400 288z"></path></svg>
+							</span>
+			<p class="uagb-question">What happens if a camera stops working?</p>
+</div>
+<div class="uagb-faq-content"><p>Under our annual maintenance plan, defective cameras are replaced for free, ensuring uninterrupted protection.</p></div>
+</div>
+<div data-aos="null" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-faq-child uagb-faq-child__outer-wrap uagb-faq-item uagb-block-1e65efd5 " role="tab" tabindex="0">
+<div class="uagb-faq-questions-button uagb-faq-questions">			<span class="uagb-icon uagb-faq-icon-wrap">
+								<svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 448 512"><path d="M432 256c0 17.69-14.33 32.01-32 32.01H256v144c0 17.69-14.33 31.99-32 31.99s-32-14.3-32-31.99v-144H48c-17.67 0-32-14.32-32-32.01s14.33-31.99 32-31.99H192v-144c0-17.69 14.33-32.01 32-32.01s32 14.32 32 32.01v144h144C417.7 224 432 238.3 432 256z"></path></svg>
+							</span>
+						<span class="uagb-icon-active uagb-faq-icon-wrap">
+								<svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 448 512"><path d="M400 288h-352c-17.69 0-32-14.32-32-32.01s14.31-31.99 32-31.99h352c17.69 0 32 14.3 32 31.99S417.7 288 400 288z"></path></svg>
+							</span>
+			<p class="uagb-question">Do your cameras work at night?</p>
+</div>
+<div class="uagb-faq-content"><p>Yes, all our cameras are equipped with automatic night vision, delivering clear and reliable footage even in complete darkness.</p></div>
+</div>
+</div>
+</div>
+</div></div>
+
+
+
+
+
+
+<div id="success-stories" class="wp-block-uagb-container inpage-section uagb-block-f4e663ad alignfull uagb-is-root-container"><div class="uagb-container-inner-blocks-wrap">
+<div class="wp-block-uagb-info-box uagb-block-471365c0 uagb-infobox__content-wrap  uagb-infobox-icon-above-title uagb-infobox-image-valign-top wp-block-uagb-info-box--has-margin"><div class="uagb-infobox-margin-wrapper"><div class="uagb-ifb-content">
+<div class="uagb-ifb-title-wrap"><h3 class="uagb-ifb-title">What Our Clients Are Saying</h3></div>
+<p class="uagb-ifb-desc">See what our happy clients are saying about our CCTV installation services. <br>Our expert team has helped them feel secure and at ease. Hear directly from a few who have experienced our reliable service firsthand</p>
+</div></div></div>
+
+
+
+<div class="wp-block-uagb-container uagb-block-5941ef60 alignfull uagb-is-root-container"><div class="uagb-container-inner-blocks-wrap">
+<div class="wp-block-uagb-container uagb-block-9923054d">
+<div data-aos="fade" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-info-box uagb-block-07e1aff2 uagb-infobox__content-wrap  uagb-infobox-icon-above-title uagb-infobox-image-valign-top wp-block-uagb-info-box--has-margin"><div class="uagb-infobox-margin-wrapper"><div class="uagb-ifb-content">
+<div class="uagb-ifb-image-content"><img decoding="async" src="content/uploads/2024/10/WhatsApp-Image-2024-10-20-at-17.01.37-e1729437682833-150x150.jpeg" alt="" width="100" height="100" loading="lazy"></div>
+<div class="uagb-ifb-title-wrap"></div>
+<p class="uagb-ifb-desc">Seamless CCTV installation. The team was punctual, and the system works perfectly. Night vision quality is especially impressive. Worth every penny!</p>
+</div></div></div>
+
+
+
+<div data-aos="fade-up" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-star-rating uagb-block-6bc5d5a5"><div class="uag-star-rating" title="5/5">
+<span class="uag-star">★</span><span class="uag-star">★</span><span class="uag-star">★</span><span class="uag-star">★</span><span class="uag-star">★</span>
+</div></div>
+
+
+
+<div data-aos="fade-up" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-advanced-heading uagb-block-c60c972e"><h6 class="uagb-heading-text">Rajesh</h6></div>
+
+
+
+<div data-aos="fade" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-info-box uagb-block-83fad4d3 uagb-infobox__content-wrap  uagb-infobox-icon-above-title uagb-infobox-image-valign-top wp-block-uagb-info-box--has-margin"><div class="uagb-infobox-margin-wrapper"><div class="uagb-ifb-content">
+<div class="uagb-ifb-image-content"><img decoding="async" src="content/uploads/2024/10/WhatsApp-Image-2024-10-20-at-16.59.17-150x150.jpeg" alt="" width="100" height="100" loading="lazy"></div>
+<div class="uagb-ifb-title-wrap"></div>
+<p class="uagb-ifb-desc">Superb service! The technicians were experts, and the installation was neat and efficient. The clarity of the cameras is excellent.</p>
+</div></div></div>
+
+
+
+<div data-aos="fade-up" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-star-rating uagb-block-27b6e75e"><div class="uag-star-rating" title="5/5">
+<span class="uag-star">★</span><span class="uag-star">★</span><span class="uag-star">★</span><span class="uag-star">★</span><span class="uag-star">★</span>
+</div></div>
+
+
+
+<div data-aos="fade-up" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-advanced-heading uagb-block-50c34f12"><h6 class="uagb-heading-text">Chandrasekar M</h6></div>
+</div>
+
+
+
+<div class="wp-block-uagb-container uagb-block-bde08ab1">
+<div data-aos="fade" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-info-box uagb-block-37ce343b uagb-infobox__content-wrap  uagb-infobox-icon-above-title uagb-infobox-image-valign-top wp-block-uagb-info-box--has-margin"><div class="uagb-infobox-margin-wrapper"><div class="uagb-ifb-content">
+<div class="uagb-ifb-image-content"><img decoding="async" src="content/uploads/2024/10/WhatsApp-Image-2024-10-20-at-17.00.13-150x150.jpeg" alt="" width="100" height="100" loading="lazy"></div>
+<div class="uagb-ifb-title-wrap"></div>
+<p class="uagb-ifb-desc">Fantastic experience! The installation was smooth, and the staff was friendly and efficient. The cameras offer clear footage and a sense of security</p>
+</div></div></div>
+
+
+
+<div data-aos="fade-up" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-star-rating uagb-block-b60a07cb"><div class="uag-star-rating" title="5/5">
+<span class="uag-star">★</span><span class="uag-star">★</span><span class="uag-star">★</span><span class="uag-star">★</span><span class="uag-star">★</span>
+</div></div>
+
+
+
+<div data-aos="fade-up" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-advanced-heading uagb-block-1ca4676d"><h6 class="uagb-heading-text">Anita Krishamoorthy</h6></div>
+
+
+
+<div data-aos="fade" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-info-box uagb-block-d778d5ea uagb-infobox__content-wrap  uagb-infobox-icon-above-title uagb-infobox-image-valign-top wp-block-uagb-info-box--has-margin"><div class="uagb-infobox-margin-wrapper"><div class="uagb-ifb-content">
+<div class="uagb-ifb-image-content"><img decoding="async" src="content/uploads/2024/10/WhatsApp-Image-2024-10-20-at-17.00.40-150x150.jpeg" alt="" width="100" height="100" loading="lazy"></div>
+<div class="uagb-ifb-title-wrap"></div>
+<p class="uagb-ifb-desc">Highly professional team. The cameras were installed with care, and the monitoring setup is easy to use. Couldn’t be more pleased!</p>
+</div></div></div>
+
+
+
+<div data-aos="fade-up" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-star-rating uagb-block-0c8f629e"><div class="uag-star-rating" title="5/5">
+<span class="uag-star">★</span><span class="uag-star">★</span><span class="uag-star">★</span><span class="uag-star">★</span><span class="uag-star">★</span>
+</div></div>
+
+
+
+<div data-aos="fade-up" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-advanced-heading uagb-block-23791e3c"><h6 class="uagb-heading-text">Arjun</h6></div>
+</div>
+</div></div>
+</div></div>
+
+
+
+
+<div class="wp-block-uagb-container uagb-block-7c6c70fa alignfull uagb-is-root-container">
+<div class="wp-block-uagb-container uagb-block-955ce554"></div>
+
+
+
+<div class="wp-block-uagb-container uagb-block-7fdb5a42">
+<div class="wp-block-uagb-info-box uagb-block-0d58403c uagb-infobox__content-wrap  uagb-infobox-icon-above-title uagb-infobox-image-valign-top wp-block-uagb-info-box--has-margin"><div class="uagb-infobox-margin-wrapper"><div class="uagb-ifb-content">
+<div class="uagb-ifb-title-wrap"><h2 class="uagb-ifb-title-prefix"><strong>Serving South Bangalore with Excellence</strong></h2></div>
+<div class="uagb-ifb-desc">
+<p class="has-contrast-color has-text-color has-link-color has-small-font-size wp-elements-c38e9cc3f693cd83ea67487e6beff3f0">At <strong>Smartronic.online</strong>, we proudly serve all areas in South Bangalore, ensuring top-notch services and seamless connectivity. We cover prominent neighbourhoods like <strong>HSR Layout, Koramangala, Bellandur, BTM Layout, Bommanahalli, Jakkasandra, Madiwala, Sarjapur Road, Ejipura, Agara, and Venkatapura. </strong><br><br>Additionally, our services extend to <strong>Jayanagar, Indiranagar, Marathahalli, Electronic City, Domlur, Whitefield, Ulsoor, and MG Road</strong>, making us your trusted partner for innovative solutions across Bangalore.</p>
+</div>
+</div></div></div>
+
+
+
+<div data-aos="fade" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-marketing-button uagb-marketing-btn__align-left uagb-marketing-btn__align-text-right uagb-marketing-btn__icon-after uagb-block-fe5e5454 wp-block-button hero-marketing-btn"><a href="#quotation" class="uagb-marketing-btn__link wp-block-button__link" target="" rel="noopener noreferrer"><span class="uagb-marketing-btn__title">GET FREE CONSULTATION NOW</span><svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 512 512"><path d="M384 320c-17.67 0-32 14.33-32 32v96H64V160h96c17.67 0 32-14.32 32-32s-14.33-32-32-32L64 96c-35.35 0-64 28.65-64 64V448c0 35.34 28.65 64 64 64h288c35.35 0 64-28.66 64-64v-96C416 334.3 401.7 320 384 320zM488 0H352c-12.94 0-24.62 7.797-29.56 19.75c-4.969 11.97-2.219 25.72 6.938 34.88L370.8 96L169.4 297.4c-12.5 12.5-12.5 32.75 0 45.25C175.6 348.9 183.8 352 192 352s16.38-3.125 22.62-9.375L416 141.3l41.38 41.38c9.156 9.141 22.88 11.84 34.88 6.938C504.2 184.6 512 172.9 512 160V24C512 10.74 501.3 0 488 0z"></path></svg><p class="uagb-marketing-btn__prefix">Enjoy a 2-Year Extended Warranty!</p></a></div>
+</div>
+</div>
+
+
+<div class="wp-block-uagb-container animated-background uagb-layout-flex uagb-block-e01ccadd alignfull uagb-is-root-container">
+<div class="uagb-container__shape uagb-container__shape-bottom uagb-container__invert" data-negative="false"><svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 283.5 27.8" preserveaspectratio="none"><path class="uagb-container__shape-fill" d="M283.5,9.7c0,0-7.3,4.3-14,4.6c-6.8,0.3-12.6,0-20.9-1.5c-11.3-2-33.1-10.1-44.7-5.7	s-12.1,4.6-18,7.4c-6.6,3.2-20,9.6-36.6,9.3C131.6,23.5,99.5,7.2,86.3,8c-1.4,0.1-6.6,0.8-10.5,2c-3.8,1.2-9.4,3.8-17,4.7	c-3.2,0.4-8.3,1.1-14.2,0.9c-1.5-0.1-6.3-0.4-12-1.6c-5.7-1.2-11-3.1-15.8-3.7C6.5,9.2,0,10.8,0,10.8V0h283.5V9.7z M260.8,11.3	c-0.7-1-2-0.4-4.3-0.4c-2.3,0-6.1-1.2-5.8-1.1c0.3,0.1,3.1,1.5,6,1.9C259.7,12.2,261.4,12.3,260.8,11.3z M242.4,8.6	c0,0-2.4-0.2-5.6-0.9c-3.2-0.8-10.3-2.8-15.1-3.5c-8.2-1.1-15.8,0-15.1,0.1c0.8,0.1,9.6-0.6,17.6,1.1c3.3,0.7,9.3,2.2,12.4,2.7	C239.9,8.7,242.4,8.6,242.4,8.6z M185.2,8.5c1.7-0.7-13.3,4.7-18.5,6.1c-2.1,0.6-6.2,1.6-10,2c-3.9,0.4-8.9,0.4-8.8,0.5	c0,0.2,5.8,0.8,11.2,0c5.4-0.8,5.2-1.1,7.6-1.6C170.5,14.7,183.5,9.2,185.2,8.5z M199.1,6.9c0.2,0-0.8-0.4-4.8,1.1	c-4,1.5-6.7,3.5-6.9,3.7c-0.2,0.1,3.5-1.8,6.6-3C197,7.5,199,6.9,199.1,6.9z M283,6c-0.1,0.1-1.9,1.1-4.8,2.5s-6.9,2.8-6.7,2.7	c0.2,0,3.5-0.6,7.4-2.5C282.8,6.8,283.1,5.9,283,6z M31.3,11.6c0.1-0.2-1.9-0.2-4.5-1.2s-5.4-1.6-7.8-2C15,7.6,7.3,8.5,7.7,8.6	C8,8.7,15.9,8.3,20.2,9.3c2.2,0.5,2.4,0.5,5.7,1.6S31.2,11.9,31.3,11.6z M73,9.2c0.4-0.1,3.5-1.6,8.4-2.6c4.9-1.1,8.9-0.5,8.9-0.8	c0-0.3-1-0.9-6.2-0.3S72.6,9.3,73,9.2z M71.6,6.7C71.8,6.8,75,5.4,77.3,5c2.3-0.3,1.9-0.5,1.9-0.6c0-0.1-1.1-0.2-2.7,0.2	C74.8,5.1,71.4,6.6,71.6,6.7z M93.6,4.4c0.1,0.2,3.5,0.8,5.6,1.8c2.1,1,1.8,0.6,1.9,0.5c0.1-0.1-0.8-0.8-2.4-1.3	C97.1,4.8,93.5,4.2,93.6,4.4z M65.4,11.1c-0.1,0.3,0.3,0.5,1.9-0.2s2.6-1.3,2.2-1.2s-0.9,0.4-2.5,0.8C65.3,10.9,65.5,10.8,65.4,11.1	z M34.5,12.4c-0.2,0,2.1,0.8,3.3,0.9c1.2,0.1,2,0.1,2-0.2c0-0.3-0.1-0.5-1.6-0.4C36.6,12.8,34.7,12.4,34.5,12.4z M152.2,21.1	c-0.1,0.1-2.4-0.3-7.5-0.3c-5,0-13.6-2.4-17.2-3.5c-3.6-1.1,10,3.9,16.5,4.1C150.5,21.6,152.3,21,152.2,21.1z"></path><path class="uagb-container__shape-fill" d="M269.6,18c-0.1-0.1-4.6,0.3-7.2,0c-7.3-0.7-17-3.2-16.6-2.9c0.4,0.3,13.7,3.1,17,3.3	C267.7,18.8,269.7,18,269.6,18z"></path><path class="uagb-container__shape-fill" d="M227.4,9.8c-0.2-0.1-4.5-1-9.5-1.2c-5-0.2-12.7,0.6-12.3,0.5c0.3-0.1,5.9-1.8,13.3-1.2	S227.6,9.9,227.4,9.8z"></path><path class="uagb-container__shape-fill" d="M204.5,13.4c-0.1-0.1,2-1,3.2-1.1c1.2-0.1,2,0,2,0.3c0,0.3-0.1,0.5-1.6,0.4	C206.4,12.9,204.6,13.5,204.5,13.4z"></path><path class="uagb-container__shape-fill" d="M201,10.6c0-0.1-4.4,1.2-6.3,2.2c-1.9,0.9-6.2,3.1-6.1,3.1c0.1,0.1,4.2-1.6,6.3-2.6	S201,10.7,201,10.6z"></path><path class="uagb-container__shape-fill" d="M154.5,26.7c-0.1-0.1-4.6,0.3-7.2,0c-7.3-0.7-17-3.2-16.6-2.9c0.4,0.3,13.7,3.1,17,3.3	C152.6,27.5,154.6,26.8,154.5,26.7z"></path><path class="uagb-container__shape-fill" d="M41.9,19.3c0,0,1.2-0.3,2.9-0.1c1.7,0.2,5.8,0.9,8.2,0.7c4.2-0.4,7.4-2.7,7-2.6	c-0.4,0-4.3,2.2-8.6,1.9c-1.8-0.1-5.1-0.5-6.7-0.4S41.9,19.3,41.9,19.3z"></path><path class="uagb-container__shape-fill" d="M75.5,12.6c0.2,0.1,2-0.8,4.3-1.1c2.3-0.2,2.1-0.3,2.1-0.5c0-0.1-1.8-0.4-3.4,0	C76.9,11.5,75.3,12.5,75.5,12.6z"></path><path class="uagb-container__shape-fill" d="M15.6,13.2c0-0.1,4.3,0,6.7,0.5c2.4,0.5,5,1.9,5,2c0,0.1-2.7-0.8-5.1-1.4	C19.9,13.7,15.7,13.3,15.6,13.2z"></path></svg></div>
+<div id="home" class="wp-block-uagb-container inpage-section uagb-block-51a989dd alignfull uagb-is-root-container"><div class="uagb-container-inner-blocks-wrap">
+<div class="wp-block-columns is-layout-flex wp-container-core-columns-is-layout-1 wp-block-columns-is-layout-flex">
+<div class="wp-block-column hero-copy is-layout-flow wp-block-column-is-layout-flow" style="flex-basis:65%">
+<div class="wp-block-uagb-container uagb-layout-flex uagb-block-1c4e75f2">
+<div class="wp-block-uagb-info-box uagb-block-2626d306 uagb-infobox__content-wrap  uagb-infobox-icon-above-title uagb-infobox-image-valign-top wp-block-uagb-info-box--has-margin"><div class="uagb-infobox-margin-wrapper"><div class="uagb-ifb-content">
+<div class="uagb-ifb-title-wrap"><h3 class="uagb-ifb-title">
+<span class="w700">Peace of Mind is Priceless</span> <br>Secure It Today with <span class="hl">20% Off on CCTV</span> at Smartronic</h3></div>
+<p class="uagb-ifb-desc"> Your Trusted Partner for 24/7 Surveillance with Affordable, High-Quality <span class="hl">CCTV</span> Expert Installation. <br><span>Get your free consultation today!</span></p>
+</div></div></div>
+</div>
+
+
+
+<div class="wp-block-uagb-container hero-marketing-btn uagb-block-7dc18d1e">
+<div data-aos="fade" data-aos-duration="400" data-aos-delay="0" data-aos-easing="ease" data-aos-once="true" class="wp-block-uagb-marketing-button uagb-marketing-btn__align-right uagb-marketing-btn__align-text-right uagb-marketing-btn__icon-after uagb-block-17c869c7 wp-block-button hero-marketing-btn"><a href="#quotation" class="uagb-marketing-btn__link wp-block-button__link" target="" rel="noopener noreferrer"><span class="uagb-marketing-btn__title">GET FREE CONSULTATION NOW</span><svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 512 512"><path d="M384 320c-17.67 0-32 14.33-32 32v96H64V160h96c17.67 0 32-14.32 32-32s-14.33-32-32-32L64 96c-35.35 0-64 28.65-64 64V448c0 35.34 28.65 64 64 64h288c35.35 0 64-28.66 64-64v-96C416 334.3 401.7 320 384 320zM488 0H352c-12.94 0-24.62 7.797-29.56 19.75c-4.969 11.97-2.219 25.72 6.938 34.88L370.8 96L169.4 297.4c-12.5 12.5-12.5 32.75 0 45.25C175.6 348.9 183.8 352 192 352s16.38-3.125 22.62-9.375L416 141.3l41.38 41.38c9.156 9.141 22.88 11.84 34.88 6.938C504.2 184.6 512 172.9 512 160V24C512 10.74 501.3 0 488 0z"></path></svg><p class="uagb-marketing-btn__prefix">Enjoy a 2-Year Extended Warranty!</p></a></div>
+</div>
+
+
+   
+    <div id="brp-container" style="display:none">
+                    <div class="brp-item">
+               
+                <div class="brp-rating" style="font-size: 16px;">
+                    <span class="brp-star" style="color: #ff000d">&#9733;</span><span class="brp-star" style="color: #ff000d">&#9733;</span><span class="brp-star" style="color: #ff000d">&#9733;</span><span class="brp-star" style="color: #ff000d">&#9733;</span><span class="brp-star" style="color: #999;">&#9733;</span>                </div>
+                <div class="brp-label" style="color: #000000; font-size: 16px;">
+                    SONY                </div>
+            </div>
+                    <div class="brp-item">
+               
+                <div class="brp-rating" style="font-size: 16px;">
+                    <span class="brp-star" style="color: #ff000d">&#9733;</span><span class="brp-star" style="color: #ff000d">&#9733;</span><span class="brp-star" style="color: #ff000d">&#9733;</span><span class="brp-star" style="color: #ff000d">&#9733;</span><span class="brp-star" style="color: #999;">&#9733;</span>                </div>
+                <div class="brp-label" style="color: #000000; font-size: 16px;">
+                    HIKIVISION                </div>
+            </div>
+                    <div class="brp-item">
+               
+                <div class="brp-rating" style="font-size: 16px;">
+                    <span class="brp-star" style="color: #ff000d">&#9733;</span><span class="brp-star" style="color: #ff000d">&#9733;</span><span class="brp-star" style="color: #ff000d">&#9733;</span><span class="brp-star" style="color: #ff000d">&#9733;</span><span class="brp-star" style="color: #999;">&#9733;</span>                </div>
+                <div class="brp-label" style="color: #000000; font-size: 16px;">
+                    DAUAUA                </div>
+            </div>
+                    <div class="brp-item">
+               
+                <div class="brp-rating" style="font-size: 16px;">
+                    <span class="brp-star" style="color: #ff000d">&#9733;</span><span class="brp-star" style="color: #ff000d">&#9733;</span><span class="brp-star" style="color: #ff000d">&#9733;</span><span class="brp-star" style="color: #ff000d">&#9733;</span><span class="brp-star" style="color: #999;">&#9733;</span>                </div>
+                <div class="brp-label" style="color: #000000; font-size: 16px;">
+                    CP PLUS                </div>
+            </div>
+                    <div class="brp-item">
+               
+                <div class="brp-rating" style="font-size: 16px;">
+                    <span class="brp-star" style="color: #ff000d">&#9733;</span><span class="brp-star" style="color: #ff000d">&#9733;</span><span class="brp-star" style="color: #ff000d">&#9733;</span><span class="brp-star" style="color: #ff000d">&#9733;</span><span class="brp-star" style="color: #ff000d">&#9733;</span>                </div>
+                <div class="brp-label" style="color: #000000; font-size: 16px;">
+                    HONEYWELL                </div>
+            </div>
+            </div>
+    <div id="brp-header" style="display:none; text-align: center; font-size: 20px;">
+        <span>Top rated brands we deal at Smartronic</span>
+        <span class="brp-info-icon" style="cursor: pointer; margin-left: 10px;" title="Based on the rating given on Amazon India, Flipkart and other online sources.-2024.">&#9432;</span>
+    </div>
+    
+</div>
+
+
+
+<div class="wp-block-column uag-hide-tab uag-hide-mob is-layout-flow wp-block-column-is-layout-flow" style="flex-basis:35%">
+<div class="wp-block-uagb-container uagb-block-d63e563c">
+<div class="wp-block-uagb-image uagb-block-49a7dc76 wp-block-uagb-image--layout-default wp-block-uagb-image--effect-static wp-block-uagb-image--align-none"><figure class="wp-block-uagb-image__figure"><img decoding="async" srcset="content/uploads/2024/10/cctv-camera-on-transparent-background_16434494-888x1024.png ,content/uploads/2024/10/cctv-camera-on-transparent-background_16434494.png 780w, content/uploads/2024/10/cctv-camera-on-transparent-background_16434494.png 360w" sizes="auto, (max-width: 480px) 150px" src="content/uploads/2024/10/cctv-camera-on-transparent-background_16434494-888x1024.png" alt="" class="uag-image-587" width="888" height="1024" title="cctv camera on transparent background_16434494" loading="lazy" role="img"></figure></div>
+</div>
+</div>
+</div>
+</div></div>
+</div>
+
+
+<div id="contact" class="wp-block-uagb-container inpage-section uagb-block-0644594a alignfull uagb-is-root-container">
+<div class="wp-block-uagb-info-box uagb-block-cce8d023 uagb-infobox__content-wrap  uagb-infobox-icon-left uagb-infobox-left uagb-infobox-stacked-mobile uagb-infobox-image-valign-top">
+<div class="uagb-ifb-icon-wrap"><svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 512 512"><path d="M511.2 387l-23.25 100.8c-3.266 14.25-15.79 24.22-30.46 24.22C205.2 512 0 306.8 0 54.5c0-14.66 9.969-27.2 24.22-30.45l100.8-23.25C139.7-2.602 154.7 5.018 160.8 18.92l46.52 108.5c5.438 12.78 1.77 27.67-8.98 36.45L144.5 207.1c33.98 69.22 90.26 125.5 159.5 159.5l44.08-53.8c8.688-10.78 23.69-14.51 36.47-8.975l108.5 46.51C506.1 357.2 514.6 372.4 511.2 387z"></path></svg></div>
+<div class="uagb-ifb-content">
+<div class="uagb-ifb-title-wrap"><h6 class="uagb-ifb-title">Phone:</h6></div>
+<p class="uagb-ifb-desc">8496080849</p>
+</div>
+</div>
+
+
+
+<div class="wp-block-uagb-info-box uagb-block-6fa46215 uagb-infobox__content-wrap  uagb-infobox-icon-left uagb-infobox-left uagb-infobox-stacked-mobile uagb-infobox-image-valign-top">
+<div class="uagb-ifb-icon-wrap"><svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 448 512"><path d="M285.6 444.1C279.8 458.3 264.8 466.3 249.8 463.4C234.8 460.4 223.1 447.3 223.1 432V256H47.1C32.71 256 19.55 245.2 16.6 230.2C13.65 215.2 21.73 200.2 35.88 194.4L387.9 50.38C399.8 45.5 413.5 48.26 422.6 57.37C431.7 66.49 434.5 80.19 429.6 92.12L285.6 444.1z"></path></svg></div>
+<div class="uagb-ifb-content">
+<div class="uagb-ifb-title-wrap"><h6 class="uagb-ifb-title">Address:</h6></div>
+<p class="uagb-ifb-desc">70, 9th cross, ITI Layout<br>Bangalore 560 068</p>
+</div>
+</div>
+
+
+
+<div class="wp-block-uagb-info-box uagb-block-c1337f7b uagb-infobox__content-wrap  uagb-infobox-icon-left uagb-infobox-left uagb-infobox-stacked-mobile uagb-infobox-image-valign-top">
+<div class="uagb-ifb-icon-wrap"><svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 512 512"><path d="M464 64C490.5 64 512 85.49 512 112C512 127.1 504.9 141.3 492.8 150.4L275.2 313.6C263.8 322.1 248.2 322.1 236.8 313.6L19.2 150.4C7.113 141.3 0 127.1 0 112C0 85.49 21.49 64 48 64H464zM217.6 339.2C240.4 356.3 271.6 356.3 294.4 339.2L512 176V384C512 419.3 483.3 448 448 448H64C28.65 448 0 419.3 0 384V176L217.6 339.2z"></path></svg></div>
+<div class="uagb-ifb-content">
+<div class="uagb-ifb-title-wrap"><h6 class="uagb-ifb-title">Email:</h6></div>
+<p class="uagb-ifb-desc"><a href="mailto:hello@smartronic.online" target="_blank" rel="noreferrer noopener">hello@smartronic.online</a></p>
+</div>
+</div>
+
+
+
+<div class="wp-block-uagb-info-box uagb-block-4262416d uagb-infobox__content-wrap  uagb-infobox-icon-left uagb-infobox-left uagb-infobox-stacked-mobile uagb-infobox-image-valign-top">
+<div class="uagb-ifb-icon-wrap"><svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 512 512"><path d="M256 512C114.6 512 0 397.4 0 256C0 114.6 114.6 0 256 0C397.4 0 512 114.6 512 256C512 397.4 397.4 512 256 512zM232 256C232 264 236 271.5 242.7 275.1L338.7 339.1C349.7 347.3 364.6 344.3 371.1 333.3C379.3 322.3 376.3 307.4 365.3 300L280 243.2V120C280 106.7 269.3 96 255.1 96C242.7 96 231.1 106.7 231.1 120L232 256z"></path></svg></div>
+<div class="uagb-ifb-content">
+<div class="uagb-ifb-title-wrap"><h6 class="uagb-ifb-title">Open Hours:</h6></div>
+<p class="uagb-ifb-desc">Mon-Sat: 9am &#8211; 7pm</p>
+</div>
+</div>
+</div>
+
+
+<p><!-- Popup/Callout --></p>
+<div id="qr-popup" class="qr-popup">
+<div class="qr-popup-content">
+<img decoding="async" class="qr-image" src="content/uploads/2025/01/adobe-express-qr-code.svg" alt="" width="250" height="250">
+<p>Scan the QR code with your mobile <br>to call or click to call us at <br><a class="call-link" href="tel:8884831000">8884831000</a></p>
+</div>
+</div>
+<div id="-breakpoint-display"></div>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const header = document.querySelector("header"); // Select the header
+    let lastScrollTop = 0;
+    const scrollThreshold = 100; // Threshold to hide/show the header
+
+    window.addEventListener("scroll", function () {
+      let currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+
+      if (currentScroll > lastScrollTop && currentScroll > scrollThreshold) {
+        // Scrolling down past the threshold, hide the header
+        header.classList.add("hidden-header");
+      } else if (currentScroll < lastScrollTop) {
+        // Scrolling up, show the header
+        header.classList.remove("hidden-header");
+      }
+
+      lastScrollTop = currentScroll <= 0 ? 0 : currentScroll; // Prevent negative values
+    });
+  });
+</script>
+
+
+<p></p>
+</div></main>
+
+
+<footer class="wp-block-template-part">
+<div class="wp-block-group has-base-2-color has-text-color has-background has-link-color wp-elements-0c786f16f9a6ada6b5c28405b78ef0f8 has-global-padding is-layout-constrained wp-block-group-is-layout-constrained" style="background-color:#232f3e;padding-top:var(--wp--preset--spacing--60);padding-bottom:var(--wp--preset--spacing--60)">
+<div class="wp-block-group alignwide is-layout-flow wp-block-group-is-layout-flow" style="padding-top:0;padding-bottom:0">
+<div class="wp-block-columns alignwide is-layout-flex wp-container-core-columns-is-layout-5 wp-block-columns-is-layout-flex">
+<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow" style="flex-basis:30%">
+<div class="wp-block-group is-vertical is-layout-flex wp-container-core-group-is-layout-7 wp-block-group-is-layout-flex">
+<figure class="wp-block-image size-large is-resized"><img decoding="async" width="122" height="30" src="content/uploads/2024/11/smarthome-white3.svg" alt="" class="wp-image-946" style="width:336px;height:auto"></figure>
+
+
+<p class="wp-block-site-title has-medium-font-size"><a target="_self" rel="home" aria-current="page">Smartronic | CCTV with Free Installation | Smart Home Automation</a></p>
+
+</div>
+</div>
+
+
+
+<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow" style="flex-basis:20%"></div>
+
+
+
+<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow" style="flex-basis:50%">
+<div class="wp-block-group is-content-justification-space-between is-layout-flex wp-container-core-group-is-layout-11 wp-block-group-is-layout-flex">
+<div class="wp-block-group is-vertical is-content-justification-stretch is-layout-flex wp-container-core-group-is-layout-8 wp-block-group-is-layout-flex">
+<h2 class="wp-block-heading has-medium-font-size has-base-2-color has-text-color has-link-color has-body-font-family wp-elements-2cab3a8c50f47de48c80841beb5f4fd0" style="font-style:normal;font-weight:300"><a href="#quotation">Home</a></h2>
+
+
+
+<h2 class="wp-block-heading has-medium-font-size has-base-2-color has-text-color has-link-color has-body-font-family wp-elements-bafc843aa5ea509c384c589e98a73adf" style="font-style:normal;font-weight:300"><a href="#success-stories">Success Stories</a></h2>
+</div>
+
+
+
+<div class="wp-block-group is-vertical is-content-justification-stretch is-layout-flex wp-container-core-group-is-layout-9 wp-block-group-is-layout-flex">
+<h2 class="wp-block-heading has-medium-font-size has-base-2-color has-text-color has-link-color wp-elements-ebce97e9b1ce6e64933d1285a78de5f1" style="font-style:normal;font-weight:300"><a href="#quotation">Get Quotation Now</a></h2>
+
+
+
+<h2 class="wp-block-heading has-medium-font-size has-base-2-color has-text-color has-link-color has-body-font-family wp-elements-b3dfd3800d7e944a14ad64468c2df74a" style="font-style:normal;font-weight:300">
+<a href="#faq">FAQ</a>
+</h2>
+<h2 class="wp-block-heading has-medium-font-size has-base-2-color has-text-color has-link-color has-body-font-family wp-elements-b3dfd3800d7e944a14ad64468c2df74a" style="font-style:normal;font-weight:300">
+
+</h2>
+</div>
+
+
+
+<div class="wp-block-group is-vertical is-content-justification-stretch is-layout-flex wp-container-core-group-is-layout-10 wp-block-group-is-layout-flex">
+<h2 class="wp-block-heading has-medium-font-size has-base-2-color has-text-color has-link-color has-body-font-family wp-elements-0563e95aa783ae1fdd2f1e4282b2ecdd" style="font-style:normal;font-weight:300"><a href="#services">Services</a></h2>
+
+
+
+<h2 class="wp-block-heading has-medium-font-size has-base-2-color has-text-color has-link-color has-body-font-family wp-elements-b126e96bf3cccd151b34939c69c92a87" style="font-style:normal;font-weight:300"><a href="#contact">Contact</a></h2>
+<h2 class="wp-block-heading has-medium-font-size has-base-2-color has-text-color has-link-color has-body-font-family wp-elements-b126e96bf3cccd151b34939c69c92a87" style="font-style:normal;font-weight:300"><a href="https://smartronic.online/invoice/terms.php" target="_blank">Terms of Service</a></h2>
+</div>
+</div>
+</div>
+</div>
+
+
+
+<p class="has-base-2-color has-text-color has-link-color has-small-font-size wp-elements-a5cf571c8c89a9f4336b62fad62440a5">© 2025 | <strong>Smartronic</strong> | <a href="https://smartronic.online/">www.smartronic.online</a></p>
+</div>
+</div>
+</footer>
+</div>
+<script id="wp-block-template-skip-link-js-after">( function() {
+		var skipLinkTarget = document.querySelector( 'main' ),
+			sibling,
+			skipLinkTargetID,
+			skipLink;
+
+		// Early exit if a skip-link target can't be located.
+		if ( ! skipLinkTarget ) {
+			return;
+		}
+
+		/*
+		 * Get the site wrapper.
+		 * The skip-link will be injected in the beginning of it.
+		 */
+		sibling = document.querySelector( '.wp-site-blocks' );
+
+		// Early exit if the root element was not found.
+		if ( ! sibling ) {
+			return;
+		}
+
+		// Get the skip-link target's ID, and generate one if it doesn't exist.
+		skipLinkTargetID = skipLinkTarget.id;
+		if ( ! skipLinkTargetID ) {
+			skipLinkTargetID = 'wp--skip-link--target';
+			skipLinkTarget.id = skipLinkTargetID;
+		}
+
+		// Create the skip link.
+		skipLink = document.createElement( 'a' );
+		skipLink.classList.add( 'skip-link', 'screen-reader-text' );
+		skipLink.href = '#' + skipLinkTargetID;
+		skipLink.innerHTML = 'Skip to content';
+
+		// Inject the skip link.
+		sibling.parentElement.insertBefore( skipLink, sibling );
+	}() );</script>
+<script src="content/plugins/brand-rating-plugin/js/script.js" id="brp-script-js"></script>
+<script id="crf-form-script-js-extra">var crf_ajax_object = {"ajax_url":"\admin_v2\/admin-ajax.php"};</script>
+<script src="content/plugins/cctv-requirement-form/assets/form-script.js" id="crf-form-script-js"></script>
+<script src="content/plugins/ultimate-addons-for-gutenberg/assets/js/spectra-block-positioning.min.js?ver=2.13.5" id="uagb-block-positioning-js-js"></script>
+<script src="content/plugins/ultimate-addons-for-gutenberg/assets/js/aos.min.js?ver=2.13.5" id="uagb-aos-js-js"></script>
+<script src="content/plugins/ultimate-addons-for-gutenberg/assets/js/spectra-animations.min.js?ver=2.13.5" id="uagb-animation-js-js"></script>
+<script src="content/plugins/ultimate-addons-for-gutenberg/assets/js/faq.min.js?ver=2.13.5" id="uagb-faq-js-js"></script>
+<script id="uagb-image-gallery-js-js-extra">var uagb_image_gallery = {"ajax_url":"\admin_v2\/admin-ajax.php","uagb_image_gallery_masonry_ajax_nonce":"663af0226f","uagb_image_gallery_grid_pagination_ajax_nonce":"30cd5ff401"};</script>
+<script src="content/plugins/ultimate-addons-for-gutenberg/assets/js/image-gallery.min.js?ver=2.13.5" id="uagb-image-gallery-js-js"></script>
+<script src="content/plugins/ultimate-addons-for-gutenberg/assets/js/isotope.min.js?ver=2.13.5" id="uagb-masonry-js"></script>
+<script src="content/plugins/ultimate-addons-for-gutenberg/assets/js/imagesloaded.min.js?ver=2.13.5" id="uagb-imagesloaded-js"></script>
+<script src="content/plugins/ultimate-addons-for-gutenberg/assets/js/slick.min.js?ver=2.13.5" id="uagb-slick-js-js"></script>
+<script src="content/plugins/ultimate-addons-for-gutenberg/assets/js/swiper-bundle.min.js?ver=2.13.5" id="uagb-swiper-js-js"></script>
+<script src="content/uploads/uag-plugin/assets/0/uag-js-382.js?ver=1737555549" id="uag-script-382-js"></script>
+  <!-- 100% privacy-first analytics -->
+<script async src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
+<section id="quotation-overlay" style="display: none; overflow-y: auto;  overflow-y: none;">
+    <button id="close-overlay">X</button>
+	<a href="/" class="custom-logo-link" rel="home" aria-current="page">
+		<img width="200" height="49"  src="content/uploads/2025/01/smarthome-black2.svg" class="custom-logo" alt="Smartronic | CCTV with Free Installation | Smart Home Automation" decoding="async" content="" uploads="">
+	</a>
+	<div id="quotation-overlay-form" class="wp-block-uagb-container crf-form-wrapper inpage-section uagb-block-c19de64c alignfull uagb-is-root-container">
+
+	</div>
+
+  </section>
+  <button id="goToTop" class="go-to-top">↑ Get Quotation</button>
+<form 
+  action="https://smartronic.online/admin_v2/smart/whatsapp_leads.php"
+  method="POST"
+  style="display:inline;"
+  target="_blank"
+>
+    <input type="hidden" name="gads" value="<?php echo isset($_GET['gads']) ? htmlspecialchars($_GET['gads']) : ''; ?>">
+    <input type="hidden" name="key" value="9f4a73c2e9b84bdc902f1a7e5d13acbd">
+
+    <button 
+      type="submit"
+      class="btn-whatsapp"
+      style="background:none;border:none;padding:0;cursor:pointer;"
+    >
+        <i class="fab fa-whatsapp"></i>
+    </button>
+</form>
+<a href="https://smartronic.online/admin_v2/smart/whatsapp_leads.php?key=9f4a73c2e9b84bdc902f1a7e5d13acbd">
+    WhatsApp Chat
+</a>
+
+  <img src="analytics.png" alt="Tracking Image" id="tracking-image" />
+
+ 
+</body>
+</html>
+<script>
+
+    
+        // Initialize visitor tracking
+        let scrollDepth = 0;
+        let startTime = Date.now();
+
+        // Capture scroll depth
+        window.addEventListener('scroll', () => {
+            const scrolled = Math.ceil((window.scrollY / document.body.scrollHeight) * 100);
+            scrollDepth = Math.max(scrollDepth, scrolled);
+          console.log('scrollDepth', scrollDepth, scrolled)
+        });
+
+
+        document.addEventListener("DOMContentLoaded", function () {
+    const goToTopBtn = document.getElementById("goToTop");
+
+    window.addEventListener("scroll", function () {
+        const scrollPosition = window.scrollY;
+        const quotationSection = document.getElementById("quotation");
+        console.log("scrollPosition", scrollPosition)
+        console.log(quotationSection.getBoundingClientRect().bottom)
+        
+        if (scrollPosition > 100) {
+            goToTopBtn.style.display = "block";
+        } else {
+            goToTopBtn.style.display = "none";
+        }
+
+        // Hide the button when inside the #quotation section
+        if (quotationSection) {
+            const quotationRect = quotationSection.getBoundingClientRect();
+            if (quotationRect.top < window.innerHeight && quotationRect.bottom > 1500) {
+                goToTopBtn.classList.add("hide-button");
+            } else {
+                goToTopBtn.classList.remove("hide-button");
+            }
+        }
+    });
+
+    // Scroll to Top Action
+    goToTopBtn.addEventListener("click", function () {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+});
+
+
+        // Send data to the server
+        function sendData(data) {
+            fetch('https://smartronic.online/admin/track.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+        }
+
+        // Send user activity on unload
+        window.addEventListener('beforeunload', () => {
+            const timeOnPage = Math.ceil((Date.now() - startTime) / 1000);
+            sendData({
+                scrollDepth: scrollDepth,
+                timeOnPage: timeOnPage,
+            });
+           console.log(scrollDepth, timeOnPage )
+        });
+
+        // Tracking pixel for capturing visitor info
+        const img = document.getElementById('tracking-image');
+        img.src = `https://smartronic.online/admin/capture.php?timestamp=${Date.now()}`;
+   document.addEventListener("DOMContentLoaded", function () {
+
+    
+  const overlay = document.getElementById("quotation-overlay");
+  const closeBtn = document.getElementById("close-overlay");
+  const quoteSection = document.querySelector("#quotation")?.innerHTML;
+
+  if (!overlay || !closeBtn || !quoteSection) {
+    console.error("One or more required elements are missing.");
+    return;
+  }
+
+  function showQuotationOverlay() {
+    if (window.location.hash === "#show-quotation") {
+      overlay.style.display = "block";
+      document.body.classList.add("overlay-active"); // Disable body scroll
+      document.querySelector("#quotation-overlay-form").innerHTML += quoteSection;
+	  document.querySelector("#quotation").innerHTML = '';
+    }
+  }
+
+  showQuotationOverlay();
+
+  window.addEventListener("hashchange", showQuotationOverlay);
+
+  closeBtn.addEventListener("click", function () {
+	// Hide the overlay and re-enable body scrolling
+    overlay.style.display = "none";
+	document.body.classList.remove("overlay-active");
+	document.querySelector("#quotation-overlay-form").innerHTML = '';
+
+    // Restore content back to the original section
+    document.querySelector("#quotation").innerHTML = quoteSection;
+	window.location.hash = ""; // Remove #show-quotation from URL
+	handleCCTVFormSubmission();
+  });
+});
+
+
+
+</script>
+<style>
+
+
+body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+/* Ensure the overlay scrolls independently */
+#quotation-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto; /* Allow vertical scrolling */
+  background: #fff; /* Optional: overlay background */
+  z-index: 1000; /* Ensure overlay is on top */
+ 
+  box-sizing: border-box;
+
+  & .custom-logo-link {
+	padding: 20px 20px;
+    /* margin-top: 30px; */
+    display: block;
+    border-bottom: 1px solid #eee;
+  }
+
+ 
+}
+
+
+
+	#quotation-overlay > div {
+      background: #fff;
+      --margin: 15% auto;
+      
+      border-radius: 8px;
+      
+      --max-height: 80%;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      overflow-y: auto; /* Enable scrolling within the overlay */
+    }
+
+    /* Close button */
+    #close-overlay {
+      position: absolute;
+      top: 30px;
+      right: 30px;
+      background: transparent;
+      color: white;
+      font-size: 24px;
+      border: none;
+      cursor: pointer;
+	  z-index: 1002;
+    background: #e1e1e1;
+    border-radius: 50%;
+    padding: 4px 10px;
+    }
+
+    #close-overlay:hover {
+      color: red;
+    }
+
+    /* Disable scrolling on body when overlay is active */
+    body.overlay-active {
+      overflow: hidden;
+    }
+
+/* Go to Top Button Styling */
+.go-to-top {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #fc0000!important;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    display: none; /* Initially hidden */
+    transition: opacity 0.3s ease-in-out;
+    z-index: 1;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, .3);
+}
+
+.go-to-top:hover {
+    background: #fc0000!important;
+}
+
+/* Hide the button when inside #quotation section */
+.hide-button {
+    display: none !important;
+}
+.btn-whatsapp {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  width: 70px;
+  height: 70px;
+  background: #25d366 !important;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 36px;
+  text-decoration: none;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  animation: wppPulse 1.6s infinite ease-out;
+  z-index: 9999;
+}
+
+@keyframes wppPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 20px rgba(37, 211, 102, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
+  }
+}
+
+
+  </style>
+<?php
+$botToken = "7650074875:AAGuFoUncn_CE2CMCPadV_wjqHg4D47kXvI"; // Replace with your bot token
+$chatID = "7994221275"; // Replace with your Chat ID
+
+// Check the referer
+$referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : 'Unknown';
+
+// Check if the visitor came from Google Ads (Google Ads referers contain 'google.com')
+if (strpos($referer, 'google.com') !== false) {
+    $message = "Visit from G!Ads \n $referer";
+} else {
+    $message = "Visit from \n $referer";
+}
+
+// Send message to Telegram
+$url = "https://api.telegram.org/bot$botToken/sendMessage?chat_id=$chatID&text=" . urlencode($message);
+file_get_contents($url);
+?>
+
+ 

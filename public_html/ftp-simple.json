@@ -1,0 +1,24 @@
+[
+  {
+    "name": "Development Server",
+    "host": "82.25.120.106",
+    "port": 21,
+    "type": "ftp",
+    "username": "u398852039.smartronic.online",
+    "password": "Chennai@40!",
+    "path": "/public_html/dev",
+    "autosave": false,
+    "confirm": true
+  },
+  {
+    "name": "Production Server",
+    "host": "82.25.120.106",
+    "port": 21,
+    "type": "ftp",
+    "username": "u398852039.smartronic.online",
+    "password": "Chennai@40!",
+    "path": "/public_html",
+    "autosave": true,
+    "confirm": false
+  }
+]

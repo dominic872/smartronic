@@ -1,0 +1,430 @@
+// Calendar and core installs module
+// Requires: installs.utils.js, installs.notes.js, installs.stats.js
+
+(function () {
+  const weeksContainer = document.getElementById('calendarWeeks');
+  const monthLabel = document.getElementById('monthLabel');
+  const popup = document.getElementById('order-popup');
+  const form = document.getElementById('installForm');
+
+  const monthColors = ["#03944f", "#e53935", "#f0b414", "#454dce", "#498aaa", "#c315dc"];
+
+  window.allInstalls = window.allInstalls || [];
+  window.currentMonday = window.currentMonday || getMonday(new Date());
+  let editingId = null;
+  window.showExtendedWeeks = !!window.showExtendedWeeks;
+  let weeksToggleBtn = null;
+
+  // Toolbar helper (shared id used by stats module too)
+  function ensureToolbar() {
+    let toolbar = document.getElementById('calendarToolbar');
+    let toolbarRight = toolbar ? toolbar.querySelector('.toolbar-right') : null;
+    if (!toolbar) {
+      toolbar = document.createElement('div');
+      toolbar.id = 'calendarToolbar';
+      toolbar.className = 'calendar-toolbar';
+      const left = document.createElement('div'); left.className = 'toolbar-left';
+      toolbarRight = document.createElement('div'); toolbarRight.className = 'toolbar-right';
+      toolbar.appendChild(left); toolbar.appendChild(toolbarRight);
+      const calendarEl = document.querySelector('.calendar');
+      const weekdaysEl = calendarEl ? calendarEl.querySelector('.weekdays') : null;
+      if (calendarEl) {
+        if (weekdaysEl) calendarEl.insertBefore(toolbar, weekdaysEl);
+        else calendarEl.insertBefore(toolbar, calendarEl.firstChild);
+      }
+      if (left && monthLabel) left.appendChild(monthLabel);
+    } else if (!toolbarRight) {
+      toolbarRight = document.createElement('div'); toolbarRight.className = 'toolbar-right';
+      toolbar.appendChild(toolbarRight);
+    }
+    return { toolbar, toolbarRight };
+  }
+
+  function ensureWeeksToggle() {
+    const { toolbarRight } = ensureToolbar();
+    if (!weeksToggleBtn) {
+      weeksToggleBtn = document.createElement('button');
+      weeksToggleBtn.type = 'button';
+      weeksToggleBtn.className = 'weeks-toggle-btn';
+      toolbarRight.appendChild(weeksToggleBtn);
+    }
+    weeksToggleBtn.textContent = window.showExtendedWeeks ? 'Hide Weeks' : 'Show Weeks';
+    weeksToggleBtn.setAttribute('aria-pressed', String(window.showExtendedWeeks));
+    weeksToggleBtn.onclick = () => {
+      window.showExtendedWeeks = !window.showExtendedWeeks;
+      ensureWeeksToggle();
+      buildCalendar();
+      if (typeof window.updateStats === 'function') window.updateStats();
+      if (window.showExtendedWeeks) window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+  }
+
+  function changeWeek(offset) {
+    window.currentMonday.setDate(window.currentMonday.getDate() + offset * 7);
+    render();
+    if (typeof window.updateStats === 'function') window.updateStats();
+  }
+  window.changeWeek = changeWeek;
+
+  async function fetchLeaves(date) {
+    try {
+      const res = await fetch(`../vacation/api_get_leaves.php?date=${date}`);
+      const data = await res.json();
+      if (data.success) return data.leaves;
+    } catch (e) { console.error(`Error fetching leaves for ${date}`, e); }
+    return [];
+  }
+
+  function buildCalendar() {
+    if (!weeksContainer) return;
+    weeksContainer.innerHTML = '';
+    const prev2 = new Date(window.currentMonday); prev2.setDate(prev2.getDate() - 14);
+    const prev1 = new Date(window.currentMonday); prev1.setDate(prev1.getDate() - 7);
+    const next1 = new Date(window.currentMonday); next1.setDate(next1.getDate() + 7);
+    const next2 = new Date(window.currentMonday); next2.setDate(next2.getDate() + 14);
+
+    const wPrev2 = buildWeek(prev2, 'prev');
+    const wPrev1 = buildWeek(prev1, 'prev');
+    const wCurr = buildWeek(window.currentMonday, 'current');
+    const wNext1 = buildWeek(next1, 'next');
+    const wNext2 = buildWeek(next2, 'next');
+
+    [wPrev2, wPrev1, wNext1, wNext2].forEach(w => { w.classList.add('extended-week'); w.style.display = window.showExtendedWeeks ? '' : 'none'; });
+
+    wCurr.id = 'currentWeek';
+
+    weeksContainer.appendChild(wPrev2);
+    weeksContainer.appendChild(wPrev1);
+    weeksContainer.appendChild(wCurr);
+    weeksContainer.appendChild(wNext1);
+    weeksContainer.appendChild(wNext2);
+
+    const labelDate = new Date(window.currentMonday);
+    if (monthLabel) monthLabel.textContent = labelDate.toLocaleString('default', { month: 'long', year: 'numeric' }).toUpperCase();
+
+    ensureWeeksToggle();
+
+    if (window.showExtendedWeeks) {
+      setTimeout(() => {
+        const currentWeek = document.getElementById('currentWeek');
+        if (currentWeek) currentWeek.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 0);
+    }
+  }
+
+  function buildWeek(startDate, label) {
+    const week = document.createElement('div');
+    week.className = `week ${label}`;
+    for (let i = 0; i < 7; i++) {
+      const dayDate = new Date(startDate); dayDate.setDate(startDate.getDate() + i);
+      const dateStr = formatDate(dayDate);
+      const day = document.createElement('div');
+      day.className = 'day';
+      day.dataset.date = dateStr;
+      const monthIndex = dayDate.getMonth() % monthColors.length;
+      if (dateStr === formatDate(new Date())) day.classList.add('today');
+      const dateBgColor = monthColors[monthIndex];
+      day.innerHTML = `<span class="date" style="background-color:${dateBgColor}" onclick="window.toggleDayMaps(this)" title="Click to show/hide map locations">${dayDate.getDate()} ${dayDate.toLocaleString('default', { month: 'short' }).toUpperCase()}</span>`;
+
+      fetchLeaves(dateStr).then(leaves => {
+        if (leaves.length > 0) {
+          const leaveDiv = document.createElement('div');
+          leaveDiv.className = 'leaves';
+          leaveDiv.innerHTML = `<strong><i class="fas fa-user-times"></i></strong> ${leaves.map(l => l.fullname).join(', ')}`;
+          day.querySelector('.date').after(leaveDiv);
+        }
+      });
+
+      day.ondblclick = () => openForm({ date: dateStr });
+      day.ondragover = e => { e.preventDefault(); day.classList.add('dragover'); };
+      day.ondragleave = () => day.classList.remove('dragover');
+      day.ondrop = e => {
+        e.preventDefault(); day.classList.remove('dragover');
+        const noteId = e.dataTransfer.getData('note-id');
+        if (noteId) { window.moveNoteToDate && window.moveNoteToDate(noteId, dateStr); return; }
+        const id = e.dataTransfer.getData('id');
+        const item = window.allInstalls.find(i => i.id === id);
+        if (item) { item.date = dateStr; saveInstalls(item); }
+      };
+
+      const todays = window.allInstalls.filter(ev => ev.date === dateStr).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+      todays.forEach(ev => {
+        const div = document.createElement('div');
+        div.className = `event ${ev.type || ''}`;
+        const requiredFields = ['id', 'name', 'cams', 'bullets', 'dome', 'hdd', 'time', 'location', 'date'];
+        const isComplete = requiredFields.every(f => ev[f] && ev[f].toString().trim() !== '');
+        if (!isComplete) div.classList.add('missing');
+        div.draggable = true; div.dataset.id = ev.id;
+        div.ondragstart = e => { e.dataTransfer.setData('id', ev.id); e.dataTransfer.effectAllowed = 'move'; };
+        div.ondragover = e => e.preventDefault();
+        div.ondrop = e => {
+          e.preventDefault();
+          const draggedId = e.dataTransfer.getData('id');
+          const targetId = ev.id; if (draggedId === targetId) return;
+          const dragged = window.allInstalls.find(i => i.id === draggedId);
+          const target = window.allInstalls.find(i => i.id === targetId);
+          if (dragged && target && dragged.date === target.date) {
+            const siblings = window.allInstalls.filter(i => i.date === dragged.date && i.id !== draggedId);
+            const targetIndex = siblings.findIndex(i => i.id === targetId);
+            siblings.splice(targetIndex, 0, dragged);
+            siblings.forEach((item, idx) => item.order = idx);
+            saveInstalls(dragged);
+            render();
+          }
+        };
+        ev.hdd = (ev.hdd || '').replace(/\s+/g, '');
+        const monitorIcon = ev.monitor ? '<i class="fas fa-tv" title="Monitor"></i>' : '';
+        const rackIcon = ev.rack ? '<i class="fas fa-server" title="Rack"></i>' : '';
+        if (label === 'current') {
+          const origin = 'HSR Layout';
+          const destination = `${ev.location || ''}, Bengaluru`;
+          div.innerHTML = `
+            <h3><span onclick="editInstall('${ev.id}')"> ${String(ev.id || '').replace('-', '<br>')}</span><a href="tel:${ev.phone || ''}">${ev.name || 'No Name'}</a></h3>
+            ${ev.notes ? `<div class="event-notes" style="background:#fffbcc;border-left:1px solid #f0b414;padding:4px 8px;margin:4px 0 9px;color:#333;"><strong>${escapeHtml(ev.notes)}</strong></div>` : ''}
+            <div class="details">
+              <span class="hdd">${ev.hdd || ''}</span>
+              <span class="cams"> ${ev.resolution || ''} x <strong>${ev.cams || 0}</strong></span>
+              <span class="cams type">${ev.bullets || 0} B + ${ev.dome || 0} D</span>
+              <span class="area"><span id="dist-${ev.id}"></span> <a href="${ev.map || ''}" target="_blank">${ev.location || ''}</a> @ ${ev.time || ''}</span>
+              <span class="monitor">${monitorIcon}</span> <span class="rack">${rackIcon}</span>
+            </div>
+            <div class="names"><strong>${ev.owner || ''}</strong> | 
+              <a href="#" onclick='sendToWhatsapp(event, ${JSON.stringify(ev).replace(/"/g, '&quot;')})'>${ev.technician || ''}</a> | ${ev.helper || ''}
+            </div>
+            <div class="icons">
+              <i class="fas fa-edit" onclick="editInstall('${ev.id}')" title="Edit"></i>
+              <i class="fas fa-trash" onclick="deleteInstall('${ev.id}')" title="Delete"></i>
+            </div>
+          `;
+          if (destination) {
+            fetch(`../distance_api.php?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}`)
+              .then(res => res.json())
+              .then(data => {
+                const distEl = div.querySelector(`#dist-${ev.id}`);
+                if (data.distance_km !== undefined) distEl.innerHTML = `<span class="distance">${Math.round(data.distance_km)}</span>`;
+                else distEl.innerHTML = '';
+              })
+              .catch(err => console.error('Distance fetch error:', err));
+          }
+        } else {
+          div.innerHTML = `
+            <span class="past-event"><strong>${ev.id || 0}</strong> | ${ev.name || 'No Name'}</span>
+            <div class="icons past">
+              <i class="fas fa-edit" onclick="editInstall('${ev.id}')" title="Edit"></i>
+              <i class="fas fa-trash" onclick="deleteInstall('${ev.id}')" title="Delete"></i>
+            </div>
+          `;
+        }
+        day.appendChild(div);
+      });
+
+      // Notes under installs
+      window.fetchNotes && window.fetchNotes(dateStr).then(notes => {
+        if (!notes || !notes.length) return;
+        const groups = { Issue: [], Inspection: [], General: [] };
+        notes.forEach(n => { const t = (n.type === 'Issue' || n.type === 'Inspection' || n.type === 'General') ? n.type : 'General'; groups[t].push(n); });
+        const typeOrder = ['Issue', 'Inspection', 'General'];
+        const presentTypes = typeOrder.filter(t => groups[t] && groups[t].length);
+        presentTypes.forEach((type, idx) => {
+          const arr = groups[type]; if (!arr || !arr.length) return;
+          const group = document.createElement('div'); group.className = `note-group note-${type.toLowerCase()}`;
+          arr.forEach(note => {
+            const item = document.createElement('div'); item.className = 'note'; item.dataset.id = note.id;
+            item.draggable = true;
+            item.addEventListener('dragstart', (e) => { e.dataTransfer.setData('note-id', String(note.id)); e.dataTransfer.effectAllowed = 'move'; item.classList.add('note-dragging'); });
+            item.addEventListener('dragend', () => item.classList.remove('note-dragging'));
+            item.addEventListener('dragover', (e) => { if (!e.dataTransfer.getData('note-id')) return; e.preventDefault(); item.classList.add('note-dragover'); });
+            item.addEventListener('dragleave', () => item.classList.remove('note-dragover'));
+            item.addEventListener('drop', (e) => {
+              e.preventDefault(); item.classList.remove('note-dragover');
+              const draggedId = e.dataTransfer.getData('note-id'); if (!draggedId || +draggedId === note.id) return;
+              const dayEl = item.closest('.day'); const draggedEl = dayEl.querySelector(`.note[data-id="${draggedId}"]`);
+              if (draggedEl) { dayEl.insertBefore(draggedEl, item); window.persistNoteOrder && window.persistNoteOrder(dayEl); }
+            });
+            item.innerHTML = `
+              <div class="note-line">
+                <div class="note-main">
+                  <span class="note-type">${type.toUpperCase()}</span>
+                  <span class="note-sep">|</span>
+                  <strong class="note-title">${note.title || ''}</strong>
+                </div>
+              </div>
+              <div class="note-desc">${linkify(note.description || '')}</div>
+              ${note.phone ? `<div class="note-phone"><a href="tel:${note.phone}">${note.phone}</a></div>` : ''}
+              <button class="note-edit" title="Edit" aria-label="Edit" onclick='editNote(${JSON.stringify(note).replace(/"/g, '&quot;')})'><i class="fas fa-edit" aria-hidden="true"></i></button>
+              <button class="note-delete" title="Delete" aria-label="Delete" onclick="deleteNote(${note.id})"><i class="fas fa-trash" aria-hidden="true"></i></button>
+            `;
+            group.appendChild(item);
+          });
+          day.appendChild(group);
+          if (presentTypes.length > 1 && idx < presentTypes.length - 1) { const sep = document.createElement('hr'); sep.className = 'note-type-sep'; day.appendChild(sep); }
+        });
+      });
+
+      const addNoteBtn = document.createElement('button');
+      addNoteBtn.className = 'add-note-btn'; addNoteBtn.type = 'button'; addNoteBtn.title = 'Add quick note'; addNoteBtn.setAttribute('aria-label', 'Add quick note');
+      addNoteBtn.innerHTML = '<i class="fas fa-plus-circle" aria-hidden="true"></i>';
+      addNoteBtn.addEventListener('click', (e) => { e.stopPropagation(); window.openNoteForm && window.openNoteForm(dateStr); });
+      day.appendChild(addNoteBtn);
+
+      week.appendChild(day);
+    }
+    return week;
+  }
+
+  function render() {
+    fetch('installs_api.php')
+      .then(res => res.json())
+      .then(data => {
+        window.allInstalls = data;
+        buildCalendar();
+        if (typeof window.updateStats === 'function') window.updateStats();
+        setTimeout(() => { const currentWeek = document.getElementById('currentWeek'); if (currentWeek) currentWeek.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 0);
+      });
+  }
+  window.render = render;
+
+  function openForm(data = {}) {
+    if (!form) return;
+    form.reset();
+    Object.entries(data).forEach(([k, v]) => { const field = form.querySelector(`#${k}`); if (field) field.value = v; });
+    editingId = data.id || null;
+    if (popup) popup.style.display = 'block';
+    if (!window.orderDetails) window.orderDetails = {};
+    if (typeof window.redirectToOrderItems === 'function') window.redirectToOrderItems('');
+  }
+  window.openForm = openForm;
+
+  function closeForm() { if (popup) popup.style.display = 'none'; }
+  window.closeForm = closeForm;
+
+  function editInstall(id) {
+    const data = window.allInstalls.find(i => i.id === id);
+    if (data) openForm(data);
+
+
+    setTimeout(() => { if (typeof window.initLocationAutocomplete === 'function') window.initLocationAutocomplete(); }, 3000);
+    const fields = ['id', 'name', 'cams', 'bullets', 'dome', 'hdd', 'monitor', 'type', 'location', 'time', 'date', 'owner', 'technician', 'helper', 'resolution', 'map', 'rack', 'notes'];
+    const params = new URLSearchParams();
+    if (!window.orderDetails) window.orderDetails = {};
+    fields.forEach(field => { const input = document.getElementById(field); if (input && input.value) params.append(field, input.value); window.orderDetails[field] = input ? input.value : ''; });
+    if (typeof window.getQuoteDetails === 'function') window.getQuoteDetails(window.orderDetails);
+  }
+  window.editInstall = editInstall;
+
+  function deleteInstall(id) {
+    if (!confirm('Are you sure to delete this install?')) return;
+    fetch('installs.php', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) })
+      .then(res => res.json())
+      .then(data => { if (data.success) render(); else alert(data.message || 'You do not have permission to delete this.'); });
+  }
+  window.deleteInstall = deleteInstall;
+
+  function saveInstalls(data) {
+    if (!data || !data.id) { console.error('No data to save'); return; }
+    fetch('installs_api.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+      .then(res => res.json())
+      .then(() => render());
+  }
+  window.saveInstalls = saveInstalls;
+
+  if (form) {
+    form.onsubmit = function (e) {
+      e.preventDefault();
+      const data = {
+        id: form.id.value,
+        name: form.name.value,
+        cams: form.cams.value,
+        bullets: form.bullets.value,
+        dome: form.dome.value,
+        hdd: (form.hdd.value || '').replace(/\s+/g, ''),
+        monitor: form.monitor.value,
+        type: form.type.value,
+        location: form.location.value,
+        time: form.time.value,
+        date: form.date.value,
+        owner: form.owner.value,
+        technician: form.technician.value,
+        helper: form.helper.value,
+        resolution: form.resolution.value,
+        map: form.map.value,
+        rack: form.rack.value,
+        notes: form.notes ? form.notes.value.trim() : ''
+      };
+      if (!editingId) data.order = window.allInstalls.filter(i => i.date === data.date).length;
+      if (editingId) window.allInstalls = window.allInstalls.map(i => i.id === editingId ? data : i); else window.allInstalls.push(data);
+      saveInstalls(data);
+      closeForm();
+      render();
+    };
+  }
+
+  // Toggles map preview for all events in the day
+  window.toggleDayMaps = function (el) {
+    const day = el.closest('.day');
+    if (!day) return;
+
+    // If maps are already shown, remove them (toggle functionality)
+    const existingMaps = day.querySelectorAll('.map-preview-img');
+    if (existingMaps.length > 0) {
+      existingMaps.forEach(img => img.remove());
+      return;
+    }
+
+    const events = day.querySelectorAll('.event');
+    events.forEach(ev => {
+      const areaSpan = ev.querySelector('.area');
+      if (!areaSpan) return;
+
+      const link = areaSpan.querySelector('a');
+      // If no link, we can't get href, but maybe we can use location text if available?
+      // The requirement says ".area href maps location".
+      let location = '';
+      if (link) {
+        location = link.innerText.trim(); // Default fallback
+        const href = link.href;
+        if (href) {
+          // Try to extract query or coordinates
+          const qMatch = href.match(/[?&]q=([^&]+)/);
+          const llMatch = href.match(/[?&]ll=([^&]+)/);
+          const atMatch = href.match(/@([\d.-]+,[\d.-]+)/);
+
+          if (qMatch) location = decodeURIComponent(qMatch[1]);
+          else if (llMatch) location = decodeURIComponent(llMatch[1]);
+          else if (atMatch) location = atMatch[1];
+        }
+      } else {
+        // Fallback to text content of areaSpan (excluding child nodes if possible, or just all text)
+        // But .area contains other things. let's rely on link being present as per current structure.
+        return;
+      }
+
+      if (!location) return;
+
+      const img = document.createElement('img');
+      img.className = 'map-preview-img';
+      // Style to ensure it looks good and fits
+      img.style.display = 'block';
+      img.style.width = '100%';
+      img.style.height = '150px';
+      img.style.objectFit = 'cover';
+      img.style.borderRadius = '6px';
+      img.style.marginTop = '8px';
+      img.style.marginBottom = '8px';
+      img.style.border = '1px solid #ddd';
+
+      const key = 'AIzaSyB7BKkBQEI0WpbFFjn8K4VWKRaYeIs3GhU';
+      // Construct static map URL
+      // Use logic to clean up location if it is a full URL or strange string
+      // Static API handles addresses well.
+
+      img.src = `https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(location)}&zoom=14&size=400x300&maptype=roadmap&markers=color:red%7C${encodeURIComponent(location)}&key=${key}`;
+
+      // Insert just above .area
+      areaSpan.parentNode.insertBefore(img, areaSpan);
+    });
+  };
+
+  // Initial render
+  render();
+})();

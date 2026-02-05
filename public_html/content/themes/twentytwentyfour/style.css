@@ -1,0 +1,602 @@
+/*
+Theme Name: Twenty Twenty-Four
+Theme URI: https://wordpress.org/themes/twentytwentyfour/
+Author: the WordPress team
+Author URI: https://wordpress.org
+Description: Twenty Twenty-Four is designed to be flexible, versatile and applicable to any website. Its collection of templates and patterns tailor to different needs, such as presenting a business, blogging and writing or showcasing work. A multitude of possibilities open up with just a few adjustments to color and typography. Twenty Twenty-Four comes with style variations and full page designs to help speed up the site building process, is fully compatible with the site editor, and takes advantage of new design tools introduced in WordPress 6.4.
+Requires at least: 6.4
+Tested up to: 6.6
+Requires PHP: 7.0
+Version: 1.2
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: twentytwentyfour
+Tags: one-column, custom-colors, custom-menu, custom-logo, editor-style, featured-images, full-site-editing, block-patterns, rtl-language-support, sticky-post, threaded-comments, translation-ready, wide-blocks, block-styles, style-variations, accessibility-ready, blog, portfolio, news
+*/
+
+/*
+ADD CUSTOM CSS HERE
+*/
+
+
+#wpadminbar {
+    display: none;
+}
+
+.wp-block-navigation .wp-block-navigation-item__content.wp-block-navigation-item__content {
+  color: #333;
+}
+@media (min-width: 600px) {
+
+  .wp-block-navigation__responsive-container:not(.hidden-by-default):not(.is-menu-open) {
+      background-color: inherit;
+      display: none !important;
+      position: relative;
+      width: 100%;
+      z-index: auto;
+  }
+}
+
+.nav-link.has-global-padding {
+  padding-left: 20px !important;
+}
+
+@media (min-width: 1024px) {
+  
+  .wp-block-navigation__responsive-container:not(.hidden-by-default):not(.is-menu-open) {
+      background-color: inherit;
+      display: block !important;
+      position: relative;
+      width: 100%;
+      z-index: auto;
+  }
+}
+
+@media (min-width: 600px) {
+  .wp-block-navigation__responsive-container-open:not(.always-shown) {
+      display: block;
+  }
+}
+
+@media (min-width: 1024px) {
+  .wp-block-navigation__responsive-container-open:not(.always-shown) {
+      display: none;
+  }
+}
+
+.wp-block-navigation__responsive-container-open.wp-block-navigation__responsive-container-open.wp-block-navigation__responsive-container-open {
+  color: #fc0000;
+}
+.wp-block-navigation__responsive-container-close svg, .wp-block-navigation__responsive-container-open svg {
+  height: 50px;
+  width: 50px;
+}
+
+.wp-block-navigation__responsive-container-close {
+  right: -20px;
+}
+
+@media (min-width: 782px) {
+  .has-modal-open .admin-bar .is-menu-open .wp-block-navigation__responsive-dialog {
+    margin-top: 0;
+  }
+}
+
+.has-modal-open .admin-bar .is-menu-open .wp-block-navigation__responsive-dialog {
+  margin-top: 0;
+}
+
+.wp-block-navigation__responsive-container.is-menu-open {
+  padding: 10px 20px 0 20px;
+}
+.highlight-line  h3 > strong > mark {
+    background-color: #fc0000!important;
+color: #fff !important;
+
+    display: inline-block;
+    padding: 0 5px;
+    transform: rotateZ(2deg);
+    position: relative;
+}
+  body {
+    background: #ffffff; /* Light grey base color */
+    background-size: 1000px 1000px; /* Adjusts the size of the pattern */
+    background-repeat: no-repeat; /* Repeats the pattern */
+    background-position: center;
+    background-attachment: fixed;
+    margin-top: 80px; /* Adjusts the top margin to account for the fixed header's height */
+  }
+
+  header {
+    background-color: var(--wp--preset--color--base) !important;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    color: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    transition: transform 0.3s ease-in-out; /* Smooth transition effect when showing/hiding */
+  }
+
+  .hidden-header {
+    transform: translateY(-100%); /* Moves the header out of view smoothly */
+  }
+
+  main {
+    margin-block-start: 0;
+  }
+
+  .has-global-padding {
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+  }
+
+  .wp-block-uagb-container.uagb-block-e01ccadd {
+    background-color: #fff;
+  }
+
+  .wp-block-uagb-container.uagb-block-e01ccadd .uagb-container__shape.uagb-container__shape-bottom .uagb-container__shape-fill {
+    fill: rgb(226 226 226);
+}
+
+.wp-block-uagb-container.uagb-block-b8876bf9 {
+  box-shadow: 0px 0px #00000070;
+  padding-top: 0px;
+  padding-bottom: 100px;
+  padding-left: 10px;
+  padding-right: 10px;
+  margin-top: 0px !important;
+  margin-bottom: 0px !important;
+  margin-left: 0px;
+  margin-right: 0px;
+  overflow: visible;
+  border-color: inherit;
+  background: linear-gradient(to bottom, #e0e0e0 0%, #ffffff 100%) !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: nowrap;
+  row-gap: 20px;
+  column-gap: 20px;
+}
+
+  /*
+  .animated-background {
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    background-size: 120% 100%;
+    background-position: center top; 
+    animation: moveAndZoom 40s infinite linear, hueRotate 40s infinite linear, glowEffect 15s infinite alternate;
+  }
+*/
+  @keyframes moveAndZoom {
+    0% {
+      background-size: 120% 100%;
+      background-position: center top;
+    }
+    50% {
+      background-size: 100% 100%; /* Zoom out to the original size */
+      background-position: center 0; /* Maintain the position */
+    }
+    100% {
+      background-size: 120% 100%; /* Return to the initial zoomed state */
+      background-position: center top;
+    }
+  }
+
+  @keyframes hueRotate {
+    0% {
+      filter: hue-rotate(0deg);
+    }
+    100% {
+      filter: hue-rotate(360deg); /* Complete color cycle */
+    }
+  }
+
+  @keyframes glowEffect {
+    0% {
+      box-shadow: 0 0 20px 10px rgba(255, 255, 255, 0.2);
+    }
+    100% {
+      box-shadow: 0 0 60px 30px rgba(255, 255, 255, 0.6); /* Stronger glow */
+    }
+  }
+
+  .container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .card_box::before {
+    content: '';
+  }
+
+  .card_box {
+    width: 200px;
+    height: 250px;
+    border-radius: 20px;
+    background: linear-gradient(170deg, rgba(58, 56, 56, 0.623) 0%, rgb(31, 31, 31) 100%);
+    position: relative;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.55);
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .card_box:hover {
+    transform: scale(0.9);
+  }
+
+  .card_box > span {
+    position: absolute;
+    overflow: hidden;
+    width: 150px;
+    height: 150px;
+    top: -10px;
+    left: -10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .card_box > span::before {
+    content: 'Premium';
+    position: absolute;
+    width: 150%;
+    height: 40px;
+    background-image: linear-gradient(45deg, #ff6547 0%, #ffb144 51%, #ff7053 100%);
+    transform: rotate(-45deg) translateY(-20px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.23);
+  }
+
+  .card_box > span::after {
+    content: '';
+    position: absolute;
+    width: 10px;
+    bottom: 0;
+    left: 0;
+    height: 10px;
+    z-index: -1;
+    box-shadow: 140px -140px #cc3f47;
+    background-image: linear-gradient(45deg, #FF512F 0%, #F09819 51%, #FF512F 100%);
+  }
+
+  .uagb-marketing-btn__link {
+    background-color: #f40009;
+  }
+
+  .uagb-ifb-title-wrap span {
+    color: red;
+  }
+
+  .uagb-ifb-title-wrap span.w700 {
+    font-weight: 700;
+  }
+
+  span.hl {
+    background-color:  #fc0000;
+    border: 2px dotted #fc0000;
+    border-radius: 5px;
+    color: #fff !important;
+    display: inline-block;
+    padding: 0 5px;
+    transform: rotateZ(-1.5deg);
+    position: relative;
+    line-height: 1.4;
+    font-weight: 700;
+  }
+  .uagb-ifb-title-wrap .uagb-ifb-title {
+    line-height: 1.5;
+  }
+ 
+
+
+  .wp-block-uagb-container.service-cards {
+    box-shadow: 11px 10px 32px 0px rgba(100, 100, 100, 0.5);
+    padding-top: 50px;
+    padding-bottom: 50px;
+    padding-left: 50px;
+    padding-right: 50px;
+    margin-top: 10px !important;
+    margin-bottom: 10px !important;
+    margin-left: 10px;
+    margin-right: 10px;
+    overflow: visible;
+
+    border-style: none;
+    border-color: #111111;
+    background-color: #ffffff;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
+    row-gap: 20px;
+    column-gap: 20px;
+  }
+
+  
+/* Base style for the breakpoint display */
+#breakpoint-display {
+    position: fixed;
+    bottom: 0;
+    /* width: 100%; */
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 10px;
+    font-size: 1rem;
+    z-index: 1000;
+    opacity: 0.9;
+}
+
+footer .wp-block-navigation-item__label {
+    color: #eee;
+}
+
+/* Small mobile devices */
+@media screen and (max-width: 680px) {
+    #breakpoint-display::after {
+        content: "Small Mobile (max-width: 680px)";
+    }
+}
+
+/* Most mobile devices in portrait mode */
+@media screen and (max-width: 800px) {
+    #breakpoint-display::after {
+        content: "Mobile Portrait (max-width: 800px)";
+    }
+}
+
+/* Larger mobile devices and some tablets in portrait */
+@media (max-width: 767px) {
+    #breakpoint-display::after {
+        content: "Large Mobile (max-width: 767px)";
+    }
+    .wp-block-uagb-container.uagb-block-e01ccadd{
+      padding-left: 25px;
+      padding-right: 25px;
+      padding-top: 0;
+    }
+
+    .hero-copy {
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    #brp-header {
+      justify-content: unset;
+    align-items: unset; 
+    width: unset;
+    }
+    #brp-container {
+      width: 100%;
+      align-items: center;
+    }
+
+    
+    
+}
+
+
+@media (min-width: 767px) {
+  #breakpoint-display::after {
+      content: "Large Mobile (min-width: 767px)";
+  }
+
+  .wp-block-columns:not(.is-not-stacked-on-mobile)>.wp-block-column[style*=flex-basis] {
+      flex-grow: 1;
+  }
+
+  .hero-copy {
+    padding-left: 50px;
+    padding-right: 50px;
+  }
+
+  
+  
+}
+
+
+
+/* Larger mobile devices and some tablets in landscape */
+@media screen and (max-width: 782px) {
+    #breakpoint-display::after {
+        content: "Mobile/Tablet Landscape (max-width: 782px)";
+    }
+
+   
+}
+
+/* Smaller laptops and large tablets */
+@media screen and (max-width: 976px) {
+    #breakpoint-display::after {
+        content: "Large Tablet/Small Laptop (max-width: 976px)";
+    }
+    .wp-block-uagb-container.uagb-block-e01ccadd {
+      padding-left: 25px;
+      padding-right: 25px;
+      padding-top: 0;
+    
+    }
+}
+
+
+
+
+@media screen and (max-width: 1023px) {
+    .wp-block-uagb-marketing-button.uagb-marketing-btn__align-right.uagb-marketing-btn__align-text-right.uagb-marketing-btn__icon-after.uagb-block-17c869c7.wp-block-button.hero-marketing-btn, .hero-marketing-btn {
+        -webkit-box-pack: center;
+        -ms-flex-pack: end;
+        justify-content: center;
+        text-align: center;
+        
+       
+    }
+
+    .brp-label {
+          text-align: unset;
+    }
+
+   
+}
+
+/* DESKTOP */
+@media screen and (min-width: 1024px) {
+  .hero-copy {
+    padding-bottom: 150px;
+  }
+  #brp-container, #brp-header {
+    justify-content: end;
+    width: 100%;
+    align-items: end;
+    right: 10px;
+    position: relative;
+    }
+   .wp-block-uagb-container.uagb-block-7dc18d1e.hero-marketing-btn {
+        -webkit-box-pack: end;
+        -ms-flex-pack: end;
+        justify-content: end;
+        align-items: end;
+
+        span {
+          font-size: 1.2rem;
+        }
+        .uagb-marketing-btn__prefix {
+          margin-right: 30px;
+        }
+    }
+    .brp-label {
+      flex: unset;
+      margin-left: 10px;
+    }
+
+    .wp-block-uagb-container.service-cards.one {
+      top: -100px;
+    }
+  
+    .wp-block-uagb-container.service-cards.three {
+      top: 100px;
+    }
+  
+
+    
+}
+/* Most tablets in landscape, small desktops, and large mobile devices */
+@media screen and (min-width: 977px) and (max-width: 1024px) {
+    #breakpoint-display::after {
+        content: "Tablet Landscape (min-width: 977px) and (max-width: 1024px)";
+    }
+
+    .uagb-block-2626d306.uagb-infobox-icon-above-title {
+        text-align: center;
+    }
+}
+
+/* Large desktops */
+@media screen and (min-width: 1280px) {
+    #breakpoint-display::after {
+        content: "Large Desktop (min-width: 1280px)";
+    }
+}
+
+/* Desktops or larger tablets */
+@media screen and (max-width: 1400px) and (min-width: 1024px) {
+    #breakpoint-display::after {
+        content: "Desktop/Tablet (1024px to 1400px)";
+    }
+}
+
+.uagb-block-2626d306.uagb-infobox__content-wrap.wp-block-uagb-info-box--has-margin .uagb-infobox-margin-wrapper {
+  margin-top: 70px !important;
+
+
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+.nav-link a:hover {
+text-decoration: none;
+color: #f40009 !important;
+}
+/* Active link style */
+.nav-link .active {
+  color: #007BFF; /* Highlight color */
+  font-weight: bolder;
+  border-bottom: 2px solid #f40009;
+}
+
+footer > .has-global-padding {
+  padding-left: 20px  !important;
+  padding-right: 20px  !important;
+}
+
+footer > .has-global-padding a:where(:not(.wp-element-button)){
+  text-decoration: none;
+}
+
+footer .wp-block-site-title :where(a), footer a, footer p.has-small-font-size {
+  font-family: "Raleway" !important;
+}
+
+.service-solution strong {
+  color: #fc0000;
+  font-size: 1.2rem;
+  
+}
+#cctv-requirement-form > .error-message {
+  background: #ffffff;
+  padding: 5px 20px;
+  border-radius: 10px;
+  color: #ff0000;
+}
+
+.uagb-ifb-desc.gads-text{
+  font-size: 22px;
+  color: #1558d6 !important;
+  font-family: Helvetica,sans-serif;
+  line-height: 26px;
+  font-weight: 400;
+  letter-spacing: .4px;
+}
+
+.uagb-ifb-desc .gads-desc {
+  font-family: Helvetica, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: #4d5156;
+  margin-top: 10px;
+  letter-spacing: 0;
+
+}
+#quotation {
+  padding-top: 90px;
+}
+img.g-review {
+  width: 100%;
+
+  
+  }
+@media (min-width: 768px) {
+  #quotation {
+    padding-top: 120px;
+  }
+  img.g-review {
+ 
+  margin-left: 30px;
+  
+  }
+  
+}
+
+

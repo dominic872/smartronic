@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integration Test - Quote System</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        #results { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Integration Test - Quote System</h1>
+    <p>Testing the complete quote system with data.json</p>
+    
+    <div id="results">
+        <div class="status info">Loading data.json...</div>
+    </div>
+
+    <script>
+        async function runIntegrationTest() {
+            const results = document.getElementById('results');
+            
+            try {
+                // Step 1: Load data.json
+                results.innerHTML = '<div class="status info">Loading data.json...</div>';
+                const response = await fetch('data.json');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                results.innerHTML += '<div class="status success">✅ data.json loaded successfully</div>';
+                
+                // Step 2: Check profit percentage
+                const profitPercentage = data.additionalItems?.profitPercentage?.value;
+                if (profitPercentage === 15) {
+                    results.innerHTML += '<div class="status success">✅ Profit percentage is correctly set to 15</div>';
+                } else {
+                    results.innerHTML += `<div class="status error">❌ Profit percentage is ${profitPercentage}, expected 15</div>`;
+                }
+                
+                // Step 3: Check profit flat value
+                const profitFlat = data.additionalItems?.profit?.value;
+                if (profitFlat === 3000) {
+                    results.innerHTML += '<div class="status success">✅ Profit flat value is correctly set to 3000</div>';
+                } else {
+                    results.innerHTML += `<div class="status error">❌ Profit flat value is ${profitFlat}, expected 3000</div>`;
+                }
+                
+                // Step 4: Test calculation with sample data
+                const sampleTotal = 15000;
+                const minTotal = sampleTotal + profitFlat;
+                const profitAmount = sampleTotal * (profitPercentage / 100);
+                const maxTotal = sampleTotal + profitAmount;
+                const profitMargin = ((maxTotal - minTotal) / minTotal) * 100;
+                
+                results.innerHTML += `
+                    <div class="status info">
+                        <strong>Sample Calculation Test:</strong><br>
+                        Base Total: ₹${sampleTotal.toLocaleString()}<br>
+                        Min Total: ₹${minTotal.toLocaleString()} (Base + ₹${profitFlat})<br>
+                        Max Total: ₹${maxTotal.toLocaleString()} (Base + 15% profit)<br>
+                        Profit Margin: ${profitMargin.toFixed(2)}%
+                    </div>
+                `;
+                
+                if (Math.abs(profitMargin - 15) < 0.1) {
+                    results.innerHTML += '<div class="status success">✅ Sample calculation produces correct 15% margin</div>';
+                } else {
+                    results.innerHTML += `<div class="status error">❌ Sample calculation margin is ${profitMargin.toFixed(2)}%, expected 15%</div>`;
+                }
+                
+                // Step 5: Check data structure
+                const hasHDD = data.HDD && Object.keys(data.HDD).length > 0;
+                const hasType = data.Type && Object.keys(data.Type).length > 0;
+                const hasItems = data.items && Object.keys(data.items).length > 0;
+                
+                if (hasHDD && hasType && hasItems) {
+                    results.innerHTML += '<div class="status success">✅ Data structure is complete (HDD, Type, items)</div>';
+                } else {
+                    results.innerHTML += '<div class="status error">❌ Data structure is incomplete</div>';
+                }
+                
+                // Final result
+                const allTestsPassed = profitPercentage === 15 && 
+                                     profitFlat === 3000 && 
+                                     Math.abs(profitMargin - 15) < 0.1 &&
+                                     hasHDD && hasType && hasItems;
+                
+                results.innerHTML += `
+                    <div class="status ${allTestsPassed ? 'success' : 'error'}">
+                        <strong>${allTestsPassed ? '🎉 All Integration Tests Passed!' : '❌ Some Integration Tests Failed'}</strong><br>
+                        The quote system is ${allTestsPassed ? 'ready' : 'not ready'} for use with the corrected profit calculations.
+                    </div>
+                `;
+                
+            } catch (error) {
+                results.innerHTML += `<div class="status error">❌ Error: ${error.message}</div>`;
+            }
+        }
+        
+        // Run the integration test
+        window.addEventListener('load', runIntegrationTest);
+    </script>
+</body>
+</html>
