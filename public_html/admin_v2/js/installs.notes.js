@@ -5,6 +5,16 @@
   const NOTES_API = 'notes_api.php';
   // Expose for other modules
   window.NOTES_API = NOTES_API;
+  let notesAutoRenderQueued = false;
+
+  function queueNotesAutoRender() {
+    if (notesAutoRenderQueued || typeof window.render !== 'function') return;
+    notesAutoRenderQueued = true;
+    setTimeout(() => {
+      notesAutoRenderQueued = false;
+      window.render();
+    }, 0);
+  }
 
   // Persist order of notes for a given day element
   function persistNoteOrder(dayEl) {
@@ -46,6 +56,7 @@
       if (!contentType.includes('application/json')) { console.error('Notes API non-JSON response:', raw); return []; }
       const data = JSON.parse(raw);
       if (!data || data.success !== true) return [];
+      if (Number(data.moved_count || 0) > 0) queueNotesAutoRender();
       return Array.isArray(data.notes) ? data.notes : [];
     } catch (e) {
       console.error(`Error fetching notes for ${date}`, e);
@@ -53,6 +64,102 @@
     }
   }
   window.fetchNotes = fetchNotes;
+
+  function localDateString(date = new Date()) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  function parseNoteDate(value) {
+    if (!value) return null;
+    const text = String(value).trim();
+    const match = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (match) {
+      return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+    }
+    const parsed = new Date(text);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+
+  function getNoteAgeDays(note) {
+    const created = parseNoteDate(note.created_at || note.date);
+    if (!created) return 0;
+    const today = parseNoteDate(localDateString());
+    const createdDay = new Date(created.getFullYear(), created.getMonth(), created.getDate());
+    return Math.max(0, Math.floor((today - createdDay) / 86400000));
+  }
+
+  function formatNoteAgeLabel(days) {
+    return String(Math.max(0, Number(days) || 0));
+  }
+
+  function isBeforeToday(value) {
+    const noteDate = parseNoteDate(value);
+    const today = parseNoteDate(localDateString());
+    if (!noteDate || !today) return false;
+    const noteDay = new Date(noteDate.getFullYear(), noteDate.getMonth(), noteDate.getDate());
+    return noteDay < today;
+  }
+
+  async function moveOpenNotesToToday(notes, dateStr) {
+    const today = localDateString();
+    if (dateStr === today) return notes;
+
+    const openOldNotes = notes.filter(note => {
+      const isDone = !!(note.is_done && String(note.is_done) !== '0');
+      return !isDone && isBeforeToday(note.date || dateStr);
+    });
+
+    if (!openOldNotes.length) return notes;
+
+    await Promise.all(openOldNotes.map(note =>
+      fetch(NOTES_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: Number(note.id), date: today })
+      }).catch(err => console.warn('Failed to auto-move note', note.id, err))
+    ));
+
+    queueNotesAutoRender();
+
+    return notes.filter(note => !openOldNotes.some(moved => String(moved.id) === String(note.id)));
+  }
+
+  async function autoMarkOldNotesDone(notes) {
+    const staleOpenNotes = notes.filter(note => {
+      const isDone = !!(note.is_done && String(note.is_done) !== '0');
+      return !isDone && getNoteAgeDays(note) > 14;
+    });
+
+    if (!staleOpenNotes.length) return notes;
+
+    const results = await Promise.all(staleOpenNotes.map(note =>
+      fetch(NOTES_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: Number(note.id), is_done: 1 })
+      })
+        .then(r => r.json())
+        .then(d => ({ ok: !!(d && d.success), id: String(note.id) }))
+        .catch(err => {
+          console.warn('Failed to auto-mark old note as done', note.id, err);
+          return { ok: false, id: String(note.id) };
+        })
+    ));
+
+    const doneIds = new Set(results.filter(r => r.ok).map(r => r.id));
+    if (!doneIds.size) return notes;
+
+    queueNotesAutoRender();
+
+    return notes.map(note => (
+      doneIds.has(String(note.id))
+        ? { ...note, is_done: 1 }
+        : note
+    ));
+  }
 
   function saveNote(note) {
     fetch(NOTES_API, {
@@ -98,6 +205,25 @@
       .catch(() => alert('Failed to delete note'));
   }
   window.deleteNote = deleteNote;
+
+  function toggleNoteDone(id, isDone) {
+    if (!id) return;
+    fetch(NOTES_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, is_done: isDone ? 1 : 0 })
+    })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          if (typeof window.render === 'function') window.render();
+        } else {
+          alert(data.message || 'Failed to update note');
+        }
+      })
+      .catch(() => alert('Failed to update note'));
+  }
+  window.toggleNoteDone = toggleNoteDone;
 
   function openNoteForm(date, note = null) {
     closeNoteForm();
@@ -158,6 +284,26 @@
     document.body.appendChild(backdrop);
     document.body.appendChild(wrap);
 
+    const phoneInput = document.getElementById('notePhone');
+    const descInput = document.getElementById('noteDesc');
+    const titleInput = document.getElementById('noteTitle');
+    const saveBtn = form.querySelector('.np-save');
+    if (saveBtn && !saveBtn.dataset.label) saveBtn.dataset.label = saveBtn.textContent || '';
+    const setSaveLoading = (on) => {
+      if (!saveBtn) return;
+      if (on) saveBtn.classList.add('is-loading');
+      else saveBtn.classList.remove('is-loading');
+      saveBtn.disabled = true;
+    };
+    const syncSaveDisabled = () => {
+      if (!saveBtn) return;
+      const hasTitle = !!(titleInput && titleInput.value.trim());
+      const isLoading = saveBtn.classList.contains('is-loading');
+      saveBtn.disabled = isLoading || !hasTitle;
+    };
+    if (titleInput) titleInput.addEventListener('input', syncSaveDisabled);
+    syncSaveDisabled();
+
     if (isEdit) {
       document.getElementById('noteType').value = note.type || 'General';
       document.getElementById('noteTitle').value = note.title || '';
@@ -165,7 +311,29 @@
       if (note.phone) document.getElementById('notePhone').value = note.phone;
     }
 
-    const phoneInput = document.getElementById('notePhone');
+    // Focus on Phone or Name field for both Add and Edit
+    setTimeout(() => {
+      if (phoneInput) {
+        phoneInput.focus();
+        // Move cursor to end if there's a value
+        const val = phoneInput.value;
+        phoneInput.value = '';
+        phoneInput.value = val;
+      }
+    }, 150);
+
+    // Make | a line separator in Description (input and paste)
+    const replacePipe = (e) => {
+      if (e.target.value.includes('|')) {
+        const start = e.target.selectionStart;
+        e.target.value = e.target.value.replace(/\|/g, '\n');
+        e.target.setSelectionRange(start, start);
+      }
+    };
+    if (descInput) {
+      descInput.addEventListener('input', replacePipe);
+      descInput.addEventListener('paste', () => setTimeout(() => replacePipe({ target: descInput }), 0));
+    }
     const suggBox = document.getElementById('phoneSuggestions');
 
     function orderToPreview(o){
@@ -199,14 +367,71 @@
           const hit = latestResults.find(r => String(r.id) === String(id));
           if (hit) document.getElementById('noteDesc').value = orderToPreview(hit);
         });
-        el.addEventListener('click', (evt) => {
+        el.addEventListener('click', async (evt) => {
           evt.stopPropagation();
           const id = el.getAttribute('data-id');
           const hit = latestResults.find(r => String(r.id) === String(id));
           if (hit) {
-            phoneInput.value = hit.phone || '';
-            if (!document.getElementById('noteTitle').value) document.getElementById('noteTitle').value = hit.name || '';
-            document.getElementById('noteDesc').value = orderToPreview(hit);
+            console.log('Suggestion clicked:', hit);
+            setSaveLoading(true);
+            try {
+              phoneInput.value = hit.phone || '';
+              const titleField = document.getElementById('noteTitle');
+              if (titleField) titleField.value = '';
+              syncSaveDisabled();
+              
+              let areaName = hit.location || '';
+              const mapsRegex = /https?:\/\/[^\s]*(?:maps|goo\.gl)[^\s]*/i;
+              let locationToGeocode = hit.location || '';
+              const desc = orderToPreview(hit) || '';
+              
+              if (!locationToGeocode.match(mapsRegex) && desc.match(mapsRegex)) {
+                locationToGeocode = desc.match(mapsRegex)[0];
+                console.log('Found map URL in description:', locationToGeocode);
+              }
+
+              if (locationToGeocode && typeof google !== 'undefined' && google.maps && google.maps.Geocoder) {
+                try {
+                  if (locationToGeocode.match(mapsRegex)) {
+                    const resolveRes = await fetch(`../smart/resolve_map_url.php?url=${encodeURIComponent(locationToGeocode)}`);
+                    const resolveData = await resolveRes.json();
+                    if (resolveData.success && resolveData.coords) {
+                      locationToGeocode = `${resolveData.coords.lat},${resolveData.coords.lng}`;
+                    }
+                  }
+
+                  const geocoder = new google.maps.Geocoder();
+                  const geoRes = await new Promise((resolve, reject) => {
+                    const request = locationToGeocode.includes(',') && !isNaN(parseFloat(locationToGeocode))
+                      ? { location: { lat: parseFloat(locationToGeocode.split(',')[0]), lng: parseFloat(locationToGeocode.split(',')[1]) } }
+                      : { address: locationToGeocode };
+                    geocoder.geocode(request, (results, status) => {
+                      if (status === 'OK' && results[0]) resolve(results[0]);
+                      else reject(status);
+                    });
+                  });
+                  
+                  const addr = geoRes.address_components;
+                  const subLoc = addr.find(c => c.types.includes('sublocality_level_1')) || 
+                                 addr.find(c => c.types.includes('sublocality')) || 
+                                 addr.find(c => c.types.includes('locality')) ||
+                                 addr.find(c => c.types.includes('neighborhood'));
+                  if (subLoc) areaName = subLoc.long_name;
+                  console.log('Geocoded area name:', areaName);
+                } catch (e) {
+                  console.warn('Geocoding failed for', locationToGeocode, e);
+                }
+              }
+              
+              const newTitle = [areaName, hit.name, hit.phone].filter(Boolean).join(' | ');
+              if (titleField) titleField.value = newTitle;
+              console.log('New Title set:', newTitle);
+              
+              document.getElementById('noteDesc').value = orderToPreview(hit);
+            } finally {
+              if (saveBtn) saveBtn.classList.remove('is-loading');
+              syncSaveDisabled();
+            }
           }
           suggBox.innerHTML = '';
           suggBox.style.display = 'none';
@@ -303,13 +528,22 @@
 
   // Inject notes for a specific date into the day element
   async function injectNotesForDate(dayEl, dateStr) {
-    const notes = await fetchNotes(dateStr);
+    const fetchedNotes = await fetchNotes(dateStr);
+    const movedNotes = await moveOpenNotesToToday(fetchedNotes, dateStr);
+    const notesWithAutoDone = await autoMarkOldNotesDone(movedNotes);
+    const notes = notesWithAutoDone.sort((a, b) => {
+      const ageDiff = getNoteAgeDays(b) - getNoteAgeDays(a);
+      if (ageDiff !== 0) return ageDiff;
+      return (Number(a.sort_order) || 0) - (Number(b.sort_order) || 0);
+    });
     
     notes.forEach(note => {
       const noteDiv = document.createElement('div');
-      noteDiv.className = 'note';
+      const isDone = !!(note.is_done && String(note.is_done) !== '0');
+      const ageDays = getNoteAgeDays(note);
+      noteDiv.className = `note${isDone ? ' is-done' : ''}`;
       noteDiv.dataset.id = note.id;
-      noteDiv.draggable = true;
+      noteDiv.draggable = !isDone;
       
       const typeClass = (note.type || 'General').toLowerCase();
       const typeColor = {
@@ -320,18 +554,27 @@
       noteDiv.style.borderColor = typeColor;
       
       noteDiv.innerHTML = `
+        <input type="checkbox" class="note-select-checkbox" aria-label="Select note">
         <div class="note-header" style="text-transform: uppercase; color: ${typeColor}">
           <span class="note-type">${note.type || 'General'}</span>
-          <div class="note-actions">
-            <i class="fas fa-edit" onclick="editNote(${JSON.stringify(note).replace(/"/g, '&quot;')})" title="Edit"></i>
-            <i class="fas fa-trash" onclick="deleteNote(${note.id})" title="Delete"></i>
-          </div>
+          <span class="note-age">${formatNoteAgeLabel(ageDays)}</span>
         </div>
         <div class="note-content">
           <div class="note-title">${window.escapeHtml(note.title || '')}</div>
           ${note.description ? `<div class="note-desc">${window.linkify(window.escapeHtml(note.description))}</div>` : ''}
           ${note.phone ? `<div class="note-phone"><i class="fas fa-phone"></i> <a href="tel:${note.phone}">${note.phone}</a></div>` : ''}
           ${note.username ? `<div class="note-username" style="color:#1976d2;font-size:12px;margin-top:2px;">By: ${window.escapeHtml(note.username)}</div>` : ''}
+        </div>
+        <div class="note-actions" aria-label="Note actions">
+          <button type="button" class="note-action note-action-done" onclick="toggleNoteDone(${note.id}, ${isDone ? 0 : 1})" aria-label="${isDone ? 'Reopen' : 'Done'}" title="${isDone ? 'Reopen' : 'Done'}">
+            <i class="fas ${isDone ? 'fa-undo' : 'fa-check-circle'}" aria-hidden="true"></i>
+          </button>
+          <button type="button" class="note-action note-action-edit" onclick="editNote(${JSON.stringify(note).replace(/"/g, '&quot;')})" aria-label="Edit" title="Edit">
+            <i class="fas fa-edit" aria-hidden="true"></i>
+          </button>
+          <button type="button" class="note-action note-action-delete" onclick="deleteNote(${note.id})" aria-label="Delete" title="Delete">
+            <i class="fas fa-trash" aria-hidden="true"></i>
+          </button>
         </div>
       `;
       
@@ -345,5 +588,454 @@
     });
   }
   window.injectNotesForDate = injectNotesForDate;
+
+  const NOTE_BASKET_KEY = 'installs_note_basket_v1';
+  const NOTE_BASKET_UI_KEY = 'installs_note_basket_ui_v1';
+  let noteBasketState = [];
+  let activeDayEl = null;
+  let basketEl = null;
+  let dragId = null;
+
+  function loadBasketState() {
+    try {
+      const raw = localStorage.getItem(NOTE_BASKET_KEY);
+      const data = raw ? JSON.parse(raw) : [];
+      noteBasketState = Array.isArray(data) ? data : [];
+    } catch (e) {
+      noteBasketState = [];
+    }
+  }
+
+  function saveBasketState() {
+    try {
+      localStorage.setItem(NOTE_BASKET_KEY, JSON.stringify(noteBasketState));
+    } catch (e) {}
+  }
+
+  function loadBasketUi() {
+    try {
+      const raw = localStorage.getItem(NOTE_BASKET_UI_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function saveBasketUi(data) {
+    try {
+      localStorage.setItem(NOTE_BASKET_UI_KEY, JSON.stringify(data));
+    } catch (e) {}
+  }
+
+  function normalizePhone(raw) {
+    let s = String(raw || '').trim();
+    if (!s) return '';
+    if (s.startsWith('+')) s = s.slice(1);
+    const digits = s.replace(/\D/g, '');
+    if (!digits) return '';
+    if (digits.length === 10) return digits;
+    if (digits.length > 10) return digits.slice(-10);
+    return digits;
+  }
+
+  function getMapLink(noteEl) {
+    const desc = noteEl.querySelector('.note-desc');
+    if (!desc) return '';
+    const links = Array.from(desc.querySelectorAll('a[href]'));
+    const map = links.find(a => /maps|goo\.gl\/maps|maps\.app\.goo\.gl/i.test(a.getAttribute('href') || ''));
+    return (map ? map.getAttribute('href') : (links[0] ? links[0].getAttribute('href') : '')) || '';
+  }
+
+  function getDescriptionText(noteEl) {
+    const desc = noteEl.querySelector('.note-desc');
+    if (!desc) return '';
+    return (desc.textContent || '').trim();
+  }
+
+  function buildNotePayload(noteEl) {
+    const id = String(noteEl?.dataset?.id || '');
+    const type = (noteEl.querySelector('.note-type')?.textContent || '').trim();
+    const title = (noteEl.querySelector('.note-title')?.textContent || '').trim();
+    const phoneText = (noteEl.querySelector('.note-phone a')?.textContent || '').trim();
+    const mapLink = getMapLink(noteEl);
+    const desc = getDescriptionText(noteEl);
+    const by = (noteEl.querySelector('.note-username')?.textContent || '').trim();
+    const other = [desc, by].filter(Boolean).join('\n');
+    return { id, type, title, phone: phoneText, mapLink, other };
+  }
+
+  function formatNoteForWhatsApp(payload) {
+    const lines = [];
+    const icon = '📌';
+    if (payload.type) lines.push(`${icon} ${payload.type}`);
+    if (payload.title) lines.push(payload.title);
+    if (payload.phone) lines.push(payload.phone);
+    if (payload.mapLink) lines.push(payload.mapLink);
+    if (payload.other) lines.push(payload.other);
+    return lines.join('\n').trim();
+  }
+
+  function ensureBasketEl() {
+    if (basketEl && document.body.contains(basketEl)) return basketEl;
+
+    basketEl = document.createElement('div');
+    basketEl.className = 'note-basket';
+    basketEl.id = 'note-basket';
+    basketEl.innerHTML = `
+      <div class="note-basket-header" id="note-basket-header">
+        <div class="note-basket-title">Notes</div>
+        <button type="button" class="note-basket-close" id="note-basket-close" aria-label="Close">
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="note-basket-body">
+        <div class="note-basket-list" id="note-basket-list"></div>
+      </div>
+      <div class="note-basket-footer">
+        <select id="note-basket-user"></select>
+        <button type="button" class="note-basket-send" id="note-basket-send">Send</button>
+      </div>
+    `;
+    document.body.appendChild(basketEl);
+
+    const bodyEl = basketEl.querySelector('.note-basket-body');
+    if (bodyEl) {
+      let touchY = 0;
+      const canScrollBody = () => (bodyEl.scrollHeight - bodyEl.clientHeight) > 1;
+      const onWheel = (e) => {
+        const dy = Number(e.deltaY || 0);
+        const withinBody = !!(e.target && e.target.closest && e.target.closest('.note-basket-body'));
+        if (!withinBody) {
+          if (canScrollBody() && dy) bodyEl.scrollTop += dy;
+          e.preventDefault();
+        } else if (!canScrollBody()) {
+          e.preventDefault();
+        }
+        e.stopPropagation();
+      };
+      basketEl.addEventListener('wheel', onWheel, { passive: false, capture: true });
+      basketEl.addEventListener('touchstart', (e) => {
+        if (!e.touches || e.touches.length !== 1) return;
+        touchY = e.touches[0].clientY;
+      }, { passive: true, capture: true });
+      basketEl.addEventListener('touchmove', (e) => {
+        if (!e.touches || e.touches.length !== 1) return;
+        const nextY = e.touches[0].clientY;
+        const dy = touchY - nextY;
+        touchY = nextY;
+        const withinBody = !!(e.target && e.target.closest && e.target.closest('.note-basket-body'));
+        if (!withinBody) {
+          if (canScrollBody() && dy) bodyEl.scrollTop += dy;
+          e.preventDefault();
+        } else if (!canScrollBody()) {
+          e.preventDefault();
+        }
+        e.stopPropagation();
+      }, { passive: false, capture: true });
+    }
+
+    const closeBtn = basketEl.querySelector('#note-basket-close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeBasket();
+      });
+    }
+
+    const sendBtn = basketEl.querySelector('#note-basket-send');
+    if (sendBtn) {
+      sendBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        sendBasketToWhatsApp();
+      });
+    }
+
+    const list = basketEl.querySelector('#note-basket-list');
+    if (list) {
+      list.addEventListener('click', (e) => {
+        const rm = e.target.closest('.note-basket-item-remove');
+        if (!rm) return;
+        const id = rm.getAttribute('data-id') || '';
+        removeFromBasket(id);
+      });
+    }
+
+    const header = basketEl.querySelector('#note-basket-header');
+    if (header) {
+      let moving = false;
+      let startX = 0;
+      let startY = 0;
+      let startLeft = 0;
+      let startTop = 0;
+
+      const move = (ev) => {
+        if (!moving) return;
+        const dx = ev.clientX - startX;
+        const dy = ev.clientY - startY;
+        const left = Math.max(8, Math.min(window.innerWidth - basketEl.offsetWidth - 8, startLeft + dx));
+        const top = Math.max(8, Math.min(window.innerHeight - 60, startTop + dy));
+        basketEl.style.left = `${left}px`;
+        basketEl.style.top = `${top}px`;
+        basketEl.style.right = 'auto';
+        saveBasketUi({ open: basketEl.classList.contains('open'), left, top });
+      };
+
+      const up = () => {
+        if (!moving) return;
+        moving = false;
+        document.removeEventListener('mousemove', move, true);
+        document.removeEventListener('mouseup', up, true);
+      };
+
+      header.addEventListener('mousedown', (ev) => {
+        if (ev.button !== 0) return;
+        if (ev.target.closest('button')) return;
+        moving = true;
+        const rect = basketEl.getBoundingClientRect();
+        startX = ev.clientX;
+        startY = ev.clientY;
+        startLeft = rect.left;
+        startTop = rect.top;
+        document.addEventListener('mousemove', move, true);
+        document.addEventListener('mouseup', up, true);
+      });
+    }
+
+    const ui = loadBasketUi();
+    if (ui && typeof ui.left === 'number' && typeof ui.top === 'number') {
+      basketEl.style.left = `${ui.left}px`;
+      basketEl.style.top = `${ui.top}px`;
+      basketEl.style.right = 'auto';
+    }
+
+    populateUserDropdown();
+    renderBasket();
+
+    return basketEl;
+  }
+
+  function populateUserDropdown() {
+    const sel = basketEl?.querySelector('#note-basket-user');
+    if (!sel) return;
+    const users = Array.isArray(window.INSTALLS_WA_USERS) ? window.INSTALLS_WA_USERS : [];
+    sel.innerHTML = '';
+    const opt0 = document.createElement('option');
+    opt0.value = '';
+    opt0.textContent = 'Select user';
+    sel.appendChild(opt0);
+    users.forEach(u => {
+      const name = String(u?.name || '').trim();
+      const phone = String(u?.phone || '').trim();
+      if (!name || !phone) return;
+      const opt = document.createElement('option');
+      opt.value = normalizePhone(phone);
+      opt.textContent = `${name} (${phone})`;
+      sel.appendChild(opt);
+    });
+
+    const ui = loadBasketUi();
+    if (ui && ui.selectedPhone) sel.value = String(ui.selectedPhone || '');
+    sel.addEventListener('change', () => {
+      const next = loadBasketUi() || {};
+      next.selectedPhone = sel.value;
+      next.open = basketEl.classList.contains('open');
+      saveBasketUi(next);
+    });
+  }
+
+  function openBasket() {
+    ensureBasketEl();
+    basketEl.classList.add('open');
+    const ui = loadBasketUi() || {};
+    ui.open = true;
+    saveBasketUi(ui);
+  }
+
+  function closeBasket() {
+    ensureBasketEl();
+    basketEl.classList.remove('open');
+    const ui = loadBasketUi() || {};
+    ui.open = false;
+    saveBasketUi(ui);
+  }
+
+  function renderBasket() {
+    ensureBasketEl();
+    const list = basketEl.querySelector('#note-basket-list');
+    if (!list) return;
+    list.innerHTML = '';
+
+    noteBasketState.forEach(item => {
+      const wrap = document.createElement('div');
+      wrap.className = 'note-basket-item';
+      wrap.setAttribute('draggable', 'true');
+      wrap.dataset.id = item.id;
+
+      const payload = item.payload || {};
+      const text = formatNoteForWhatsApp(payload);
+
+      wrap.innerHTML = `
+        <div class="note-basket-item-top">
+          <div class="note-basket-item-lines">${window.escapeHtml(text)}</div>
+          <button type="button" class="note-basket-item-remove" aria-label="Remove" data-id="${window.escapeHtml(item.id)}">
+            <i class="fa-solid fa-trash" aria-hidden="true"></i>
+          </button>
+        </div>
+      `;
+
+      wrap.addEventListener('dragstart', (e) => {
+        dragId = item.id;
+        wrap.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        try { e.dataTransfer.setData('text/plain', String(item.id)); } catch (err) {}
+      });
+      wrap.addEventListener('dragend', () => {
+        wrap.classList.remove('dragging');
+        dragId = null;
+        syncBasketFromDom();
+        saveBasketState();
+      });
+      wrap.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        if (!dragId || dragId === item.id) return;
+        const draggingEl = list.querySelector(`.note-basket-item[data-id="${CSS.escape(String(dragId))}"]`);
+        if (!draggingEl) return;
+        const rect = wrap.getBoundingClientRect();
+        const before = (e.clientY - rect.top) < rect.height / 2;
+        list.insertBefore(draggingEl, before ? wrap : wrap.nextSibling);
+      });
+      wrap.addEventListener('drop', (e) => {
+        e.preventDefault();
+        syncBasketFromDom();
+        saveBasketState();
+        syncCheckboxesForDay(activeDayEl);
+      });
+
+      list.appendChild(wrap);
+    });
+
+    const sendBtn = basketEl.querySelector('#note-basket-send');
+    if (sendBtn) sendBtn.disabled = noteBasketState.length === 0;
+  }
+
+  function syncBasketFromDom() {
+    const list = basketEl?.querySelector('#note-basket-list');
+    if (!list) return;
+    const ids = Array.from(list.querySelectorAll('.note-basket-item')).map(el => String(el.dataset.id || ''));
+    const next = [];
+    ids.forEach(id => {
+      const hit = noteBasketState.find(x => String(x.id) === id);
+      if (hit) next.push(hit);
+    });
+    noteBasketState = next;
+  }
+
+  function addToBasket(payload) {
+    const id = String(payload?.id || '');
+    if (!id) return;
+    const exists = noteBasketState.some(x => String(x.id) === id);
+    if (exists) return;
+    noteBasketState.push({ id, payload });
+    saveBasketState();
+    renderBasket();
+  }
+
+  function removeFromBasket(id) {
+    const nid = String(id || '');
+    if (!nid) return;
+    noteBasketState = noteBasketState.filter(x => String(x.id) !== nid);
+    saveBasketState();
+    renderBasket();
+    if (activeDayEl) syncCheckboxesForDay(activeDayEl);
+  }
+
+  function isInBasket(noteId) {
+    return noteBasketState.some(x => String(x.id) === String(noteId));
+  }
+
+  function syncCheckboxesForDay(dayEl) {
+    if (!dayEl) return;
+    dayEl.querySelectorAll('.note').forEach(noteEl => {
+      const cb = noteEl.querySelector('.note-select-checkbox');
+      if (!cb) return;
+      cb.checked = isInBasket(noteEl.dataset.id);
+    });
+  }
+
+  window.toggleNoteSelectMode = function (btn) {
+    console.log('toggleNoteSelectMode clicked', btn);
+    const day = btn.closest('.day');
+    if (!day) {
+      console.error('Day element not found for button', btn);
+      return;
+    }
+    
+    if (day.classList.contains('note-select-mode')) {
+      console.log('Deactivating select mode for day', day);
+      day.classList.remove('note-select-mode');
+      const icon = btn.querySelector('i');
+      if (icon) {
+        icon.classList.remove('fa-check');
+        icon.classList.add('fa-plus');
+      }
+      closeBasket();
+    } else {
+      console.log('Activating select mode for day', day);
+      activateSelectModeForDay(day);
+      const icon = btn.querySelector('i');
+      if (icon) {
+        icon.classList.remove('fa-plus');
+        icon.classList.add('fa-check');
+      }
+      openBasket();
+    }
+  };
+
+  function activateSelectModeForDay(dayEl) {
+    if (!dayEl) return;
+    if (activeDayEl && activeDayEl !== dayEl) {
+      activeDayEl.classList.remove('note-select-mode');
+      const oldBtn = activeDayEl.querySelector('.day-note-select-toggle i');
+      if (oldBtn) {
+        oldBtn.classList.remove('fa-check');
+        oldBtn.classList.add('fa-plus');
+      }
+    }
+    activeDayEl = dayEl;
+    activeDayEl.classList.add('note-select-mode');
+    syncCheckboxesForDay(activeDayEl);
+  }
+
+  function sendBasketToWhatsApp() {
+    ensureBasketEl();
+    const sel = basketEl.querySelector('#note-basket-user');
+    const phone = sel ? normalizePhone(sel.value) : '';
+    if (!phone) return;
+    const msg = noteBasketState
+      .map(x => formatNoteForWhatsApp(x.payload || {}))
+      .filter(Boolean)
+      .join('\n\n');
+    if (!msg) return;
+    const url = `https://wa.me/91${encodeURIComponent(phone)}?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank', 'noopener');
+  }
+
+  document.addEventListener('change', (e) => {
+    const cb = e.target.closest('.note-select-checkbox');
+    if (!cb) return;
+    const noteEl = cb.closest('.note');
+    if (!noteEl) return;
+    e.stopPropagation();
+    openBasket();
+    const payload = buildNotePayload(noteEl);
+    if (cb.checked) addToBasket(payload);
+    else removeFromBasket(payload.id);
+  }, true);
+
+  (function initNoteBasket() {
+    loadBasketState();
+    const ui = loadBasketUi();
+    if (ui && ui.open) openBasket();
+  })();
 
 })();
