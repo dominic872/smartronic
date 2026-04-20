@@ -93,6 +93,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
+$schedule = [];
+if (isset($whatsappSchedule) && is_array($whatsappSchedule)) {
+    $schedule = $whatsappSchedule;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -112,6 +117,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         button:hover { background: #075ec4; }
         .msg { margin-top: 0.75rem; padding: 0.5rem; border-radius: 6px; background: #f0f7ff; border: 1px solid #c9e4ff; }
         .hint { font-size: 0.9rem; color: #555; }
+        .schedule-details { margin-top: 0.75rem; }
+        .schedule-details > summary { cursor: pointer; user-select: none; font-weight: 600; }
+        .schedule-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; font-size: 0.9rem; }
+        .schedule-table th, .schedule-table td { border: 1px solid #e5e7eb; padding: 6px 8px; text-align: left; }
+        .schedule-table th { background: #f9fafb; font-weight: 700; }
+        .schedule-table td code { font-size: 0.85rem; }
     </style>
 </head>
 <body>
@@ -174,6 +185,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="actions">
                 <button type="submit">Update Active Number</button>
             </div>
+            <details class="schedule-details">
+                <summary>Schedule</summary>
+                <div class="hint" style="margin-top: 0.35rem;">Used when Automatic Mode is selected.</div>
+                <table class="schedule-table" aria-label="WhatsApp schedule">
+                    <thead>
+                        <tr>
+                            <th>Day</th>
+                            <th>Active</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+                        foreach ($days as $d) {
+                            $num = isset($schedule[$d]) ? sanitize_number($schedule[$d]) : '';
+                            $label = $num !== '' ? (get_label($num, $labels) ?: $num) : '-';
+                            echo '<tr>';
+                            echo '<td>' . htmlspecialchars($d) . '</td>';
+                            echo '<td>' . htmlspecialchars($label) . ($num !== '' && get_label($num, $labels) ? ' <span class="hint">(' . htmlspecialchars($num) . ')</span>' : '') . '</td>';
+                            echo '</tr>';
+                        }
+                        ?>
+                    </tbody>
+                </table>
+            </details>
         </form>
         <?php if ($message): ?>
             <div class="msg"><?php echo htmlspecialchars($message); ?></div>

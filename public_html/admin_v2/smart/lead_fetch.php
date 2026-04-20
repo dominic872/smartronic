@@ -21,6 +21,33 @@ if ($conn->connect_error) {
 $conn->query("SET time_zone = '+05:30'");
 date_default_timezone_set('Asia/Kolkata');
 
+$role = $_COOKIE['auth_role'] ?? '';
+$isAdmin = ($role === 'admin');
+$isMarket = ($role === 'market');
+if (!$isAdmin && !$isMarket) {
+    http_response_code(403);
+    echo json_encode(['error' => 'No access']);
+    $conn->close();
+    exit;
+}
+
+$authName = $_COOKIE['auth_name'] ?? '';
+$authUser = $_COOKIE['auth_user'] ?? '';
+$codeSource = $authName !== '' ? $authName : $authUser;
+$letters = preg_replace('/[^a-zA-Z]/', '', $codeSource);
+$letters = strtoupper($letters);
+$userCode = $letters !== '' ? substr($letters, 0, 3) : '';
+$userCodeLower = strtolower($userCode);
+$userAssignCond = '';
+if (!$isAdmin) {
+    if ($userCodeLower !== '') {
+        $userCodeLowerSafe = $conn->real_escape_string($userCodeLower);
+        $userAssignCond = "LOWER(TRIM(Assign)) = '$userCodeLowerSafe'";
+    } else {
+        $userAssignCond = "0=1";
+    }
+}
+
 $origAssignColRes = $conn->query("SHOW COLUMNS FROM leads LIKE 'originally_assigned'");
 if ($origAssignColRes && $origAssignColRes->num_rows === 0) {
     $conn->query("ALTER TABLE leads ADD COLUMN originally_assigned VARCHAR(255) NULL");
@@ -61,8 +88,150 @@ if (!$inQuietWindow) {
     }
 }
 
+$ensureWhatsAppTables = function() use ($conn) {
+    $conn->query("CREATE TABLE IF NOT EXISTS lead_whatsapp_templates (
+        id INT NOT NULL AUTO_INCREMENT,
+        user_code VARCHAR(16) NOT NULL,
+        message_text TEXT NOT NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY idx_user_code (user_code)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    $conn->query("CREATE TABLE IF NOT EXISTS lead_whatsapp_sent (
+        id INT NOT NULL AUTO_INCREMENT,
+        lead_id INT NOT NULL,
+        user_code VARCHAR(16) NOT NULL,
+        message_text TEXT NOT NULL,
+        sent_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY idx_lead_id (lead_id),
+        KEY idx_user_code (user_code),
+        KEY idx_sent_at (sent_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+};
+
+$assertLeadAccess = function($leadId) use ($conn, $isAdmin, $userAssignCond, $openCond) {
+    if ($isAdmin) return true;
+    $lid = (int)$leadId;
+    if ($lid <= 0) return false;
+    $q = "SELECT id FROM leads WHERE id = $lid AND ($userAssignCond OR $openCond) LIMIT 1";
+    $res = $conn->query($q);
+    return ($res && $res->num_rows > 0);
+};
+
+if (isset($_GET['wa_templates'])) {
+    $ensureWhatsAppTables();
+    $rows = [];
+    $res = $conn->query("SELECT id, message_text FROM lead_whatsapp_templates WHERE user_code = 'global' ORDER BY id DESC LIMIT 200");
+    if ($res) {
+        while ($r = $res->fetch_assoc()) $rows[] = $r;
+    }
+    echo json_encode($rows);
+    $conn->close();
+    exit;
+}
+
+if (isset($_GET['wa_history'])) {
+    $ensureWhatsAppTables();
+    $leadId = isset($_GET['lead_id']) ? (int)$_GET['lead_id'] : 0;
+    if ($leadId <= 0 || !$assertLeadAccess($leadId)) {
+        echo json_encode([]);
+        $conn->close();
+        exit;
+    }
+    $rows = [];
+    $res = $conn->query("SELECT message_text, sent_at FROM lead_whatsapp_sent WHERE lead_id = $leadId ORDER BY sent_at DESC, id DESC LIMIT 500");
+    if ($res) {
+        while ($r = $res->fetch_assoc()) $rows[] = $r;
+    }
+    $grouped = [];
+    foreach ($rows as $r) {
+        $msg = isset($r['message_text']) ? (string)$r['message_text'] : '';
+        if ($msg === '') continue;
+        if (!isset($grouped[$msg])) {
+            $grouped[$msg] = ['message_text' => $msg, 'sent_times' => []];
+        }
+        $grouped[$msg]['sent_times'][] = $r['sent_at'];
+    }
+    echo json_encode(array_values($grouped));
+    $conn->close();
+    exit;
+}
+
+if (isset($_GET['wa_template_add'])) {
+    $ensureWhatsAppTables();
+    if (!$isAdmin) {
+        http_response_code(403);
+        echo json_encode(['success' => 0, 'error' => 'Only admin can add']);
+        $conn->close();
+        exit;
+    }
+    $msg = isset($_POST['message_text']) ? trim((string)$_POST['message_text']) : '';
+    if ($msg === '') {
+        echo json_encode(['success' => 0, 'error' => 'Empty message']);
+        $conn->close();
+        exit;
+    }
+    $msgSafe = $conn->real_escape_string($msg);
+    $ok = $conn->query("INSERT INTO lead_whatsapp_templates (user_code, message_text) VALUES ('global', '$msgSafe')");
+    if ($ok) {
+        echo json_encode(['success' => 1, 'id' => $conn->insert_id, 'message_text' => $msg]);
+    } else {
+        echo json_encode(['success' => 0, 'error' => 'Failed to save']);
+    }
+    $conn->close();
+    exit;
+}
+
+if (isset($_GET['wa_template_delete'])) {
+    $ensureWhatsAppTables();
+    if (!$isAdmin) {
+        http_response_code(403);
+        echo json_encode(['success' => 0, 'error' => 'Only admin can remove']);
+        $conn->close();
+        exit;
+    }
+    $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+    if ($id <= 0) {
+        echo json_encode(['success' => 0, 'error' => 'Invalid id']);
+        $conn->close();
+        exit;
+    }
+    $ok = $conn->query("DELETE FROM lead_whatsapp_templates WHERE id = $id AND user_code = 'global' LIMIT 1");
+    if ($ok) {
+        echo json_encode(['success' => 1]);
+    } else {
+        echo json_encode(['success' => 0, 'error' => 'Failed to remove']);
+    }
+    $conn->close();
+    exit;
+}
+
+if (isset($_GET['wa_send'])) {
+    $ensureWhatsAppTables();
+    $leadId = isset($_POST['lead_id']) ? (int)$_POST['lead_id'] : 0;
+    $msg = isset($_POST['message_text']) ? trim((string)$_POST['message_text']) : '';
+    if ($leadId <= 0 || $msg === '' || !$assertLeadAccess($leadId)) {
+        echo json_encode(['success' => 0, 'error' => 'Invalid request']);
+        $conn->close();
+        exit;
+    }
+    $userCodeSafe = $conn->real_escape_string($userCodeLower);
+    $msgSafe = $conn->real_escape_string($msg);
+    $ok = $conn->query("INSERT INTO lead_whatsapp_sent (lead_id, user_code, message_text) VALUES ($leadId, '$userCodeSafe', '$msgSafe')");
+    if ($ok) {
+        echo json_encode(['success' => 1, 'sent_at' => date('Y-m-d H:i:s')]);
+    } else {
+        echo json_encode(['success' => 0, 'error' => 'Failed to log']);
+    }
+    $conn->close();
+    exit;
+}
+
 $offset = isset($_GET['offset']) ? intval($_GET['offset']) : 0;
-$limit = 100;
+$limit = isset($_GET['limit']) ? intval($_GET['limit']) : 100;
+$limit = max(1, min(200, $limit));
 $searchRaw = isset($_GET['search']) ? trim($_GET['search']) : '';
 $search = $searchRaw !== '' ? $conn->real_escape_string($searchRaw) : '';
 $mineRaw = isset($_GET['mine']) ? trim($_GET['mine']) : '';
@@ -74,6 +243,17 @@ $followNorm = strtolower($followRaw);
 $follow = in_array($followNorm, ['today', 'tomorrow', 'yesterday'], true) ? $conn->real_escape_string($followNorm) : '';
 $midsRaw = isset($_GET['mids']) ? trim($_GET['mids']) : '';
 $leadId = isset($_GET['leadId']) ? $conn->real_escape_string($_GET['leadId']) : '';
+$statusRaw = isset($_GET['status']) ? trim($_GET['status']) : '';
+$statusFilter = $statusRaw !== '' ? $conn->real_escape_string($statusRaw) : '';
+$col1Raw = isset($_GET['col1']) ? trim($_GET['col1']) : '';
+$col1Filter = $col1Raw !== '' ? $conn->real_escape_string($col1Raw) : '';
+$col2Raw = isset($_GET['col2']) ? trim($_GET['col2']) : '';
+$col2Filter = $col2Raw !== '' ? $conn->real_escape_string($col2Raw) : '';
+$dateModeRaw = isset($_GET['date_mode']) ? trim((string)$_GET['date_mode']) : '';
+$dateModeNorm = strtolower(preg_replace('/[^a-z_]/', '', $dateModeRaw));
+$dateModeNorm = substr($dateModeNorm, 0, 24);
+$dateStartRaw = isset($_GET['date_start']) ? trim((string)$_GET['date_start']) : '';
+$dateEndRaw = isset($_GET['date_end']) ? trim((string)$_GET['date_end']) : '';
 
 // ✅ Fetch a single lead by ID
 if (!empty($leadId)) {
@@ -83,7 +263,11 @@ if (!empty($leadId)) {
         $id = $leadId;
     }
 
-    $sql = "SELECT *, IFNULL(MID, id) as display_id FROM leads WHERE id = '$id' LIMIT 1";
+    $sql = "SELECT *, IFNULL(MID, id) as display_id FROM leads WHERE id = '$id'";
+    if (!$isAdmin) {
+        $sql .= " AND ($userAssignCond OR $openCond)";
+    }
+    $sql .= " LIMIT 1";
     $result = $conn->query($sql);
 
     if ($result && $result->num_rows > 0) {
@@ -98,13 +282,14 @@ if (!empty($leadId)) {
             $dtSafe = $conn->real_escape_string($dt);
             $rid = (int)$row['id'];
             $dayStart = $conn->real_escape_string($dt . ' 00:00:00');
+            $statsExtra = (!$isAdmin && $userAssignCond !== '') ? " AND ($userAssignCond OR $openCond)" : "";
             
-            $countSql = "SELECT COUNT(*) as c FROM leads WHERE created_at >= '$dayStart' AND created_at < DATE_ADD('$dtSafe', INTERVAL 1 DAY)";
+            $countSql = "SELECT COUNT(*) as c FROM leads WHERE created_at >= '$dayStart' AND created_at < DATE_ADD('$dtSafe', INTERVAL 1 DAY)$statsExtra";
             $cRes = $conn->query($countSql);
             $row['day_total'] = ($cRes && $r = $cRes->fetch_assoc()) ? $r['c'] : 1;
 
             $createdAtSafe = $conn->real_escape_string($row['created_at']);
-            $rankSql = "SELECT COUNT(*) as c FROM leads WHERE created_at >= '$dayStart' AND created_at < DATE_ADD('$dtSafe', INTERVAL 1 DAY) AND (created_at > '$createdAtSafe' OR (created_at = '$createdAtSafe' AND id >= $rid))";
+            $rankSql = "SELECT COUNT(*) as c FROM leads WHERE created_at >= '$dayStart' AND created_at < DATE_ADD('$dtSafe', INTERVAL 1 DAY)$statsExtra AND (created_at > '$createdAtSafe' OR (created_at = '$createdAtSafe' AND id >= $rid))";
             $rRes = $conn->query($rankSql);
             $row['day_rank'] = ($rRes && $r = $rRes->fetch_assoc()) ? $r['c'] : 1;
         } else {
@@ -163,7 +348,10 @@ if (!empty($midsRaw)) {
     $offset = 0;
     $limit = max(1, min(200, count($midsList)));
 }
-if (!empty($mine)) {
+
+if (!$isAdmin) {
+    $andConditions[] = "(" . $userAssignCond . " OR " . $openCond . ")";
+} else if (!empty($mine)) {
     $andConditions[] = "(Assign LIKE '%$mine%' OR $openCond)";
 }
 
@@ -175,6 +363,61 @@ if (!empty($follow)) {
     } else if ($follow === 'yesterday') {
         $andConditions[] = "(Follow_up IS NOT NULL AND Follow_up <> '' AND Follow_up <> '-' AND Follow_up <> 'NA' AND STR_TO_DATE(Follow_up, '%d %b %y') = DATE_SUB(CURDATE(), INTERVAL 1 DAY))";
     }
+}
+
+$dateClauseWrapped = '';
+
+$dateCond = '';
+if (in_array($dateModeNorm, ['this_month', 'last_month', 'month_minus_2', 'last_two_months', 'custom'], true)) {
+    $startDt = null;
+    $endDt = null;
+    $tz = new DateTimeZone('Asia/Kolkata');
+    $now = new DateTime('now', $tz);
+    $thisMonthStart = new DateTime($now->format('Y-m-01 00:00:00'), $tz);
+
+    if ($dateModeNorm === 'this_month') {
+        $startDt = clone $thisMonthStart;
+        $endDt = (clone $thisMonthStart)->modify('+1 month');
+    } elseif ($dateModeNorm === 'last_month') {
+        $startDt = (clone $thisMonthStart)->modify('-1 month');
+        $endDt = clone $thisMonthStart;
+    } elseif ($dateModeNorm === 'month_minus_2') {
+        $startDt = (clone $thisMonthStart)->modify('-2 month');
+        $endDt = (clone $thisMonthStart)->modify('-1 month');
+    } elseif ($dateModeNorm === 'last_two_months') {
+        $startDt = (clone $thisMonthStart)->modify('-1 month');
+        $endDt = (clone $thisMonthStart)->modify('+1 month');
+    } elseif ($dateModeNorm === 'custom') {
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateStartRaw) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateEndRaw)) {
+            $startDt = DateTime::createFromFormat('Y-m-d H:i:s', $dateStartRaw . ' 00:00:00', $tz) ?: null;
+            $endBase = DateTime::createFromFormat('Y-m-d H:i:s', $dateEndRaw . ' 00:00:00', $tz) ?: null;
+            if ($startDt && $endBase) {
+                if ($dateStartRaw <= $dateEndRaw) {
+                    $endDt = (clone $endBase)->modify('+1 day');
+                }
+            }
+        }
+    }
+
+    if ($startDt && $endDt) {
+        $startStr = $conn->real_escape_string($startDt->format('Y-m-d H:i:s'));
+        $endStr = $conn->real_escape_string($endDt->format('Y-m-d H:i:s'));
+        $dateCond = "created_at >= '$startStr' AND created_at < '$endStr'";
+        $dateClauseWrapped = "($dateCond)";
+        $andConditions[] = $dateClauseWrapped;
+    }
+}
+
+if ($statusFilter !== '' && $statusColSql !== null) {
+    $andConditions[] = "(LOWER(TRIM($statusColSql)) LIKE LOWER('%" . $statusFilter . "%'))";
+}
+
+if ($col1Filter !== '') {
+    $andConditions[] = "(LOWER(TRIM(COALESCE(Column_1, ''))) LIKE LOWER('%" . $col1Filter . "%'))";
+}
+
+if ($col2Filter !== '') {
+    $andConditions[] = "(LOWER(TRIM(COALESCE(Column_2, ''))) LIKE LOWER('%" . $col2Filter . "%'))";
 }
 
 if (!empty($search)) {
@@ -210,6 +453,56 @@ if (!empty($search)) {
     }
 
     $andConditions[] = "(" . implode(" OR ", $orConditions) . ")";
+}
+
+if (isset($_GET['count_summary'])) {
+    $summaryConditions = $andConditions;
+    if ($dateClauseWrapped !== '') {
+        $summaryConditions = array_values(array_filter($summaryConditions, function($cond) use ($dateClauseWrapped) {
+            return $cond !== $dateClauseWrapped;
+        }));
+    }
+
+    $tz = new DateTimeZone('Asia/Kolkata');
+    $now = new DateTime('now', $tz);
+    $thisMonthStart = new DateTime($now->format('Y-m-01 00:00:00'), $tz);
+
+    $makeCountSql = function($startDt, $endDt) use ($conn, $summaryConditions) {
+        $conds = $summaryConditions;
+        $startStr = $conn->real_escape_string($startDt->format('Y-m-d H:i:s'));
+        $endStr = $conn->real_escape_string($endDt->format('Y-m-d H:i:s'));
+        $conds[] = "(created_at >= '$startStr' AND created_at < '$endStr')";
+        $sql = "SELECT COUNT(*) AS c FROM leads";
+        if (!empty($conds)) {
+            $sql .= " WHERE " . implode(" AND ", $conds);
+        }
+        return $sql;
+    };
+
+    $monthCounts = [];
+    for ($i = 0; $i < 6; $i++) {
+        $startDt = (clone $thisMonthStart)->modify("-{$i} month");
+        $endDt = (clone $startDt)->modify('+1 month');
+        $count = 0;
+        $resMonth = $conn->query($makeCountSql($startDt, $endDt));
+        if ($resMonth && ($row = $resMonth->fetch_assoc())) {
+            $count = (int)($row['c'] ?? 0);
+        }
+        $monthCounts[] = [
+            'offset' => $i,
+            'label' => $startDt->format('M Y'),
+            'month_short' => $startDt->format('M'),
+            'count' => $count
+        ];
+    }
+
+    echo json_encode([
+        'this_month_count' => isset($monthCounts[0]['count']) ? (int)$monthCounts[0]['count'] : 0,
+        'last_month_count' => isset($monthCounts[1]['count']) ? (int)$monthCounts[1]['count'] : 0,
+        'month_counts' => $monthCounts
+    ]);
+    $conn->close();
+    exit;
 }
 
 if (!empty($andConditions)) {
@@ -248,8 +541,9 @@ if ($result) {
             $dt = substr($row['created_at'], 0, 10);
             $dtSafe = $conn->real_escape_string($dt);
             $dayStart = $conn->real_escape_string($dt . ' 00:00:00');
+            $statsExtra = (!$isAdmin && $userAssignCond !== '') ? " AND ($userAssignCond OR $openCond)" : "";
             if (!isset($statsCache[$dt])) {
-                $totalRes = $conn->query("SELECT COUNT(*) as c FROM leads WHERE created_at >= '$dayStart' AND created_at < DATE_ADD('$dtSafe', INTERVAL 1 DAY)");
+                $totalRes = $conn->query("SELECT COUNT(*) as c FROM leads WHERE created_at >= '$dayStart' AND created_at < DATE_ADD('$dtSafe', INTERVAL 1 DAY)$statsExtra");
                 $statsCache[$dt] = ($totalRes && $r = $totalRes->fetch_assoc()) ? $r['c'] : 0;
             }
             $row['day_total'] = $statsCache[$dt];
@@ -257,7 +551,7 @@ if ($result) {
             // Rank must be calculated per ID
             $rid = (int)$row['id'];
             $createdAtSafe = $conn->real_escape_string($row['created_at']);
-            $rankRes = $conn->query("SELECT COUNT(*) as c FROM leads WHERE created_at >= '$dayStart' AND created_at < DATE_ADD('$dtSafe', INTERVAL 1 DAY) AND (created_at > '$createdAtSafe' OR (created_at = '$createdAtSafe' AND id >= $rid))");
+            $rankRes = $conn->query("SELECT COUNT(*) as c FROM leads WHERE created_at >= '$dayStart' AND created_at < DATE_ADD('$dtSafe', INTERVAL 1 DAY)$statsExtra AND (created_at > '$createdAtSafe' OR (created_at = '$createdAtSafe' AND id >= $rid))");
             $row['day_rank'] = ($rankRes && $r = $rankRes->fetch_assoc()) ? $r['c'] : 0;
         } else {
             $row['day_total'] = 0;

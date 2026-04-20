@@ -17,7 +17,6 @@
       function gtagSendEvent(url) {
         var callback = function () {
           if (typeof url === 'string') {
-            console.log('Quotation registered in GA');
           }
         };
         gtag('event', 'conversion_event_request_quote', {
@@ -33,12 +32,13 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="max-image-preview:large">
-  <meta property="og:title" content="Free Indoor Wi-Fi Camera or LED Monitor with Smartronic Installation!" />
-  <meta property="og:description" content="Book your Smartronic CCTV installation this month and choose between a FREE Indoor Wi-Fi Camera or a FREE LED Monitor. Offer valid for a limited time!" />
-  <meta property="og:image" content="https://smartronic.online/content/uploads/2025/01/offer.jpg" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
+  <meta property="og:title" content="Smartronic | Smart Home Automation &amp; Security" />
+  <meta property="og:description" content="Smart CCTV, home automation and security solutions with professional installation." />
   <meta property="og:url" content="https://smartronic.online" />
+  <meta property="og:image" content="https://smartronic.online/content/uploads/2025/01/smarttronic-1200-300-trans.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="300" />
   <meta property="og:type" content="website" />
 
 	<style>img:is([sizes="auto" i], [sizes^="auto," i]) { contain-intrinsic-size: 3000px 1500px }</style>
@@ -162,64 +162,18 @@ window._wpemojiSettings = {"baseUrl":"https:\/\/s.w.org\/images\/core\/emoji\/15
 			top: 5px;
 			width: auto;
 			z-index: 100000;
-		}
-    .background-video {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    background: transparent;
-    z-index: -1;}
-
-    @keyframes blink {
-    0% { opacity: 1; }
-    20% { opacity: 0; } /* Blinks for 0.25s (25% of 1s) */
-    25% { opacity: 1; } /* Image reappears */
-    100% { opacity: 1; } /* Stays visible for 1 second */
-    }
-
-    .blinking-image {
-        animation: blink 1.75s infinite;
-    }
-
-  .shimmer-text {
-  
-
-  /* shimmer gradient */
-  background: linear-gradient(
-    90deg,
-#1558d6 0%,
-#f1f1f1  3.5%,
-#1558d6 7%
-  );
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: shimmer 7.2s infinite linear;
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: 200% center;
-  }
-  100% {
-    background-position: -200% center;
-  }
-}
-    </style>
-<link rel="stylesheet" id="brp-style-css" href="content/plugins/brand-rating-plugin/css/style.css?ver=6.7.1" media="all">
+		}</style>
+<link rel="stylesheet" id="brp-style-css" href="content/plugins/brand-rating-plugin/css/style.css?ver=6.7.1" media="print" onload="this.media='all'">
 <link rel="stylesheet" id="crf-form-style-css" href="content/plugins/cctv-requirement-form/assets/form-style.css?ver=6.7.1" media="all">
-<link rel="stylesheet" id="uagb-block-positioning-css-css" href="content/plugins/ultimate-addons-for-gutenberg/assets/css/spectra-block-positioning.min.css?ver=2.13.5" media="all">
-<link rel="stylesheet" id="uagb-aos-css-css" href="content/plugins/ultimate-addons-for-gutenberg/assets/css/aos.min.css?ver=2.13.5" media="all">
-<link rel="stylesheet" id="uagb-slick-css-css" href="content/plugins/ultimate-addons-for-gutenberg/assets/css/slick.min.css?ver=2.13.5" media="all">
-<link rel="stylesheet" id="uagb-swiper-css-css" href="content/plugins/ultimate-addons-for-gutenberg/assets/css/swiper-bundle.min.css?ver=2.13.5" media="all">
-<link rel="stylesheet" id="uag-google-fonts-382-css" href="//fonts.googleapis.com/css?family=Raleway%3A400%2C400italic%7CRoboto+Flex%3A500%2C400%2C500italic%2C400italic&#038;subset=latin&#038;display=fallback&#038;ver=2.13.5" media="all">
+<link rel="stylesheet" id="uagb-aos-css-css" href="content/plugins/ultimate-addons-for-gutenberg/assets/css/aos.min.css?ver=2.13.5" media="print" onload="this.media='all'">
+<link rel="stylesheet" id="uag-google-fonts-382-css" href="//fonts.googleapis.com/css?family=Raleway%3A400%2C400italic%7CRoboto+Flex%3A500%2C400%2C500italic%2C400italic&#038;subset=latin&#038;display=fallback&#038;ver=2.13.5" media="print" onload="this.media='all'">
 <link rel="stylesheet" id="uag-style-382-css" href="content/uploads/uag-plugin/assets/0/uag-css-382.css?ver=1737555549" media="all">
 <link rel="stylesheet" id="custom-css-css" href="content/themes/twentytwentyfour/style.css?ver=6.7.1" media="all">
-<script src="includes/js/jquery/jquery.min.js?ver=3.7.1" id="jquery-core-js"></script>
-<script src="includes/js/jquery/jquery-migrate.min.js?ver=3.4.1" id="jquery-migrate-js"></script>
+<link rel="stylesheet" href="assets/css/homepage-custom.css" media="all">
+<noscript><link rel="stylesheet" href="content/plugins/brand-rating-plugin/css/style.css?ver=6.7.1"></noscript>
+<noscript><link rel="stylesheet" href="content/plugins/ultimate-addons-for-gutenberg/assets/css/aos.min.css?ver=2.13.5"></noscript>
+<noscript><link rel="stylesheet" href="//fonts.googleapis.com/css?family=Raleway%3A400%2C400italic%7CRoboto+Flex%3A500%2C400%2C500italic%2C400italic&#038;subset=latin&#038;display=fallback&#038;ver=2.13.5"></noscript>
+<script src="includes/js/jquery/jquery.min.js?ver=3.7.1" id="jquery-core-js" defer></script>
 <link rel="https://api.w.org/" href="/wp-json/">
 <link rel="alternate" title="JSON" type="application/json" href="/wp-json/wp/v2/pages/382">
 <link rel="EditURI" type="application/rsd+xml" title="RSD" href="/xmlrpc.php?rsd">
@@ -247,7 +201,7 @@ window._wpemojiSettings = {"baseUrl":"https:\/\/s.w.org\/images\/core\/emoji\/15
 
 </head>
 
-<body class="home page-template-default page page-id-382 wp-custom-logo wp-embed-responsive">
+<body class="home page-template-default page page-id-382 wp-custom-logo wp-embed-responsive" data-popup-gads="<?php echo htmlspecialchars(isset($_GET['gads']) ? trim((string)$_GET['gads']) : '', ENT_QUOTES, 'UTF-8'); ?>">
 
 <div class="wp-site-blocks">
 <header class="wp-block-template-part">
@@ -310,7 +264,8 @@ $is_gads_13k = isset($_GET['gads']) && $_GET['gads'] === '13k';
             </h2>
           <?php else: ?>
             <h2 class="uagb-ifb-title">
-              Get Your <span class="hl">CCTV Installation Quote Instantly</span>
+              Professional CCTV Installation <span class="hl">Starting ₹15,000</span> Get Instant Quote
+              
             </h2>
           <?php endif; ?>
         </div>
@@ -323,12 +278,19 @@ $is_gads_13k = isset($_GET['gads']) && $_GET['gads'] === '13k';
               Comes with motion detection, night vision, AMC, free installation, and 2 years full warranty — 
               trusted by thousands of satisfied customers.
             </div>
+            <div class="ads-trust-signals ads-trust-signals--hero">
+              <span><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i> 4.8 Rating</span>
+              <span><i class="fas fa-shield-alt" style="color:#2ecc71;"></i> 1500+ Installations</span>
+              <span><i class="fas fa-building" style="color:#3498db;"></i> Trusted by Homes & Offices</span>
+            </div>
           <?php else: ?>
             <span class="shimmer-text">Free Installation | 2-Year Service Warranty + 5-Year Free Camera Replacement with AMC |
             
             Also Get Now 20% Off with Free Setup</span>
-            <div class="gads-desc">
-              Act now to protect your property with advanced CCTV from Smartronic. Free installation, 2-year warranty, and 5-year replacement — <strong>book your quote today before the offer ends!</strong>
+            <div class="ads-trust-signals ads-trust-signals--hero">
+              <span><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i> 4.8 Rating</span>
+              <span><i class="fas fa-shield-alt" style="color:#2ecc71;"></i> 1500+ Installations</span>
+              <span><i class="fas fa-building" style="color:#3498db;"></i> Trusted by Homes & Offices</span>
             </div>
           <?php endif; ?>
         </div>
@@ -488,6 +450,14 @@ $is_gads_13k = isset($_GET['gads']) && $_GET['gads'] === '13k';
                 </div>
 
                 
+            </div>
+
+            <div style="margin:6px 0 4px; font-size:13px; line-height:1.2; display:flex; gap:6px; align-items:flex-start;">
+                <input type="checkbox" id="whatsapp-consent" checked style="margin-top:2px; width:15px; height:15px;">
+                <label for="whatsapp-consent" style="margin:0; color:#333;">
+                    I agree to receive updates from Smartronic via WhatsApp and accept the
+                    <a id="terms-of-service-link" href="invoice/terms.php" target="_blank" rel="noopener">Terms of Service</a>.
+                </label>
             </div>
 
             <button type="submit" id="next-button" class="input">Submit</button>
@@ -1140,7 +1110,7 @@ $is_gads_13k = isset($_GET['gads']) && $_GET['gads'] === '13k';
 <div class="uagb-ifb-icon-wrap"><svg xmlns="https://www.w3.org/2000/svg" viewbox="0 0 448 512"><path d="M285.6 444.1C279.8 458.3 264.8 466.3 249.8 463.4C234.8 460.4 223.1 447.3 223.1 432V256H47.1C32.71 256 19.55 245.2 16.6 230.2C13.65 215.2 21.73 200.2 35.88 194.4L387.9 50.38C399.8 45.5 413.5 48.26 422.6 57.37C431.7 66.49 434.5 80.19 429.6 92.12L285.6 444.1z"></path></svg></div>
 <div class="uagb-ifb-content">
 <div class="uagb-ifb-title-wrap"><h6 class="uagb-ifb-title">Address:</h6></div>
-<p class="uagb-ifb-desc">70, 9th cross, ITI Layout<br>Bangalore 560 068</p>
+<p class="uagb-ifb-desc">809 A, 25th Cross, Sector 2, HSR Layout, Bangalore 560102</p>
 </div>
 </div>
 
@@ -1174,27 +1144,6 @@ $is_gads_13k = isset($_GET['gads']) && $_GET['gads'] === '13k';
 </div>
 </div>
 <div id="-breakpoint-display"></div>
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const header = document.querySelector("header"); // Select the header
-    let lastScrollTop = 0;
-    const scrollThreshold = 100; // Threshold to hide/show the header
-
-    window.addEventListener("scroll", function () {
-      let currentScroll = window.pageYOffset || document.documentElement.scrollTop;
-
-      if (currentScroll > lastScrollTop && currentScroll > scrollThreshold) {
-        // Scrolling down past the threshold, hide the header
-        header.classList.add("hidden-header");
-      } else if (currentScroll < lastScrollTop) {
-        // Scrolling up, show the header
-        header.classList.remove("hidden-header");
-      }
-
-      lastScrollTop = currentScroll <= 0 ? 0 : currentScroll; // Prevent negative values
-    });
-  });
-</script>
 
 
 <p></p>
@@ -1242,7 +1191,7 @@ $is_gads_13k = isset($_GET['gads']) && $_GET['gads'] === '13k';
 <a href="#faq">FAQ</a>
 </h2>
 <h2 class="wp-block-heading has-medium-font-size has-base-2-color has-text-color has-link-color has-body-font-family wp-elements-b3dfd3800d7e944a14ad64468c2df74a" style="font-style:normal;font-weight:300">
-
+<a href="cctv_help_library.php" target="_blank">CCTV Help Library</a>
 </h2>
 </div>
 
@@ -1262,7 +1211,7 @@ $is_gads_13k = isset($_GET['gads']) && $_GET['gads'] === '13k';
 
 
 
-<p class="has-base-2-color has-text-color has-link-color has-small-font-size wp-elements-a5cf571c8c89a9f4336b62fad62440a5">© 2025 | <strong>Smartronic</strong> | <a href="https://smartronic.online/">www.smartronic.online</a></p>
+<p class="has-base-2-color has-text-color has-link-color has-small-font-size wp-elements-a5cf571c8c89a9f4336b62fad62440a5">© <?php echo date('Y'); ?> | <strong>Smartronic</strong> | <a href="https://smartronic.online/">www.smartronic.online</a></p>
 </div>
 </div>
 </footer>
@@ -1305,20 +1254,13 @@ $is_gads_13k = isset($_GET['gads']) && $_GET['gads'] === '13k';
 		// Inject the skip link.
 		sibling.parentElement.insertBefore( skipLink, sibling );
 	}() );</script>
-<script src="content/plugins/brand-rating-plugin/js/script.js" id="brp-script-js"></script>
+<script src="content/plugins/brand-rating-plugin/js/script.js" id="brp-script-js" defer></script>
 <script id="crf-form-script-js-extra">var crf_ajax_object = {"ajax_url":"\admin_v2\/admin-ajax.php"};</script>
-<script src="content/plugins/cctv-requirement-form/assets/form-script.js" id="crf-form-script-js"></script>
-<script src="content/plugins/ultimate-addons-for-gutenberg/assets/js/spectra-block-positioning.min.js?ver=2.13.5" id="uagb-block-positioning-js-js"></script>
-<script src="content/plugins/ultimate-addons-for-gutenberg/assets/js/aos.min.js?ver=2.13.5" id="uagb-aos-js-js"></script>
-<script src="content/plugins/ultimate-addons-for-gutenberg/assets/js/spectra-animations.min.js?ver=2.13.5" id="uagb-animation-js-js"></script>
-<script src="content/plugins/ultimate-addons-for-gutenberg/assets/js/faq.min.js?ver=2.13.5" id="uagb-faq-js-js"></script>
-<script id="uagb-image-gallery-js-js-extra">var uagb_image_gallery = {"ajax_url":"\admin_v2\/admin-ajax.php","uagb_image_gallery_masonry_ajax_nonce":"663af0226f","uagb_image_gallery_grid_pagination_ajax_nonce":"30cd5ff401"};</script>
-<script src="content/plugins/ultimate-addons-for-gutenberg/assets/js/image-gallery.min.js?ver=2.13.5" id="uagb-image-gallery-js-js"></script>
-<script src="content/plugins/ultimate-addons-for-gutenberg/assets/js/isotope.min.js?ver=2.13.5" id="uagb-masonry-js"></script>
-<script src="content/plugins/ultimate-addons-for-gutenberg/assets/js/imagesloaded.min.js?ver=2.13.5" id="uagb-imagesloaded-js"></script>
-<script src="content/plugins/ultimate-addons-for-gutenberg/assets/js/slick.min.js?ver=2.13.5" id="uagb-slick-js-js"></script>
-<script src="content/plugins/ultimate-addons-for-gutenberg/assets/js/swiper-bundle.min.js?ver=2.13.5" id="uagb-swiper-js-js"></script>
-<script src="content/uploads/uag-plugin/assets/0/uag-js-382.js?ver=1737555549" id="uag-script-382-js"></script>
+<script src="content/plugins/cctv-requirement-form/assets/form-script.js" id="crf-form-script-js" defer></script>
+<script src="content/plugins/ultimate-addons-for-gutenberg/assets/js/aos.min.js?ver=2.13.5" id="uagb-aos-js-js" defer></script>
+<script src="content/plugins/ultimate-addons-for-gutenberg/assets/js/spectra-animations.min.js?ver=2.13.5" id="uagb-animation-js-js" defer></script>
+<script src="content/plugins/ultimate-addons-for-gutenberg/assets/js/faq.min.js?ver=2.13.5" id="uagb-faq-js-js" defer></script>
+<script src="content/uploads/uag-plugin/assets/0/uag-js-382.js?ver=1737555549" id="uag-script-382-js" defer></script>
   <!-- 100% privacy-first analytics -->
 <script async src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
 <section id="quotation-overlay" style="display: none; overflow-y: auto;  overflow-y: none;">
@@ -1349,12 +1291,74 @@ $is_gads_13k = isset($_GET['gads']) && $_GET['gads'] === '13k';
         <i class="fab fa-whatsapp"></i>
     </button>
 </form>
-<a href="https://smartronic.online/admin_v2/smart/whatsapp_leads.php?key=9f4a73c2e9b84bdc902f1a7e5d13acbd">
+<a href="https://smartronic.online/admin_v2/smart/whatsapp_leads.php?key=9f4a73c2e9b84bdc902f1a7e5d13acbd" style="display:none;">
     WhatsApp Chat
 </a>
 
-  <img src="analytics.png" alt="Tracking Image" id="tracking-image" />
+  <img src="analytics.png" alt="Tracking Image" id="tracking-image" style="display:none;" />
 
+  <div class="reveal-logo-container">
+    <img src="content/uploads/2025/01/smarttronic-1200-300-trans.png" alt="Smartronic Logo">
+  </div>
+
+  <div class="promo-popup" id="promoPopup" aria-hidden="true">
+    <div class="promo-popup__backdrop" data-promo-close="true"></div>
+    <div class="promo-popup__dialog" role="dialog" aria-modal="true" aria-labelledby="promoPopupTitle">
+      <button type="button" class="promo-popup__close" id="promoPopupClose" aria-label="Close popup">&times;</button>
+      <div class="promo-popup__grid">
+        <div class="promo-popup__content">
+          <div class="promo-popup__eyebrow">Limited Offer</div>
+          <h3 id="promoPopupTitle">Get 20% OFF Today <br /> Book Your Installation Now</h3>
+          <form id="promoPopupForm" class="promo-popup__form" novalidate>
+            <div class="promo-popup__field">
+              <i class="fab fa-whatsapp" aria-hidden="true"></i>
+              <input type="tel" id="promoPopupPhone" name="phone" inputmode="numeric" placeholder="WhatsApp number" autofocus>
+            </div>
+            <div class="promo-popup__field">
+              <i class="fas fa-user-circle" aria-hidden="true"></i>
+              <input type="text" id="promoPopupName" name="name" placeholder="Your name">
+            </div>
+            <div class="promo-popup__consent">
+              <input type="checkbox" id="promoPopupConsent" checked>
+              <label for="promoPopupConsent">
+                I agree to receive updates from Smartronic via WhatsApp and accept the
+                <a id="promoPopupTermsLink" href="invoice/terms.php" target="_blank" rel="noopener">Terms of Service</a>.
+              </label>
+            </div>
+            <button type="submit" class="promo-popup__submit" id="promoPopupSubmit">Get now</button>
+            <div class="promo-popup__callback">
+              <i class="fas fa-phone-alt"></i>
+              <span>Our expert will call you within 5 minutes</span>
+            </div>
+            <p class="promo-popup__message" id="promoPopupMessage" aria-live="polite"></p>
+          </form>
+        </div>
+        <div class="promo-popup__benefits">
+          <div class="promo-popup__benefit">
+            <span class="promo-popup__tick"><i class="fas fa-check"></i></span>
+            <span>FREE INSTALLATION</span>
+          </div>
+          <div class="promo-popup__benefit">
+            <span class="promo-popup__tick"><i class="fas fa-check"></i></span>
+            <span>2 Years Service Warranty at Your Doorstep</span>
+          </div>
+          <div class="promo-popup__benefit">
+            <span class="promo-popup__tick"><i class="fas fa-check"></i></span>
+            <span>Extendable Warranty up to 5 Years</span>
+          </div>
+          <div class="ads-trust-signals">
+            <span><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i> 4.8 Rating</span>
+            <span><i class="fas fa-shield-alt" style="color:#2ecc71;"></i> 1500+ Installations</span>
+            <span><i class="fas fa-building" style="color:#3498db;"></i> Trusted by Homes & Offices</span>
+          </div>
+          <div class="promo-popup__support-list">
+            <div class="promo-popup__support-item"><i class="fas fa-check"></i> Free Site Inspection</div>
+            <div class="promo-popup__support-item"><i class="fas fa-check"></i> No Hidden Charges</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
  
 </body>
 </html>
@@ -1366,21 +1370,30 @@ $is_gads_13k = isset($_GET['gads']) && $_GET['gads'] === '13k';
         let startTime = Date.now();
 
         // Capture scroll depth
-        window.addEventListener('scroll', () => {
-            const scrolled = Math.ceil((window.scrollY / document.body.scrollHeight) * 100);
+        let scrollDepthTicking = false;
+        const updateScrollDepth = () => {
+            const doc = document.documentElement;
+            const scrollable = Math.max(1, doc.scrollHeight - window.innerHeight);
+            const scrolled = Math.ceil((window.scrollY / scrollable) * 100);
             scrollDepth = Math.max(scrollDepth, scrolled);
-          console.log('scrollDepth', scrollDepth, scrolled)
-        });
+            scrollDepthTicking = false;
+        };
+
+        window.addEventListener('scroll', () => {
+            if (scrollDepthTicking) return;
+            scrollDepthTicking = true;
+            window.requestAnimationFrame(updateScrollDepth);
+        }, { passive: true });
 
 
-        document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
     const goToTopBtn = document.getElementById("goToTop");
+    const quotationSection = document.getElementById("quotation");
+    if (!goToTopBtn) return;
+    let goToTopTicking = false;
 
-    window.addEventListener("scroll", function () {
+    const updateGoToTopState = function () {
         const scrollPosition = window.scrollY;
-        const quotationSection = document.getElementById("quotation");
-        console.log("scrollPosition", scrollPosition)
-        console.log(quotationSection.getBoundingClientRect().bottom)
         
         if (scrollPosition > 100) {
             goToTopBtn.style.display = "block";
@@ -1397,7 +1410,15 @@ $is_gads_13k = isset($_GET['gads']) && $_GET['gads'] === '13k';
                 goToTopBtn.classList.remove("hide-button");
             }
         }
-    });
+        goToTopTicking = false;
+    };
+
+    window.addEventListener("scroll", function () {
+        if (goToTopTicking) return;
+        goToTopTicking = true;
+        window.requestAnimationFrame(updateGoToTopState);
+    }, { passive: true });
+    updateGoToTopState();
 
     // Scroll to Top Action
     goToTopBtn.addEventListener("click", function () {
@@ -1408,26 +1429,40 @@ $is_gads_13k = isset($_GET['gads']) && $_GET['gads'] === '13k';
 
         // Send data to the server
         function sendData(data) {
+            const body = JSON.stringify(data);
+            if (navigator.sendBeacon) {
+                const blob = new Blob([body], { type: 'application/json' });
+                navigator.sendBeacon('https://smartronic.online/admin/track.php', blob);
+                return;
+            }
             fetch('https://smartronic.online/admin/track.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data),
-            });
+                body: body,
+                keepalive: true,
+            }).catch(function () {});
         }
 
-        // Send user activity on unload
-        window.addEventListener('beforeunload', () => {
+        // Send user activity when the page is being hidden
+        window.addEventListener('pagehide', () => {
             const timeOnPage = Math.ceil((Date.now() - startTime) / 1000);
             sendData({
                 scrollDepth: scrollDepth,
                 timeOnPage: timeOnPage,
             });
-           console.log(scrollDepth, timeOnPage )
         });
 
-        // Tracking pixel for capturing visitor info
-        const img = document.getElementById('tracking-image');
-        img.src = `https://smartronic.online/admin/capture.php?timestamp=${Date.now()}`;
+        // Tracking pixel for capturing visitor info after initial render settles
+        const loadTrackingPixel = function () {
+            const img = document.getElementById('tracking-image');
+            if (!img) return;
+            img.src = `https://smartronic.online/admin/capture.php?timestamp=${Date.now()}`;
+        };
+        if (window.requestIdleCallback) {
+            window.requestIdleCallback(loadTrackingPixel, { timeout: 2500 });
+        } else {
+            window.setTimeout(loadTrackingPixel, 2000);
+        }
    document.addEventListener("DOMContentLoaded", function () {
 
     
@@ -1463,6 +1498,290 @@ $is_gads_13k = isset($_GET['gads']) && $_GET['gads'] === '13k';
     document.querySelector("#quotation").innerHTML = quoteSection;
 	window.location.hash = ""; // Remove #show-quotation from URL
 	handleCCTVFormSubmission();
+  });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  const popup = document.getElementById("promoPopup");
+  const popupClose = document.getElementById("promoPopupClose");
+  const popupForm = document.getElementById("promoPopupForm");
+  const popupPhone = document.getElementById("promoPopupPhone");
+  const popupName = document.getElementById("promoPopupName");
+  const popupConsent = document.getElementById("promoPopupConsent");
+  const popupTermsLink = document.getElementById("promoPopupTermsLink");
+  const popupSubmit = document.getElementById("promoPopupSubmit");
+  const popupMessage = document.getElementById("promoPopupMessage");
+  const mainPhone = document.getElementById("num-whatsapp");
+  const mainForm = document.getElementById("cctv-requirement-form");
+  const formHolder = document.querySelector(".form-holder");
+  const successMessage = document.querySelector(".form-success-message");
+  const popupStateKey = "smartronicPromoPopupState";
+  const popupGads = <?php echo json_encode(isset($_GET['gads']) ? trim((string)$_GET['gads']) : ''); ?>;
+
+  if (!popup || !popupForm || !popupPhone || !popupName) {
+    return;
+  }
+
+  const isValidPopupPhone = function () {
+    const phone = popupPhone.value.replace(/\D+/g, "").slice(-10);
+    return phone.length === 10;
+  };
+
+  const syncPopupSubmitState = function () {
+    if (!popupSubmit) return;
+    const consentOk = !popupConsent || popupConsent.checked;
+    const isLoading = popupSubmit.dataset.loading === "1";
+    popupSubmit.disabled = isLoading || !consentOk || !isValidPopupPhone();
+  };
+
+  const focusFirstPopupField = function () {
+    const firstField = popupForm ? popupForm.querySelector('input[type="tel"], input[type="text"], textarea, select') : null;
+    if (!firstField || typeof firstField.focus !== "function") return;
+    window.requestAnimationFrame(function () {
+      try {
+        firstField.focus({ preventScroll: true });
+      } catch (e) {
+        firstField.focus();
+      }
+    });
+  };
+
+  let popupOpen = false;
+  let popupLocked = false;
+  let popupScrollY = 0;
+  let mainFormEngaged = false;
+  let mainFormSubmitted = false;
+  const popupDelay = window.innerWidth <= 767 ? 3000 : 10000;
+
+  try {
+    if (window.sessionStorage.getItem(popupStateKey) === "closed") {
+      popupLocked = true;
+    }
+  } catch (e) {}
+
+  const syncMainFormName = function (nameValue) {
+    if (!mainForm) return;
+    let hiddenNameInput = mainForm.querySelector('input[name="customer-name"]');
+    if (!hiddenNameInput) {
+      hiddenNameInput = document.createElement("input");
+      hiddenNameInput.type = "hidden";
+      hiddenNameInput.name = "customer-name";
+      hiddenNameInput.id = "customer-name";
+      mainForm.appendChild(hiddenNameInput);
+    }
+    hiddenNameInput.value = nameValue;
+  };
+
+  window.showLeadSuccessState = function () {
+    if (formHolder) {
+      formHolder.style.display = "none";
+    }
+    if (successMessage) {
+      successMessage.style.display = "block";
+    }
+  };
+
+  const setPopupState = function (value) {
+    popupLocked = value === "closed";
+    try {
+      window.sessionStorage.setItem(popupStateKey, value);
+    } catch (e) {}
+  };
+
+  const lockPageScroll = function () {
+    popupScrollY = window.scrollY || window.pageYOffset || 0;
+    document.documentElement.classList.add("overlay-active");
+    document.body.classList.add("overlay-active");
+    document.body.style.top = "-" + popupScrollY + "px";
+  };
+
+  const unlockPageScroll = function () {
+    document.documentElement.classList.remove("overlay-active");
+    document.body.classList.remove("overlay-active");
+    document.body.style.top = "";
+    window.scrollTo(0, popupScrollY);
+  };
+
+  const openPopup = function (options) {
+    const opts = options || {};
+    if (popupLocked || popupOpen || mainFormSubmitted) return;
+    if (!opts.ignoreEngaged && mainFormEngaged) return;
+    popup.classList.add("is-open");
+    popup.setAttribute("aria-hidden", "false");
+    syncPopupSubmitState();
+    lockPageScroll();
+    popupOpen = true;
+    focusFirstPopupField();
+  };
+
+  const closePopup = function (lockPopup) {
+    popup.classList.remove("is-open");
+    popup.setAttribute("aria-hidden", "true");
+    if (popupOpen) {
+      unlockPageScroll();
+    }
+    popupOpen = false;
+    if (lockPopup) {
+      setPopupState("closed");
+    }
+  };
+
+  window.setTimeout(function () {
+    openPopup();
+  }, popupDelay);
+
+  document.addEventListener("mousemove", function (event) {
+    if (popupLocked || popupOpen) return;
+    if (window.innerWidth > 767 && event.clientY <= 90) {
+      openPopup({ ignoreEngaged: true });
+    }
+  });
+
+  if (mainForm) {
+    const markMainFormEngaged = function () {
+      mainFormEngaged = true;
+    };
+    mainForm.addEventListener("focusin", markMainFormEngaged);
+    mainForm.addEventListener("input", markMainFormEngaged);
+    mainForm.addEventListener("change", markMainFormEngaged);
+    mainForm.addEventListener("submit", function () {
+      mainFormSubmitted = true;
+      setPopupState("closed");
+      closePopup(false);
+    });
+  }
+
+  window.addEventListener("smartronic:leadSubmitted", function () {
+    mainFormSubmitted = true;
+    setPopupState("closed");
+    closePopup(false);
+  });
+
+  if (popupClose) {
+    popupClose.addEventListener("click", function () {
+      closePopup(true);
+    });
+  }
+
+  if (popupTermsLink) {
+    popupTermsLink.addEventListener("click", function (event) {
+      event.stopPropagation();
+    });
+  }
+
+  popupPhone.addEventListener("input", function () {
+    popupMessage.textContent = "";
+    popupMessage.classList.remove("is-error");
+    syncPopupSubmitState();
+  });
+
+  popupName.addEventListener("input", function () {
+    popupMessage.textContent = "";
+    popupMessage.classList.remove("is-error");
+  });
+
+  if (popupConsent) {
+    popupConsent.addEventListener("change", function () {
+      popupMessage.textContent = "";
+      popupMessage.classList.remove("is-error");
+      syncPopupSubmitState();
+    });
+  }
+
+  syncPopupSubmitState();
+
+  popupForm.addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    const phone = popupPhone.value.replace(/\D+/g, "").slice(-10);
+    const name = popupName.value.trim();
+
+    if (!phone || phone.length !== 10) {
+      popupMessage.textContent = "Please enter a valid WhatsApp number.";
+      popupMessage.classList.add("is-error");
+      return;
+    }
+
+    if (!name) {
+      popupMessage.textContent = "Please enter your name.";
+      popupMessage.classList.add("is-error");
+      return;
+    }
+
+    if (popupConsent && !popupConsent.checked) {
+      popupMessage.textContent = "Please accept the Terms of Service.";
+      popupMessage.classList.add("is-error");
+      syncPopupSubmitState();
+      return;
+    }
+
+    popupMessage.textContent = "Submitting...";
+    popupMessage.classList.remove("is-error");
+    if (popupSubmit) {
+      popupSubmit.dataset.loading = "1";
+      popupSubmit.disabled = true;
+      popupSubmit.textContent = "Submitting...";
+    }
+
+    const payload = new URLSearchParams();
+    payload.set("action", "popup_lead_capture");
+    payload.set("customer_name", name);
+    payload.set("whatsapp_number", phone);
+    payload.set("gads", popupGads);
+    payload.set("popup_device", window.innerWidth <= 767 ? "pop-mobile" : "pop-desk");
+
+    fetch("admin_v2/admin-ajax.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
+      body: payload.toString()
+    })
+      .then(function (response) {
+        if (!response.ok) throw new Error("Failed request");
+        return response.json();
+      })
+      .then(function (data) {
+        if (!data || !data.success) {
+          throw new Error((data && data.message) || "Unable to save lead.");
+        }
+
+        if (typeof gtagSendEvent === "function") {
+          gtagSendEvent('https://smartronic.online');
+        }
+        popupMessage.textContent = "Thank you. We will contact you shortly.";
+        popupMessage.classList.remove("is-error");
+        if (mainPhone) {
+          mainPhone.value = phone;
+          mainPhone.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+        syncMainFormName(name);
+        mainFormSubmitted = true;
+        setPopupState("closed");
+        closePopup(false);
+        if (typeof window.showLeadSuccessState === "function") {
+          window.showLeadSuccessState();
+        }
+        window.dispatchEvent(new CustomEvent("smartronic:leadSubmitted", { detail: { source: "promo-popup" } }));
+        const headerHeight = document.querySelector("header") ? document.querySelector("header").offsetHeight : 0;
+        if (successMessage) {
+          window.setTimeout(function () {
+            window.scrollTo({
+              top: Math.max(0, successMessage.offsetTop - headerHeight - 20),
+              behavior: "smooth"
+            });
+          }, 50);
+        }
+      })
+      .catch(function (error) {
+        popupMessage.textContent = error && error.message ? error.message : "Something went wrong. Please try again.";
+        popupMessage.classList.add("is-error");
+      })
+      .finally(function () {
+        if (popupSubmit) {
+          popupSubmit.dataset.loading = "0";
+          popupSubmit.textContent = "Get now";
+        }
+        syncPopupSubmitState();
+      });
   });
 });
 
@@ -1533,9 +1852,18 @@ body {
       color: red;
     }
 
-    /* Disable scrolling on body when overlay is active */
+    /* Disable scrolling on the page when any overlay or popup is active */
+    html.overlay-active,
     body.overlay-active {
       overflow: hidden;
+      overscroll-behavior: none;
+    }
+
+    body.overlay-active {
+      position: fixed;
+      left: 0;
+      right: 0;
+      width: 100%;
     }
 
 /* Go to Top Button Styling */
@@ -1592,6 +1920,447 @@ body {
   }
   100% {
     box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
+  }
+}
+
+/* Reveal Logo at the end of the page */
+.reveal-logo-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 60vh; /* Adjust height as needed */
+    z-index: -1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+.reveal-logo-container img {
+    width: 100%;
+    height: auto;
+    max-width: 1200px; /* Optional: limit max width */
+}
+
+/* Create space for the logo reveal */
+footer.wp-block-template-part {
+    margin-bottom: 60vh; /* Matches the height of reveal-logo-container */
+    position: relative;
+    z-index: 2;
+    background-color: #232f3e; /* Ensure footer background is solid */
+}
+
+/* Ensure the main content also covers the logo */
+.wp-site-blocks {
+    background-color: #fff;
+    position: relative;
+    z-index: 2;
+}
+
+.promo-popup {
+  position: fixed;
+  inset: 0;
+  display: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  z-index: 10040;
+}
+
+.promo-popup.is-open {
+  display: block;
+}
+
+.promo-popup__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(13, 22, 37, 0.58);
+}
+
+.promo-popup__dialog {
+  position: relative;
+  width: min(900px, calc(100% - 32px));
+  margin: min(8vh, 48px) auto;
+  max-height: calc(100dvh - 32px);
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 30px 80px rgba(10, 22, 38, 0.28);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.promo-popup__close {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  border: none;
+  background: rgba(15, 23, 42, 0.08);
+  color:rgb(255, 255, 255);
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.promo-popup__grid {
+  display: flex;
+  align-items: stretch;
+}
+
+.promo-popup__content,
+.promo-popup__benefits {
+  flex: 1 1 50%;
+  padding: 36px 32px;
+}
+
+.promo-popup__content {
+  background: linear-gradient(180deg, #ffffff 0%, #cbe0f2 50%);
+}
+
+.promo-popup__benefits {
+  background: linear-gradient(135deg, #0e4db6 0%, #1b68dd 100%);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 18px;
+}
+
+.ads-trust-signals {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 15px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #444;
+}
+
+.ads-trust-signals span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ads-trust-signals i {
+  color: #f39c12;
+}
+
+.ads-trust-signals--hero {
+  justify-content: center;
+  font-size: 16px;
+  margin-top: 18px;
+  gap: 12px;
+}
+
+.ads-trust-signals--hero span {
+  gap: 7px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid rgb(52 152 220);
+  box-shadow: 0 14px 28px rgba(14, 77, 182, 0.14);
+  color: #3498dc;
+}
+
+.ads-trust-signals--hero i {
+  color: #ffd45b;
+}
+
+.promo-popup .ads-trust-signals {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 4px;
+  font-size: 15px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.96);
+}
+
+.promo-popup .ads-trust-signals span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.promo-popup .ads-trust-signals i {
+  color: #ffd45b;
+}
+
+.promo-popup__support-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.promo-popup__support-item,
+.promo-popup__callback {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: #fff;
+}
+
+
+.promo-popup__support-item i {
+  color: #1fd46f;
+}
+
+.promo-popup__callback {
+  margin-top: 2px;
+  color: rgba(60, 37, 37, 0.98);
+  font-weight: 700;
+}
+
+.promo-popup__callback i {
+  color:rgb(32, 58, 228);
+  
+}
+
+.promo-popup__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  background: #f40009;
+  color: #fff;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.promo-popup__content h3 {
+  margin: 16px 0 20px;
+  font-size: clamp(28px, 3.8vw, 38px);
+  line-height: 1.04;
+  font-weight: 800;
+  color: #13233a;
+  font-family: "Raleway";
+}
+
+.promo-popup__form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.promo-popup__field {
+  position: relative;
+}
+
+.promo-popup__field i {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #0f56d9;
+  font-size: 20px;
+}
+
+.promo-popup__field .fa-whatsapp {
+  color: #25d366;
+}
+
+.promo-popup__field input {
+  width: 100%;
+  min-height: 58px;
+  border: 1px solid #d5e2f6;
+  border-radius: 8px;
+  padding: 0 18px 0 52px;
+  font-size: 16px;
+  color: #13233a;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.promo-popup__field input:focus {
+  outline: none;
+  border-color: #0f56d9;
+  box-shadow: 0 0 0 4px rgba(15, 86, 217, 0.12);
+}
+
+.promo-popup__consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: -2px;
+  color: #30445e;
+  font-size: 13px;
+  line-height: 1.35;
+  opacity: 0.7;
+}
+
+.promo-popup__consent input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  margin: 2px 0 0;
+  flex: 0 0 auto;
+}
+
+.promo-popup__consent label {
+  margin: 0;
+}
+
+.promo-popup__consent a {
+  color: #0f56d9;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.promo-popup__consent a:hover {
+  text-decoration: underline;
+}
+
+.promo-popup__submit {
+  min-height: 58px;
+  border: none;
+  border-radius: 8px;
+  background: #f40009;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 16px 26px rgba(244, 0, 9, 0.22);
+}
+
+.promo-popup__submit:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.promo-popup__message {
+  min-height: 22px;
+  margin: 0;
+  font-size: 14px;
+  color: #0f7a3a;
+  font-weight: 600;
+}
+
+.promo-popup__message.is-error {
+  color: #c1121f;
+}
+
+.promo-popup__benefit {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.promo-popup.is-open .promo-popup__benefit {
+  animation: promoTickIn 0.48s ease forwards;
+}
+
+.promo-popup.is-open .promo-popup__benefit:nth-child(1) {
+  animation-delay: 0.08s;
+}
+
+.promo-popup.is-open .promo-popup__benefit:nth-child(2) {
+  animation-delay: 0.24s;
+}
+
+.promo-popup.is-open .promo-popup__benefit:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+.promo-popup__tick {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: #1fd46f;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  flex: 0 0 34px;
+  box-shadow: 0 10px 18px rgba(31, 212, 111, 0.32);
+}
+
+.promo-popup__benefit span:last-child {
+  font-size: 20px;
+  line-height: 1.35;
+  font-weight: 800;
+}
+
+@keyframes promoTickIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 767px) {
+  .promo-popup__dialog {
+    width: calc(100% - 18px);
+    max-height: calc(100dvh - 18px);
+    margin: 9px auto;
+    border-radius: 22px;
+  }
+
+  .promo-popup__grid {
+    flex-direction: column;
+  }
+
+  .promo-popup__content,
+  .promo-popup__benefits {
+    padding: 26px 20px;
+  }
+
+  .promo-popup .ads-trust-signals {
+    font-size: 13px;
+    gap: 10px;
+  }
+
+  .ads-trust-signals--hero {
+    justify-content: center;
+    font-size: 13px;
+    gap: 10px;
+  }
+
+  .ads-trust-signals--hero span {
+    width: auto;
+    justify-content: center;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+  }
+
+  .promo-popup__support-item,
+  .promo-popup__callback {
+    font-size: 14px;
+  }
+
+  .promo-popup__benefit span:last-child {
+    font-size: 16px;
+  }
+
+  .promo-popup__content h3 {
+    font-size: 28px;
   }
 }
 

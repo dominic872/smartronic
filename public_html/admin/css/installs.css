@@ -183,6 +183,36 @@ body {
   box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
+.day-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.day-header .date {
+  display: inline-block;
+  margin-bottom: 0;
+  flex: 0 0 auto;
+}
+.day-header .day-map-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: unset;
+  background: transparent;
+  color: #374151;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.day-header .day-map-toggle:hover {
+  background: #f3f4f6;
+}
+.day-header .day-map-toggle i {
+  font-size: 18px;
+}
+
 .event {
   background: #ffffff;
   padding: 6px; 
@@ -392,7 +422,7 @@ span.cams.type {
 
 .form-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 20px;
   margin-bottom: 20px;
 }

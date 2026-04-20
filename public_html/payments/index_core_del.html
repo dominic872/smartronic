@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Create Razorpay Payment Link</title>
+</head>
+<body>
+
+  <h2>Create Payment Link</h2>
+
+  <input type="text" id="name" placeholder="Customer Name"><br><br>
+  <input type="text" id="phone" placeholder="Customer Phone (10 digit)"><br><br>
+  <input type="number" id="amount" placeholder="Amount (INR)"><br><br>
+  <input type="text" id="description" placeholder="Description"><br><br>
+
+  <button onclick="createLink()">Create Payment Link</button>
+
+  <p id="result"></p>
+
+  <script> 
+    function createLink() {
+      const name = document.getElementById("name").value;
+      const phone = document.getElementById("phone").value;
+      const amount = document.getElementById("amount").value;
+      const description = document.getElementById("description").value;
+
+      fetch("create_payment_link.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, phone, amount, description })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.link) {
+          document.getElementById("result").innerHTML =
+            `<a href="${data.link}" target="_blank">${data.link}</a>`;
+
+          // 📲 Auto open WhatsApp
+          const msg = encodeURIComponent(
+            `Hi ${name}, please complete your payment using this link: ${data.link}`
+          );
+          window.open(`https://wa.me/91${phone}?text=${msg}`, "_blank");
+
+        } else {
+          document.getElementById("result").innerText = "Error creating link";
+        }
+      });
+    }
+  </script>
+
+</body>
+</html>

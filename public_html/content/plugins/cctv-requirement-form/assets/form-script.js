@@ -16,6 +16,7 @@ jQuery(document).ready(function($) {
         $('#cctv-requirement-form').off('submit').on('submit', function (e) {
             gtagSendEvent('https://smartronic.online'); // Google Analytics Event
             e.preventDefault(); // Prevent default form submission
+            const currentForm = this;
             const submitButton = document.getElementById("next-button");
             if (submitButton) {
                 submitButton.disabled = true;
@@ -26,8 +27,11 @@ jQuery(document).ready(function($) {
                 return urlParams.get(name);
             }
 
-            var gadsParam = getQueryParam("Gads"); // e.g. "GetLeads"
+            var gadsParam = getQueryParam("gads") || getQueryParam("Gads"); // e.g. "GetLeads"
             var gadCampaignIdParam = getQueryParam("gad_campaignid"); // e.g. "GetLeads"
+            var dryRunParam = getQueryParam("dry_run") || getQueryParam("no_db");
+            const customerNameInput = currentForm.querySelector('#customer-name, #gads-name, input[name="customer-name"], input[name="name"]');
+            const customerName = customerNameInput ? customerNameInput.value.trim() : '';
     
             const formData = {
                 action: 'crf_save_form_data',
@@ -37,8 +41,17 @@ jQuery(document).ready(function($) {
                 camera_resolution: $('input[name="camera-resolution"]:checked').val(),
                 whatsapp_number: $('#num-whatsapp').val(),
                 gads: gadsParam,  
-                gad_campaignid: gadCampaignIdParam
+                gad_campaignid: gadCampaignIdParam,
+                form_device: window.innerWidth <= 767 ? 'main-mobile' : 'main-desk'
             };
+
+            if (customerName) {
+                formData.customer_name = customerName;
+            }
+
+            if (dryRunParam && dryRunParam !== '0') {
+                formData.dry_run = dryRunParam;
+            }
 
             console.log(formData, gadsParam);
     
@@ -55,17 +68,25 @@ jQuery(document).ready(function($) {
                     }
                 } else {
                     console.log('Response is already an object:', response);
+                    responseObj = response;
                 }
     
                 const headerHeight = $('header').outerHeight(); 
                 if (responseObj.success) {
-                    // Remove the form and display success message
-                    $('.form-holder').css('display', 'none');
-                    $('.form-success-message').css('display', 'block');
-                    $('#cctv-requirement-form').replaceWith('<p class="success-message">Form data saved successfully!</p>');
+                    if (typeof window.showLeadSuccessState === 'function') {
+                        window.showLeadSuccessState();
+                    } else {
+                        $('.form-holder').css('display', 'none');
+                        $('.form-success-message').css('display', 'block');
+                        $('#cctv-requirement-form').replaceWith('<p class="success-message">Form data saved successfully!</p>');
+                    }
+                    try {
+                        window.sessionStorage.setItem('smartronicPromoPopupState', 'closed');
+                    } catch (e) {}
+                    window.dispatchEvent(new CustomEvent('smartronic:leadSubmitted', { detail: { source: 'main-form' } }));
                     $('html, body').animate({
                         scrollTop: $('.form-success-message').offset().top - headerHeight - 20,
-                    }, 600); 
+                    }, 600);
                 } else {
                     // Display error message
                     $('#cctv-requirement-form').prepend('<p class="error-message">Error: ' + responseObj.data + '</p>');

@@ -4,8 +4,8 @@ ini_set('display_errors', 1);
 require 'config.php'; // contains $mysqli = new mysqli(...);
 $error = '';
 
-//$password = 'Smart@2009'; // your desired password
-//$hash = password_hash($password, PASSWORD_DEFAULT);
+// $password = 'Smart@0000'; // your desired password
+// $hash = password_hash($password, PASSWORD_DEFAULT);
 
 //echo $hash;
 
@@ -17,21 +17,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $redirectTo = $_GET['redirect'] ?? 'form.php';
 
     // Prepare SQL query
-    $stmt = $conn->prepare("SELECT id, username, password, fullname, roll FROM users WHERE username=?");
+    $stmt = $conn->prepare("SELECT id, username, password, fullname, roll, Pages FROM users WHERE username=?");
     $stmt->bind_param('s', $username);
     $stmt->execute();
     $stmt->store_result();
 
     if ($stmt->num_rows > 0) {
-        $stmt->bind_result($id, $db_username, $hash, $fullname, $roll);
+        $stmt->bind_result($id, $db_username, $hash, $fullname, $roll, $pages);
         $stmt->fetch();
 
         // Verify password
         if (password_verify($password, $hash)) {
-            // Set cookies for 1 day
-            setcookie('auth_user', $db_username, time() + 86400, "/");
-            setcookie('auth_role', $roll, time() + 86400, "/");
-            setcookie('auth_name', $fullname, time() + 86400, "/");
+            // Set cookies for 3 days
+            $authExpiry = time() + (3 * 86400);
+            setcookie('auth_user', $db_username, $authExpiry, "/");
+            setcookie('auth_role', $roll, $authExpiry, "/");
+            setcookie('auth_name', $fullname, $authExpiry, "/");
+            setcookie('auth_pages', (string)$pages, $authExpiry, "/");
 
             header("Location: $redirectTo");
             exit;

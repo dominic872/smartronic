@@ -202,7 +202,7 @@ button {
       <label>
         ID No: <input type="text" id="user-id" required>
       </label>
-    </div>
+          </div>
 
     <div class="tables-wrapper">
       <table>
@@ -244,10 +244,77 @@ button {
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <script>
-    const items = [
-      { name: "HIKVISON BULLET", options: ["5 MP Cam Normal with Mic", "5 MP Cam HYBRID with Mic", "2 MP with Mic", "2 MP HYBRID with Mic"], quantityRange: 20, id: "resolution-bullet" },
-      { name: "HIKVISON DOME", options: ["5 MP Cam Normal with Mic", "5 MP Cam HYBRID with Mic", "2 MP with Mic", "2 MP HYBRID with Mic"], quantityRange: 20, id: "resolution-dome" },
-      { name: "HIKVISON DVR", options: ["2 MP 4 CH", "2 MP 8 CH", "2 MP 16 CH", "2 MP 32 CH", "5 MP 4 CH", "5 MP 8 CH", "5 MP 16 CH", "5 MP 32 CH"], quantityRange: 1, id: "type" },
+    const CAMERA_RESOLUTION_OPTIONS = ["2 MP", "5 MP"];
+    const CAMERA_TYPE_OPTIONS = ["Normal with mic", "Hybrid", "Full colour"];
+    let activeMaterialBrand = '';
+
+    function normalizeCamType(value) {
+      const normalized = String(value || '').trim().toLowerCase();
+      if (!normalized) return '';
+      if (normalized === 'hybrid' || normalized.includes('hybrid')) return 'Hybrid';
+      if (normalized === 'full colour' || normalized === 'full color' || normalized.includes('full colour') || normalized.includes('full color')) return 'Full colour';
+      return 'Normal with mic';
+    }
+
+    function getCameraOptionLabel(resolutionValue, camTypeValue) {
+      const resolution = String(resolutionValue || '').trim();
+      const camType = normalizeCamType(camTypeValue);
+      if (!resolution && !camType) return 'N/A';
+      if (!resolution) return camType || 'N/A';
+      if (!camType) return resolution;
+      return `${resolution} ${camType}`;
+    }
+
+    function getCameraFieldIds(item) {
+      return {
+        resolution: item.id,
+        camType: `${item.id}-cam-type`
+      };
+    }
+
+    function getCameraSelection(item) {
+      const fieldIds = getCameraFieldIds(item);
+      const resolutionField = document.getElementById(fieldIds.resolution);
+      const camTypeField = document.getElementById(fieldIds.camType);
+      return {
+        resolution: resolutionField ? resolutionField.value : '',
+        camType: camTypeField ? camTypeField.value : ''
+      };
+    }
+
+    function setCameraSelection(item, resolutionValue, camTypeValue) {
+      const fieldIds = getCameraFieldIds(item);
+      const resolutionField = document.getElementById(fieldIds.resolution);
+      const camTypeField = document.getElementById(fieldIds.camType);
+      if (resolutionField && resolutionValue) {
+        resolutionField.value = resolutionValue;
+      }
+      if (camTypeField && camTypeValue) {
+        camTypeField.value = normalizeCamType(camTypeValue);
+      }
+    }
+
+    // Dynamic items based on brand selection
+    const brandItems = {
+      'CP PLUS': [
+        { name: "CP PLUS BULLET", options: [], quantityRange: 20, id: "resolution-bullet", kind: "camera" },
+        { name: "CP PLUS DOME", options: [], quantityRange: 20, id: "resolution-dome", kind: "camera" },
+        { name: "CP PLUS DVR", options: ["2 MP 4 CH", "2 MP 8 CH", "2 MP 16 CH", "2 MP 32 CH", "5 MP 4 CH", "5 MP 8 CH", "5 MP 16 CH", "5 MP 32 CH"], quantityRange: 1, id: "type" }
+      ],
+      'Hikvision': [
+        { name: "HIKVISON BULLET", options: [], quantityRange: 20, id: "resolution-bullet", kind: "camera" },
+        { name: "HIKVISON DOME", options: [], quantityRange: 20, id: "resolution-dome", kind: "camera" },
+        { name: "HIKVISON DVR", options: ["2 MP 4 CH", "2 MP 8 CH", "2 MP 16 CH", "2 MP 32 CH", "5 MP 4 CH", "5 MP 8 CH", "5 MP 16 CH", "5 MP 32 CH"], quantityRange: 1, id: "type" }
+      ],
+      'PRAMA': [
+        { name: "PRAMA BULLET", options: [], quantityRange: 20, id: "resolution-bullet", kind: "camera" },
+        { name: "PRAMA DOME", options: [], quantityRange: 20, id: "resolution-dome", kind: "camera" },
+        { name: "PRAMA DVR", options: ["2 MP 4 CH", "2 MP 8 CH", "2 MP 16 CH", "2 MP 32 CH", "5 MP 4 CH", "5 MP 8 CH", "5 MP 16 CH", "5 MP 32 CH"], quantityRange: 1, id: "type" }
+      ]
+    };
+
+    // Common items for all brands
+    const commonItems = [
       { name: "Hard Disk Consistian", options: ["500 GB", "1 TB Seagate (3yrs)", "2 TB Toshiba (3yrs)", "3 TB", "4 TB", "6 TB"], quantityRange: 1, id: "hdd" },
       { name: "SMPS", options: ["4 CH FYBRE", "8 CH FYBRE", "16 CH FYBRE", "32 CH FYBRE"], quantityRange: 1 },
       { name: "DC PIN", options: [], quantityRange: 40 },
@@ -264,9 +331,67 @@ button {
       { name: "HDMI Cable", options: [], quantityRange: 1, id: "hdmi" }
     ];
 
-    const formBody = document.getElementById("form-body");
+    let items = [];
 
-    items.forEach((item, index) => {
+    function setMaterialBrand(brand) {
+      activeMaterialBrand = brand && brandItems[brand] ? brand : '';
+      updateItems();
+    }
+
+    // Function to update items based on brand selection
+    function updateItems() {
+      const brandField = document.getElementById('brand');
+      const brand = activeMaterialBrand || (brandField ? brandField.value : '');
+      
+      // Get values from requirements tab
+      const reqBrand = document.getElementById('brand') ? document.getElementById('brand').value : '';
+      const reqCamType = document.getElementById('cam_type') ? document.getElementById('cam_type').value : '';
+      
+      // Set defaults if no brand or cam_type selected in requirements
+      const selectedBrand = reqBrand || 'PRAMA';
+      const selectedCamType = reqCamType || 'Normal with mic';
+      
+      items = [];
+      
+      if (selectedBrand && brandItems[selectedBrand]) {
+        items = [...brandItems[selectedBrand], ...commonItems];
+      } else {
+        items = commonItems;
+      }
+      
+      regenerateForm();
+      
+      // Set default camera type selections after form regeneration
+      setTimeout(() => {
+        const bulletCamType = document.getElementById('resolution-bullet-cam-type');
+        const domeCamType = document.getElementById('resolution-dome-cam-type');
+        
+        if (bulletCamType) {
+          selectOptionByText(bulletCamType, selectedCamType);
+        }
+        if (domeCamType) {
+          selectOptionByText(domeCamType, selectedCamType);
+        }
+      }, 100);
+    }
+
+    // Helper function to select option by text
+    function selectOptionByText(selectElement, text) {
+      if (!selectElement) return;
+      for (let i = 0; i < selectElement.options.length; i++) {
+        if (selectElement.options[i].textContent === text || selectElement.options[i].value === text) {
+          selectElement.selectedIndex = i;
+          break;
+        }
+      }
+    }
+
+    // Function to regenerate the form
+    function regenerateForm() {
+      const formBody = document.getElementById("form-body");
+      formBody.innerHTML = ''; // Clear existing content
+
+      items.forEach((item, index) => {
       const row = document.createElement("tr");
 
       const nameCell = document.createElement("td");
@@ -274,7 +399,67 @@ button {
       row.appendChild(nameCell);
 
       const optionCell = document.createElement("td");
-      if (item.options.length > 0) {
+      if (item.kind === "camera") {
+        const cameraSection = document.createElement("div");
+        cameraSection.style.display = "flex";
+        cameraSection.style.flexDirection = "column";
+
+        // Create container for side-by-side resolution and camera type
+        const selectsContainer = document.createElement("div");
+        selectsContainer.style.display = "flex";
+        selectsContainer.style.gap = "8px";
+        selectsContainer.style.marginBottom = "8px";
+        
+        // Resolution section
+        const resolutionSection = document.createElement("div");
+        resolutionSection.style.flex = "0 0 25%";
+        
+        const resolutionLabel = document.createElement("div");
+        resolutionLabel.style.fontSize = "12px";
+        resolutionLabel.style.marginBottom = "4px";
+        resolutionLabel.textContent = "Resolution:";
+        resolutionSection.appendChild(resolutionLabel);
+        
+        const resolutionSelect = document.createElement("select");
+        resolutionSelect.style.width = "100%";
+        const fieldIds = getCameraFieldIds(item);
+        resolutionSelect.name = `option-${index}`;
+        resolutionSelect.id = fieldIds.resolution;
+        CAMERA_RESOLUTION_OPTIONS.forEach(opt => {
+          const option = document.createElement("option");
+          option.value = opt;
+          option.textContent = opt;
+          resolutionSelect.appendChild(option);
+        });
+        resolutionSection.appendChild(resolutionSelect);
+        
+        // Camera type section
+        const camTypeSection = document.createElement("div");
+        camTypeSection.style.flex = "0 0 75%";
+        
+        const camTypeLabel = document.createElement("div");
+        camTypeLabel.style.fontSize = "12px";
+        camTypeLabel.style.marginBottom = "4px";
+        camTypeLabel.textContent = "Camera Type:";
+        camTypeSection.appendChild(camTypeLabel);
+        
+        const camTypeSelect = document.createElement("select");
+        camTypeSelect.style.width = "100%";
+        camTypeSelect.name = `cam-type-${index}`;
+        camTypeSelect.id = fieldIds.camType;
+        CAMERA_TYPE_OPTIONS.forEach(opt => {
+          const option = document.createElement("option");
+          option.value = opt;
+          option.textContent = opt;
+          camTypeSelect.appendChild(option);
+        });
+        camTypeSection.appendChild(camTypeSelect);
+        
+        selectsContainer.appendChild(resolutionSection);
+        selectsContainer.appendChild(camTypeSection);
+        cameraSection.appendChild(selectsContainer);
+        optionCell.appendChild(cameraSection);
+      } else if (item.options.length > 0) {
         const select = document.createElement("select");
         select.name = `option-${index}`;
         select.id = item.id;
@@ -309,6 +494,16 @@ button {
 
       formBody.appendChild(row);
     });
+    }
+
+    // Add event listener for brand change when that field is present
+    const brandField = document.getElementById('brand');
+    if (brandField) {
+      brandField.addEventListener('change', updateItems);
+    }
+
+    // Initialize with common items
+    updateItems();
     function generateTable(e) {
   e.preventDefault();
 
@@ -324,19 +519,28 @@ button {
   outputBody.innerHTML = "";
   let hasItems = false;
 
-  items.forEach((item, index) => {
-    const qty = parseInt(document.querySelector(`[name=qty-${index}]`).value, 10);
-    const optionInput = document.querySelector(`[name=option-${index}]`);
-    const option = optionInput.tagName === "SELECT" ? optionInput.value : optionInput.value.trim();
+		  items.forEach((item, index) => {
+		    const qtyField = document.querySelector(`[name=qty-${index}]`);
+		    const qty = parseInt((qtyField && qtyField.value) || "0", 10);
+		    let option = "N/A";
+		    if (item.kind === "camera") {
+		      const selection = getCameraSelection(item);
+		      option = getCameraOptionLabel(selection.resolution, selection.camType);
+		    } else {
+	      const optionInput = document.querySelector(`[name=option-${index}]`);
+	      option = optionInput
+	        ? (optionInput.tagName === "SELECT" ? optionInput.value : optionInput.value.trim())
+	        : "N/A";
+	    }
 
-    if (qty > 0) {
-      hasItems = true;
+	    if (qty > 0) {
+	      hasItems = true;
       const row = document.createElement("tr");
       row.innerHTML = `<td>${item.name}</td><td>${option || "N/A"}</td><td>${qty}</td>`;
-      if (option && option.includes('HYBRID')) {
-          row.classList.add('hybrid-selected');
-      }
-      outputBody.appendChild(row);
+	      if (option && option.toLowerCase().includes('hybrid')) {
+	          row.classList.add('hybrid-selected');
+	      }
+	      outputBody.appendChild(row);
     }
   }); // ← Missing closing bracket was here
 
@@ -384,13 +588,15 @@ function updateDependentFields() {
   let totalCameras = 0;
   let cameraType = null;
 
-  items.forEach((item, index) => {
-    if (item.name === "HIKVISON BULLET" || item.name === "HIKVISON DOME") {
-      const qty = parseInt(document.querySelector(`[name=qty-${index}]`).value || "0", 10);
-      const opt = document.querySelector(`[name=option-${index}]`).value;
-      totalCameras += qty;
+	  items.forEach((item, index) => {
+	    if (item.name.includes("BULLET") || item.name.includes("DOME")) {
+		      const qtyField = document.querySelector(`[name=qty-${index}]`);
+		      const qty = parseInt((qtyField && qtyField.value) || "0", 10);
+		      const selection = getCameraSelection(item);
+		      const opt = selection.resolution;
+		      totalCameras += qty;
 
-      if (qty > 0 && opt.includes("5 MP")) {
+	      if (qty > 0 && opt.includes("5 MP")) {
         cameraType = "5 MP";
       } else if (qty > 0 && opt.includes("2 MP")) {
         cameraType = "2 MP";
@@ -399,81 +605,86 @@ function updateDependentFields() {
   });
 
   // Update DVR
-  const dvrIndex = items.findIndex(i => i.name === "HIKVISON DVR");
-  const dvrSelect = document.querySelector(`[name=option-${dvrIndex}]`);
-  const dvrQty = document.querySelector(`[name=qty-${dvrIndex}]`);
-  if (cameraType) {
-    const choices = Array.from(dvrSelect.options).map(o => o.value);
-    const suitable = choices.find(opt => opt.startsWith(cameraType) && parseInt(opt.split(" ")[2]) >= totalCameras);
-    if (suitable) {
+	  const dvrIndex = items.findIndex(i => i.name.includes("DVR"));
+	  const dvrSelect = document.querySelector(`[name=option-${dvrIndex}]`);
+	  const dvrQty = document.querySelector(`[name=qty-${dvrIndex}]`);
+	  if (cameraType && dvrSelect && dvrQty) {
+	    const choices = Array.from(dvrSelect.options).map(o => o.value);
+	    const suitable = choices.find(opt => opt.startsWith(cameraType) && parseInt(opt.split(" ")[2]) >= totalCameras);
+	    if (suitable) {
       dvrSelect.value = suitable;
       dvrQty.value = 1;
     }
   }
 
   // Hard Disk
-  const hddIndex = items.findIndex(i => i.name.startsWith("Hard Disk"));
-  const hddSelect = document.querySelector(`[name=option-${hddIndex}]`);
-  const hddQty = document.querySelector(`[name=qty-${hddIndex}]`);
+	  const hddIndex = items.findIndex(i => i.name.startsWith("Hard Disk"));
+	  const hddSelect = document.querySelector(`[name=option-${hddIndex}]`);
+	  const hddQty = document.querySelector(`[name=qty-${hddIndex}]`);
 //   if (totalCameras <= 4) hddSelect.value = "500 GB";
 //   else if (totalCameras <= 8) hddSelect.value = "1 TB";
 //   else if (totalCameras <= 16) hddSelect.value = "2 TB";
 //   else if (totalCameras <= 24) hddSelect.value = "3 TB";
 //   else hddSelect.value = "4 TB";
-  hddQty.value = 1;
+	  if (hddQty) hddQty.value = 1;
 
-  // SMPS = same as DVR
-  const smpsIndex = items.findIndex(i => i.name === "SMPS");
-  const smpsSelect = document.querySelector(`[name=option-${smpsIndex}]`);
-  const smpsQty = document.querySelector(`[name=qty-${smpsIndex}]`);
-  if (dvrSelect.value) {
-    const ch = dvrSelect.value.split(" ")[2]; // get CH number
-    const smpsMatch = Array.from(smpsSelect.options).find(o => o.value.includes(ch));
-    if (smpsMatch) {
+	  // SMPS = same as DVR
+	  const smpsIndex = items.findIndex(i => i.name === "SMPS");
+	  const smpsSelect = document.querySelector(`[name=option-${smpsIndex}]`);
+	  const smpsQty = document.querySelector(`[name=qty-${smpsIndex}]`);
+	  if (dvrSelect && smpsSelect && smpsQty && dvrSelect.value) {
+	    const ch = dvrSelect.value.split(" ")[2]; // get CH number
+	    const smpsMatch = Array.from(smpsSelect.options).find(o => o.value.includes(ch));
+	    if (smpsMatch) {
       smpsSelect.value = smpsMatch.value;
       smpsQty.value = 1;
     }
   }
 
-  // Accessory values
-  const setQty = (label, val) => {
-    const i = items.findIndex(x => x.name === label);
-    if (i >= 0) document.querySelector(`[name=qty-${i}]`).value = val;
-  };
+	  // Accessory values
+	  const setQty = (label, val) => {
+	    const i = items.findIndex(x => x.name === label);
+	    const field = i >= 0 ? document.querySelector(`[name=qty-${i}]`) : null;
+	    if (field) field.value = val;
+	  };
   setQty("DC PIN", totalCameras);
   setQty("Back Box", totalCameras);
   setQty("BNC NO", totalCameras * 2);
   setQty("C Pin bundle", 1);
 
-  // Dlink Cable
-  const cable3Index = items.findIndex(x => x.name === "Dlink Cable 3+1");
-  if (cable3Index >= 0)
-    document.querySelector(`[name=qty-${cable3Index}]`).value = totalCameras <= 4 ? 1 : 2;
+	  // Dlink Cable
+	  const cable3Index = items.findIndex(x => x.name === "Dlink Cable 3+1");
+	  if (cable3Index >= 0) {
+	    const cable3Qty = document.querySelector(`[name=qty-${cable3Index}]`);
+	    if (cable3Qty) cable3Qty.value = totalCameras <= 4 ? 1 : 2;
+	  }
 
-    const ledTVIndex = items.findIndex(i => i.name === "LED TV");
-    const ledTVSelect = document.querySelector(`[name=option-${ledTVIndex}]`);
-    const ledTVQty = document.querySelector(`[name=qty-${ledTVIndex}]`);
-    const clampIndex = items.findIndex(i => i.name === "LED TV Clamp");
-    const clampQty = document.querySelector(`[name=qty-${clampIndex}]`);
+	    const ledTVIndex = items.findIndex(i => i.name === "LED TV");
+	    const ledTVSelect = document.querySelector(`[name=option-${ledTVIndex}]`);
+	    const ledTVQty = document.querySelector(`[name=qty-${ledTVIndex}]`);
+	    const clampIndex = items.findIndex(i => i.name === "LED TV Clamp");
+	    const clampQty = document.querySelector(`[name=qty-${clampIndex}]`);
 
-    // Only set clamp = 1 if user selected a value AND quantity > 0 for LED TV
-    if (ledTVSelect.value && parseInt(ledTVQty.value) > 0) {
-    clampQty.value = 1;
-    } else {
-    clampQty.value = 0;
-    }
+	    // Only set clamp = 1 if user selected a value AND quantity > 0 for LED TV
+	    if (clampQty) {
+	      if (ledTVSelect && ledTVQty && ledTVSelect.value && parseInt(ledTVQty.value || "0", 10) > 0) {
+	        clampQty.value = 1;
+	      } else {
+	        clampQty.value = 0;
+	      }
+	    }
     
 }
-document.querySelectorAll("input, select").forEach(el => {
-  el.addEventListener("change", () => {
-    const autoUpdate = document.getElementById("auto-update-toggle").checked;
-    if (autoUpdate) {
-      updateDependentFields();
-     
-    }
-    generateTable({ preventDefault: () => {} });
-  });
-});
+	document.getElementById("equipment-form").addEventListener("change", (event) => {
+	  if (!event.target.matches("input, select")) return;
+	  const autoUpdate = document.getElementById("auto-update-toggle").checked;
+	  if (autoUpdate) {
+	    updateDependentFields();
+	  }
+	  generateTable({ preventDefault: () => {} });
+	});
+
+	window.setMaterialBrand = setMaterialBrand;
   </script>
  
 </div>
@@ -484,6 +695,8 @@ document.querySelectorAll("input, select").forEach(el => {
     const params = new URLSearchParams(window.location.search);
     
     const resolution = params.get('resolution'); // e.g., "2 MP", "5 MP", "4K"
+    const camType = params.get('cam_type');
+    const brand = params.get('brand');
 
     const bullets = parseInt(params.get('bullets') || "0", 10);
     const domes = parseInt(params.get('dome') || "0", 10);
@@ -493,6 +706,10 @@ document.querySelectorAll("input, select").forEach(el => {
     const name = params.get('name');
     const id = params.get('id');
     const location = params.get('location');
+
+    if (brand) {
+        setMaterialBrand(brand);
+    }
 
     if(name)
         document.getElementById('user-name').value = name;
@@ -520,6 +737,8 @@ document.querySelectorAll("input, select").forEach(el => {
 
       selectOptionStartingWith(bulletSelect, resolution);
       selectOptionStartingWith(domeSelect, resolution);
+      setCameraSelection({ id: 'resolution-bullet' }, resolution, camType);
+      setCameraSelection({ id: 'resolution-dome' }, resolution, camType);
 
       // Set bullet and dome quantities if present
       const bulletQty = document.getElementById('resolution-bullet-qty');
@@ -566,7 +785,6 @@ document.querySelectorAll("input, select").forEach(el => {
           }
         }
       }
-    }
 
   });
       function toggleMobileSummary() {

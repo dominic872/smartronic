@@ -1,6 +1,18 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+require_once __DIR__ . '/../auth.php';
+requireSmartPageAccess('gads_stats', $role, $authPages);
+$isAjax = isset($_GET['range']);
+if ($isAjax) {
+    error_reporting(0);
+    ini_set('display_errors', 0);
+    if (!headers_sent()) {
+        header('X-Content-Type-Options: nosniff');
+    }
+    ob_start();
+} else {
+    error_reporting(E_ALL);
+    ini_set('display_errors', 0);
+}
 
 // Load DB config from available paths
 $paths = [
@@ -21,56 +33,117 @@ if (!$configLoaded || !isset($conn) || $conn->connect_error) {
 
 date_default_timezone_set('Asia/Kolkata'); 
 
+function tableExists(mysqli $conn, string $table): bool {
+    $table = trim($table);
+    if ($table === '') return false;
+    try {
+        $escaped = $conn->real_escape_string($table);
+        $res = $conn->query("SHOW TABLES LIKE '$escaped'");
+        return $res && $res->num_rows > 0;
+    } catch (Throwable $e) {
+        return false;
+    }
+}
+
+function columnExists(mysqli $conn, string $table, string $column): bool {
+    $table = trim($table);
+    $column = trim($column);
+    if ($table === '' || $column === '') return false;
+    if (!in_array($table, ['wp_cctv_requirements', 'leads'], true)) return false;
+    try {
+        $escaped = $conn->real_escape_string($column);
+        $res = $conn->query("SHOW COLUMNS FROM `$table` LIKE '$escaped'");
+        return $res && $res->num_rows > 0;
+    } catch (Throwable $e) {
+        return false;
+    }
+}
+
+function jsonResponse(array $payload): void {
+    if (ob_get_level() > 0) {
+        ob_clean();
+    }
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode($payload);
+}
+
+$statsTable = tableExists($conn, 'leads') ? 'leads' : (tableExists($conn, 'wp_cctv_requirements') ? 'wp_cctv_requirements' : null);
+$createdCol = 'created_at';
+$labelCol = ($statsTable === 'wp_cctv_requirements') ? 'comments' : 'Column_1';
+
 // 🔹 Handle AJAX data request
 if (isset($_GET['range'])) {
     $range = $_GET['range'];
     $where = "1=1"; 
+    if (!$statsTable) {
+        jsonResponse(['success' => false, 'error' => 'Stats source table not found.']);
+        $conn->close();
+        exit;
+    }
+    if (!columnExists($conn, $statsTable, $createdCol)) {
+        jsonResponse(['success' => false, 'error' => 'created_at column missing in stats table.']);
+        $conn->close();
+        exit;
+    }
+    if (!columnExists($conn, $statsTable, $labelCol)) {
+        $labelCol = columnExists($conn, $statsTable, 'comments') ? 'comments' : (columnExists($conn, $statsTable, 'Column_1') ? 'Column_1' : $labelCol);
+    }
 
     switch ($range) {
         case '7':
-            $where = "DATE(created_at) >= CURDATE() - INTERVAL 6 DAY";
+            $where = "DATE($createdCol) >= CURDATE() - INTERVAL 6 DAY";
             break;
         case '30':
-            $where = "DATE(created_at) >= CURDATE() - INTERVAL 29 DAY";
+            $where = "DATE($createdCol) >= CURDATE() - INTERVAL 29 DAY";
             break;
         case 'this_month':
-            $where = "MONTH(created_at) = MONTH(CURDATE()) AND YEAR(created_at) = YEAR(CURDATE())";
+            $where = "MONTH($createdCol) = MONTH(CURDATE()) AND YEAR($createdCol) = YEAR(CURDATE())";
             break;
         case 'last_month':
-            $where = "MONTH(created_at) = MONTH(CURDATE() - INTERVAL 1 MONTH) AND YEAR(created_at) = YEAR(CURDATE() - INTERVAL 1 MONTH)";
+            $where = "MONTH($createdCol) = MONTH(CURDATE() - INTERVAL 1 MONTH) AND YEAR($createdCol) = YEAR(CURDATE() - INTERVAL 1 MONTH)";
             break;
         default:
-            $where = "DATE(created_at) = CURDATE()";
+            $where = "DATE($createdCol) = CURDATE()";
             break;
     }
 
     // Total records
-    $totalResult = $conn->query("SELECT COUNT(*) AS total FROM wp_cctv_requirements WHERE $where");
-    $total = $totalResult->fetch_assoc()['total'] ?? 0;
+    $totalResult = $conn->query("SELECT COUNT(*) AS total FROM `$statsTable` WHERE $where");
+    if (!$totalResult) {
+        jsonResponse(['success' => false, 'error' => 'Failed to load totals.']);
+        $conn->close();
+        exit;
+    }
+    $totalRow = $totalResult->fetch_assoc() ?: [];
+    $total = $totalRow['total'] ?? 0;
 
     // Past 4 days data
     $past_days = [];
     for ($i = 0; $i <= 4; $i++) {
         $date = date('Y-m-d', strtotime("-$i days"));
-        $r = $conn->query("SELECT COUNT(*) AS c FROM wp_cctv_requirements WHERE DATE(created_at)='$date'");
-        $count = $r->fetch_assoc()['c'] ?? 0;
+        $r = $conn->query("SELECT COUNT(*) AS c FROM `$statsTable` WHERE DATE($createdCol)='$date'");
+        $row = $r ? ($r->fetch_assoc() ?: []) : [];
+        $count = $row['c'] ?? 0;
         $past_days[] = ['date' => $date, 'day' => date('D', strtotime($date)), 'count' => $count];
     }
 
     // Group by comments
     $grouped = [];
-    $query = "SELECT comments, COUNT(*) AS total FROM wp_cctv_requirements WHERE $where GROUP BY comments";
+    $query = "SELECT `$labelCol` AS label, COUNT(*) AS total FROM `$statsTable` WHERE $where GROUP BY `$labelCol` ORDER BY total DESC";
     $r = $conn->query($query);
-    while ($row = $r->fetch_assoc()) {
-        $grouped[] = ['label' => $row['comments'] ?: 'Unknown', 'total' => $row['total']];
+    if ($r) {
+        while ($row = $r->fetch_assoc()) {
+            $grouped[] = ['label' => $row['label'] ?: 'Unknown', 'total' => $row['total']];
+        }
     }
 
-    echo json_encode([
+    jsonResponse([
         'success' => true,
         'total' => $total,
         'past_days' => $past_days,
         'grouped' => $grouped
     ]);
+    $conn->close();
     exit;
 }
 $conn->close();
@@ -80,7 +153,7 @@ $conn->close();
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CCTV Enquiry Dashboard</title>
+<title>CCTV Enquiry Dashboard 1</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="../css/gads_stats.css">
 </head>
@@ -94,7 +167,7 @@ $conn->close();
         </svg>
       </button>
     </div>
-    <h1 class="text-3xl font-bold text-gray-800 mb-6">CCTV Enquiry Stats</h1>
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">CCTV Enquiry Stats1</h1>
 
     <!-- Range Selector as Links -->
     <div class="flex justify-center mb-6">
@@ -131,8 +204,14 @@ async function loadStats(range = "1") {
   if (reloadBtn) { reloadBtn.disabled = true; document.body.classList.add("reloading"); }
   try {
     const res = await fetch(`?range=${range}`);
-    const data = await res.json();
-    if (!data.success) return;
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data || !data.success) {
+      document.getElementById("total").textContent = "—";
+      document.getElementById("totalLabel").textContent = (data && data.error) ? data.error : "Failed to load";
+      document.getElementById("pastDays").innerHTML = "";
+      document.getElementById("grouped").innerHTML = `<div class="col-span-full text-gray-500 italic">No data.</div>`;
+      return;
+    }
     document.getElementById("total").textContent = data.total;
     let labelText = "Enquiries";
     if (range === "1") labelText = "Today's Enquiries";

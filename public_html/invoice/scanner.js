@@ -4,6 +4,18 @@
 (function () {
     'use strict';
 
+    const isInvoiceContext = (() => {
+        try {
+            const path = String(window.location && window.location.pathname ? window.location.pathname : '');
+            if (/\/invoice(\/|$)/.test(path)) return true;
+            return !!document.getElementById('drop-zone') || !!document.getElementById('file-input');
+        } catch (e) {
+            return false;
+        }
+    })();
+
+    if (!isInvoiceContext) return;
+
     console.log('[Scanner] Standalone script loaded');
 
     function initTransactionScanner() {
@@ -17,10 +29,7 @@
         const dropStatus = document.getElementById('drop-status');
         const btnPasteManual = document.getElementById('btn-paste-manual');
 
-        if (!dropZone || !fileInput) {
-            console.warn('[Scanner] Elements not found yet, will retry...');
-            return false;
-        }
+        if (!dropZone || !fileInput) return false;
 
         console.log('[Scanner] All elements found! Attaching events...');
 
@@ -279,7 +288,6 @@
         if (initTransactionScanner()) {
             console.log('[Scanner] Successfully initialized');
         } else {
-            console.log('[Scanner] Retrying in 500ms...');
             setTimeout(tryInit, 500);
         }
     }

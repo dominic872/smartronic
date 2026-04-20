@@ -50,9 +50,22 @@ $letters = preg_replace('/[^a-zA-Z]/', '', $codeSource);
 $letters = strtoupper($letters);
 $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
 
+$isUnassignedAssign = function ($assignRaw) {
+    $v = strtolower(trim((string)$assignRaw));
+    return ($v === '' || $v === 'open' || $v === '-' || $v === 'na');
+};
+
 $editTraceColCheck = $conn->query("SHOW COLUMNS FROM leads LIKE 'edit_trace'");
 if ($editTraceColCheck && $editTraceColCheck->num_rows === 0) {
     $conn->query("ALTER TABLE leads ADD COLUMN edit_trace LONGTEXT NULL");
+}
+$quoteColCheck = $conn->query("SHOW COLUMNS FROM leads LIKE 'quote'");
+if ($quoteColCheck && $quoteColCheck->num_rows === 0) {
+    $conn->query("ALTER TABLE leads ADD COLUMN quote VARCHAR(50) NULL");
+}
+$installColCheck = $conn->query("SHOW COLUMNS FROM leads LIKE 'installation_date'");
+if ($installColCheck && $installColCheck->num_rows === 0) {
+    $conn->query("ALTER TABLE leads ADD COLUMN installation_date VARCHAR(20) NULL");
 }
 $stampDate = strtoupper(date('d M'));
 $stampTime = date('H:i');
@@ -109,7 +122,7 @@ if ($quoteLinkAppend !== '') {
     $existingRaw = isset($row['quote_links']) ? (string)$row['quote_links'] : '';
     $existing = array_values(array_filter(array_map('trim', explode(',', $existingRaw)), function($v) { return $v !== ''; }));
     $currentAssign = isset($row['Assign']) ? trim((string)$row['Assign']) : '';
-    $currentIsOpen = ($currentAssign === '' || strtolower($currentAssign) === 'open');
+    $currentIsOpen = $isUnassignedAssign($currentAssign);
     $assignToSet = null;
     if ($isAdmin) $assignToSet = 'Open';
     else if ($currentIsOpen && $userCode !== '') $assignToSet = $userCode;
@@ -171,7 +184,7 @@ if ($placeOrder) {
     $allowed_fields = [
         'Name', 'whatsapp_number', 'num_cameras', 'dvr_type', 'hdd_size',
         'camera_resolution', 'Assign', 'Area', 'Follow_up',
-        'comments', 'Message', 'map_link', 'quote', 'call_status'
+        'comments', 'Message', 'map_link', 'quote', 'installation_date', 'call_status'
     ];
 
     $table_columns = [];
@@ -202,7 +215,7 @@ if ($placeOrder) {
     }
     $assignDb = $assignRow->fetch_assoc();
     $currentAssign = isset($assignDb['Assign']) ? trim((string)$assignDb['Assign']) : '';
-    $currentIsOpen = ($currentAssign === '' || strtolower($currentAssign) === 'open');
+    $currentIsOpen = $isUnassignedAssign($currentAssign);
     $existingEditTrace = isset($assignDb['edit_trace']) ? (string)$assignDb['edit_trace'] : '';
 
     if (in_array('Assign', $table_columns, true)) {
@@ -244,7 +257,25 @@ if ($placeOrder) {
         exit;
     }
 
-    $leadRes = $conn->query("SELECT id, MID, whatsapp_number, quote, num_cameras, dvr_type, hdd_size, camera_resolution, Name, Area, Assign, created_at FROM leads WHERE id = $leadIdInt LIMIT 1");
+    $leadSelectFields = [
+        'id',
+        'MID',
+        'whatsapp_number',
+        'quote',
+        'installation_date',
+        'num_cameras',
+        'dvr_type',
+        'hdd_size',
+        'camera_resolution',
+        'Name',
+        'Area',
+        'Assign',
+        'created_at'
+    ];
+    if (in_array('lead_campaign', $table_columns, true)) {
+        $leadSelectFields[] = 'lead_campaign';
+    }
+    $leadRes = $conn->query("SELECT " . implode(', ', $leadSelectFields) . " FROM leads WHERE id = $leadIdInt LIMIT 1");
     if (!$leadRes || $leadRes->num_rows === 0) {
         echo json_encode(['success' => false, 'message' => 'Failed to load lead details for order placement.']);
         $conn->close();
@@ -280,7 +311,24 @@ if ($placeOrder) {
     }
 
     $phoneCol = $findOrderCol(['phone']);
-    $priceCol = $findOrderCol(['price']);
+    $priceCol = $findOrderCol([
+        'price',
+        'amount',
+        'total',
+        'total_amount',
+        'final_amount',
+        'final',
+        'order_amount',
+        'order_value',
+        'value',
+        'cost',
+        'total_cost',
+        'quoted_amount',
+        'quote_amount',
+        'quotation',
+        'quotation_amount',
+        'quote'
+    ]);
     $qtyCol = $findOrderCol(['quantity']);
     $productCol = $findOrderCol(['product']);
     $storageCol = $findOrderCol(['storage', 'storge']);
@@ -289,8 +337,23 @@ if ($placeOrder) {
     $areaCol = $findOrderCol(['area']);
     $notesCol = $findOrderCol(['notes', 'note']);
     $ownerCol = $findOrderCol(['Owner', 'owner']);
+    $leadCampaignCol = $findOrderCol(['lead_campaign']);
     $createdAtCol = $findOrderCol(['created_at', 'createdon', 'created_on']);
-    $dateCol = $findOrderCol(['date', 'install_date', 'installation_date', 'scheduled_date', 'order_date']);
+    $dateCol = $findOrderCol([
+        'date',
+        'install_date',
+        'installation_date',
+        'installationdate',
+        'installDate',
+        'installationDate',
+        'installtion_date',
+        'installtiondate',
+        'scheduled_date',
+        'schedule_date',
+        'order_date',
+        'date_of_installation',
+        'installation_day'
+    ]);
 
     $idnoVal = isset($leadRow['MID']) ? trim((string)$leadRow['MID']) : '';
     if ($idnoVal === '') $idnoVal = (string)$leadIdInt;
@@ -307,6 +370,7 @@ if ($placeOrder) {
     if ($areaCol !== null) $valuesByCol[$areaCol] = isset($leadRow['Area']) ? (string)$leadRow['Area'] : '';
     if ($notesCol !== null) $valuesByCol[$notesCol] = '';
     if ($ownerCol !== null) $valuesByCol[$ownerCol] = isset($leadRow['Assign']) ? (string)$leadRow['Assign'] : '';
+    if ($leadCampaignCol !== null) $valuesByCol[$leadCampaignCol] = isset($leadRow['lead_campaign']) ? (string)$leadRow['lead_campaign'] : '';
     if ($createdAtCol !== null) $valuesByCol[$createdAtCol] = isset($leadRow['created_at']) ? (string)$leadRow['created_at'] : '';
     if ($dateCol !== null) {
         $installationDate = isset($data['installation_date']) ? trim((string)$data['installation_date']) : '';
@@ -385,7 +449,7 @@ if ($placeOrder) {
 $allowed_fields = [
     'Name', 'whatsapp_number', 'num_cameras', 'dvr_type', 'hdd_size',
     'camera_resolution', 'Assign', 'Area', 'Follow_up',
-    'comments', 'Message', 'map_link', 'quote', 'call_status'
+    'comments', 'Message', 'map_link', 'quote', 'installation_date', 'call_status'
 ];
 
 $fields_to_process = [];
@@ -400,6 +464,15 @@ while($row = $result->fetch_assoc()){
 
 foreach ($allowed_fields as $f) {
     if (isset($data[$f]) && in_array($f, $table_columns)) {
+        // Special handling for 'quote' field to remove commas
+        if ($f === 'quote') {
+            $cleanQuote = preg_replace('/[^\d.]/', '', $data[$f]);
+            if ($cleanQuote === '' || !is_numeric($cleanQuote)) {
+                $data[$f] = ''; // Set to empty string if not a valid number after cleaning
+            } else {
+                $data[$f] = $cleanQuote;
+            }
+        }
         $fields_to_process[] = $f;
         $escaped_values[$f] = $conn->real_escape_string($data[$f]);
     }
@@ -448,7 +521,7 @@ if (empty($leadId)) {
     }
     $assignDb = $assignRow->fetch_assoc();
     $currentAssign = isset($assignDb['Assign']) ? trim((string)$assignDb['Assign']) : '';
-    $currentIsOpen = ($currentAssign === '' || strtolower($currentAssign) === 'open');
+    $currentIsOpen = $isUnassignedAssign($currentAssign);
     $existingEditTrace = isset($assignDb['edit_trace']) ? (string)$assignDb['edit_trace'] : '';
 
     if (in_array('Assign', $table_columns)) {

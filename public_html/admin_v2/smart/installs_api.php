@@ -4,6 +4,7 @@ header('Content-Type: application/json');
 // Connect based on environment
 ob_start();
 require_once '../auth.php'; // Assuming we create auth.php in admin folder
+requireSmartPageAccess('install', $role, $authPages);
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -20,15 +21,15 @@ $paths = [
 
 $configLoaded = false;
 foreach ($paths as $p) {
-  if (file_exists($p)) { require_once $p; $configLoaded = true; break; }
+  if (file_exists($p)) { require $p; $configLoaded = true; break; }
 }
 
 if (!$configLoaded || !isset($conn) || $conn->connect_error) {
   http_response_code(500);
   echo json_encode([
     'success' => false,
-    'message' => 'DB connection not available from notes_api.php',
-    'error'   => isset($conn) ? $conn->connect_error : 'config.php not found'
+    'message' => 'DB connection not available from installs_api.php',
+    'error'   => isset($conn) ? $conn->connect_error : 'config.php not loaded'
   ]);
   exit;
 }
@@ -62,6 +63,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $order = (int)($data['order'] ?? 0);
     // Add new fields with proper validation
     $resolution = $data['resolution'] ?? '';
+    $brand = isset($data['brand']) ? $conn->real_escape_string($data['brand']) : '';
+    $cam_type = isset($data['cam_type']) ? $conn->real_escape_string($data['cam_type']) : '';
     $map = $data['map'] ?? '';
     $rack = isset($data['rack']) ? $conn->real_escape_string($data['rack']) : '';
     $notes = isset($data['notes']) ? $conn->real_escape_string($data['notes']) : '';
@@ -70,11 +73,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   INSERT INTO orders (
     idno, name, quantity, bullets, dome,
     storage, monitor, product, area, time, date,
-    Owner, technician, helper, `order`, resolution, map, rack, notes
+    Owner, technician, helper, `order`, resolution, brand, cam_type, map, rack, notes
   ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   ON DUPLICATE KEY UPDATE
     name=?, quantity=?, bullets=?, dome=?, storage=?, monitor=?, product=?, area=?, time=?, date=?,
-    Owner=?, technician=?, helper=?, `order`=?, resolution=?, map=?, rack=?, notes=?
+    Owner=?, technician=?, helper=?, `order`=?, resolution=?, brand=?, cam_type=?, map=?, rack=?, notes=?
 ");
     if (!$stmt) {
         http_response_code(500);
@@ -82,16 +85,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-$types = str_repeat('s', 37);
+$types = str_repeat('s', 39);
 $stmt->bind_param(
   $types,
   $idno, $name, $cams, $bullets, $dome,
   $hdd, $monitor, $type, $location, $time, $date,
-  $owner, $technician, $helper, $order, $resolution, $map, $rack, $notes,
+  $owner, $technician, $helper, $order, $resolution, $brand, $cam_type, $map, $rack, $notes,
 
   $name, $cams, $bullets, $dome,
   $hdd, $monitor, $type, $location, $time, $date,
-  $owner, $technician, $helper, $order, $resolution, $map, $rack, $notes
+  $owner, $technician, $helper, $order, $resolution, $brand, $cam_type, $map, $rack, $notes
 );
 
 
@@ -134,11 +137,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             'technician' => $row['technician'],
             'helper' => $row['helper'],
             'order' => $row['order'],
+            'lead_campaign' => isset($row['lead_campaign']) ? $row['lead_campaign'] : '',
             'resolution' => $row['resolution'],
+            'brand' => isset($row['brand']) ? $row['brand'] : '',
+            'cam_type' => isset($row['cam_type']) ? $row['cam_type'] : '',
             'map' => $row['Map'],
             'rack' => $row['rack'],
             'notes' => isset($row['notes']) ? $row['notes'] : '',
-            'fully_paid' => isset($row['fully_paid']) ? (bool)$row['fully_paid'] : false
+            'fully_paid' => isset($row['fully_paid']) ? (bool)$row['fully_paid'] : false,
+            'pdf_sent' => isset($row['pdf_sent']) ? $row['pdf_sent'] : ''
         ];
     }
 

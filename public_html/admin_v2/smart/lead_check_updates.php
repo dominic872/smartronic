@@ -27,12 +27,30 @@ if ($origAssignColRes && $origAssignColRes->num_rows === 0) {
 
 date_default_timezone_set('Asia/Kolkata');
 $role = $_COOKIE['auth_role'] ?? '';
+$isAdmin = ($role === 'admin');
+$isMarket = ($role === 'market');
 $authName = $_COOKIE['auth_name'] ?? '';
 $authUser = $_COOKIE['auth_user'] ?? '';
+if (!$isAdmin && !$isMarket) {
+    http_response_code(403);
+    echo json_encode(['error' => 'No access']);
+    $conn->close();
+    exit;
+}
 $codeSource = $authName !== '' ? $authName : $authUser;
 $letters = preg_replace('/[^a-zA-Z]/', '', $codeSource);
 $letters = strtoupper($letters);
 $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
+$userCodeLower = strtolower($userCode);
+$userAssignCond = '';
+if (!$isAdmin) {
+    if ($userCodeLower !== '') {
+        $userCodeLowerSafe = $conn->real_escape_string($userCodeLower);
+        $userAssignCond = "LOWER(TRIM(Assign)) = '$userCodeLowerSafe'";
+    } else {
+        $userAssignCond = "0=1";
+    }
+}
 $presenceStateRaw = isset($_GET['presence_state']) ? trim((string)$_GET['presence_state']) : '';
 $presenceState = $presenceStateRaw !== '' ? strtolower($presenceStateRaw) : '';
 $presenceState = in_array($presenceState, ['active', 'inactive'], true) ? $presenceState : '';
@@ -121,6 +139,9 @@ if (!empty($staleIds)) {
     $conn->query("UPDATE leads SET originally_assigned = TRIM(Assign), Assign = 'Open' WHERE id IN ($idList)");
 
     $reSql = "SELECT *, IFNULL(MID, id) as display_id FROM leads WHERE id IN ($idList)";
+    if (!$isAdmin) {
+        $reSql .= " AND ($userAssignCond OR $openCond)";
+    }
     if (!empty($follow)) {
         if ($follow === 'today') {
             $reSql .= " AND ((Follow_up IS NOT NULL AND Follow_up <> '' AND Follow_up <> '-' AND Follow_up <> 'NA' AND STR_TO_DATE(Follow_up, '%d %b %y') = CURDATE()) OR (DATE(created_at) = CURDATE() AND (Follow_up IS NULL OR Follow_up = '' OR Follow_up = '-')))";
@@ -142,7 +163,9 @@ if (!empty($staleIds)) {
 // Check for any leads with ID greater than lastId
 // Sort by ID ASC so we get them in chronological order of creation
 $sql = "SELECT *, IFNULL(MID, id) as display_id FROM leads WHERE id > $lastId";
-if (!empty($mine)) {
+if (!$isAdmin) {
+    $sql .= " AND ($userAssignCond OR $openCond)";
+} else if (!empty($mine)) {
     $sql .= " AND (Assign LIKE '%$mine%' OR $openCond)";
 }
 if (!empty($follow)) {
@@ -171,8 +194,9 @@ if ($result) {
             $dt = substr($row['created_at'], 0, 10);
             $dtSafe = $conn->real_escape_string($dt);
             $dayStart = $conn->real_escape_string($dt . ' 00:00:00');
+            $statsExtra = (!$isAdmin && $userAssignCond !== '') ? " AND ($userAssignCond OR $openCond)" : "";
             if (!isset($statsCache[$dt])) {
-                $totalRes = $conn->query("SELECT COUNT(*) as c FROM leads WHERE created_at >= '$dayStart' AND created_at < DATE_ADD('$dtSafe', INTERVAL 1 DAY)");
+                $totalRes = $conn->query("SELECT COUNT(*) as c FROM leads WHERE created_at >= '$dayStart' AND created_at < DATE_ADD('$dtSafe', INTERVAL 1 DAY)$statsExtra");
                 $statsCache[$dt] = ($totalRes && $r = $totalRes->fetch_assoc()) ? $r['c'] : 0;
             }
             $row['day_total'] = $statsCache[$dt];
@@ -180,7 +204,7 @@ if ($result) {
             // Rank must be calculated per ID
             $rid = (int)$row['id'];
             $createdAtSafe = $conn->real_escape_string($row['created_at']);
-            $rankRes = $conn->query("SELECT COUNT(*) as c FROM leads WHERE created_at >= '$dayStart' AND created_at < DATE_ADD('$dtSafe', INTERVAL 1 DAY) AND (created_at > '$createdAtSafe' OR (created_at = '$createdAtSafe' AND id >= $rid))");
+            $rankRes = $conn->query("SELECT COUNT(*) as c FROM leads WHERE created_at >= '$dayStart' AND created_at < DATE_ADD('$dtSafe', INTERVAL 1 DAY)$statsExtra AND (created_at > '$createdAtSafe' OR (created_at = '$createdAtSafe' AND id >= $rid))");
             $row['day_rank'] = ($rankRes && $r = $rankRes->fetch_assoc()) ? $r['c'] : 0;
         } else {
             $row['day_total'] = 0;

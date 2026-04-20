@@ -50,6 +50,8 @@ $numCams  = (int) get_json_param('num_cameras', 4);
 $dvrType  = strtoupper(get_json_param('dvr_type', 'DVR'));
 $hddSize  = strtoupper(get_json_param('hdd_size', '500GB'));
 $resolution = strtoupper(get_json_param('camera_resolution', '2 MP'));
+$brand = get_json_param('brand', 'PRAMA');
+$camType = get_json_param('cam_type', '');
 
 // ------------------- Pricing Configs -------------------
 
@@ -113,6 +115,8 @@ $final_limited_profit = $withTax + $profitValue + $install_cam_min_cost;
 
 $response = [
     "whatsapp" => $whatsapp,
+    "brand" => $brand,
+    "cam_type" => $camType,
     "camera_key" => $cameraKey,
     "num_cams" => $numCams,
     "camera_unit_price" => $cameraUnitPrice,

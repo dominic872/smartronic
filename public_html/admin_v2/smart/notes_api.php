@@ -63,15 +63,72 @@ function allowType($t) {
   return in_array($t, ['General','Issue','Inspection'], true) ? $t : 'General';
 }
 
+function ensureDoneColumn($conn) {
+  $res = $conn->query("SELECT COUNT(*) AS c FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'notes' AND COLUMN_NAME = 'is_done'");
+  if (!$res) return false;
+  $row = $res->fetch_assoc();
+  $exists = ((int)($row['c'] ?? 0)) > 0;
+  if ($exists) return true;
+  $ok = $conn->query("ALTER TABLE notes ADD COLUMN is_done TINYINT(1) NOT NULL DEFAULT 0");
+  return (bool)$ok;
+}
+
+function moveOpenPastNotesToToday($conn, $hasDoneCol) {
+  if (!$hasDoneCol) return 0;
+
+  $todayRes = $conn->query("SELECT CURDATE() AS today");
+  if (!$todayRes) return 0;
+  $todayRow = $todayRes->fetch_assoc();
+  $today = $todayRow['today'] ?? '';
+  if ($today === '') return 0;
+
+  $maxQ = $conn->prepare("SELECT COALESCE(MAX(sort_order), -1) AS m FROM notes WHERE date = ?");
+  if (!$maxQ) return 0;
+  $maxQ->bind_param("s", $today);
+  if (!$maxQ->execute()) return 0;
+  $maxRes = $maxQ->get_result()->fetch_assoc();
+  $nextOrder = ((int)($maxRes['m'] ?? -1)) + 1;
+
+  $selectSql = "
+    SELECT id
+    FROM notes
+    WHERE is_done = 0
+      AND date IS NOT NULL
+      AND date <> ''
+      AND STR_TO_DATE(date, '%Y-%m-%d') < CURDATE()
+    ORDER BY STR_TO_DATE(date, '%Y-%m-%d') ASC, sort_order ASC, id ASC
+  ";
+  $res = $conn->query($selectSql);
+  if (!$res) return 0;
+
+  $stmt = $conn->prepare("UPDATE notes SET date = ?, sort_order = ? WHERE id = ?");
+  if (!$stmt) return 0;
+
+  $moved = 0;
+  while ($row = $res->fetch_assoc()) {
+    $id = (int)($row['id'] ?? 0);
+    if ($id <= 0) continue;
+    $order = $nextOrder + $moved;
+    $stmt->bind_param("sii", $today, $order, $id);
+    if ($stmt->execute()) $moved++;
+  }
+
+  return $moved;
+}
+
+$HAS_DONE_COL = ensureDoneColumn($conn);
+
 // This file is dedicated to NOTES; no action switch needed
 $method = $_SERVER['REQUEST_METHOD'];
 
 /* ===================== GET ===================== */
 if ($method === 'GET') {
   $date = isset($_GET['date']) ? trim($_GET['date']) : '';
+  $movedCount = moveOpenPastNotesToToday($conn, $HAS_DONE_COL);
+  $selDone = $HAS_DONE_COL ? "is_done" : "0 AS is_done";
   if ($date !== '') {
     $stmt = $conn->prepare(
-      "SELECT id, type, title, description, date, sort_order, username
+      "SELECT id, type, title, description, date, sort_order, username, created_at, $selDone
        FROM notes
        WHERE date = ?
        ORDER BY sort_order ASC, id ASC"
@@ -82,7 +139,7 @@ if ($method === 'GET') {
     $res = $stmt->get_result();
   } else {
     $res = $conn->query(
-      "SELECT id, type, title, description, date, sort_order, username
+      "SELECT id, type, title, description, date, sort_order, username, created_at, $selDone
        FROM notes
        WHERE date >= CURDATE() - INTERVAL 30 DAY
        ORDER BY date DESC, id DESC"
@@ -91,7 +148,7 @@ if ($method === 'GET') {
   }
   $notes = [];
   while ($row = $res->fetch_assoc()) $notes[] = $row;
-  respond(['success'=>true,'notes'=>$notes]);
+  respond(['success'=>true,'notes'=>$notes,'moved_count'=>$movedCount]);
 }
 
 /* ===================== POST ===================== */
@@ -103,12 +160,14 @@ if ($method === 'POST') {
     $hasTitle = array_key_exists('title', $body);
     $hasDesc  = array_key_exists('description', $body);
     $hasDate  = array_key_exists('date', $body);
+    $hasDone  = array_key_exists('is_done', $body);
 
     $id    = isset($body['id']) ? (int)$body['id'] : 0;
     $type  = $hasType  ? trim((string)($body['type'] ?? '')) : '';         // keep '' if not provided
     $title = $hasTitle ? trim((string)($body['title'] ?? '')) : '';
     $desc  = $hasDesc  ? trim((string)($body['description'] ?? '')) : '';
     $date  = $hasDate  ? trim((string)($body['date'] ?? '')) : '';
+    $is_done = $hasDone ? (int)(!empty($body['is_done'])) : null;
     $username = isset($body['username']) ? trim($body['username']) : '';
 
     // ---------- A) REORDER ----------
@@ -154,7 +213,8 @@ if ($method === 'POST') {
     // ---------- C) NORMAL UPSERTS ----------
     if ($id > 0) {
         // Fill missing fields from DB row
-        $cur = $conn->prepare("SELECT type, title, description, date, username FROM notes WHERE id = ?");
+        $curSelDone = $HAS_DONE_COL ? ", is_done" : "";
+        $cur = $conn->prepare("SELECT type, title, description, date, username{$curSelDone} FROM notes WHERE id = ?");
         if (!$cur) respond(['success'=>false,'message'=>'Prepare failed','error'=>$conn->error], 500);
         $cur->bind_param("i", $id);
         $cur->execute();
@@ -166,6 +226,7 @@ if ($method === 'POST') {
         $newTitle = $hasTitle ? $title  : $old['title'];
         $newDesc  = $hasDesc  ? $desc   : $old['description'];
         $newDate  = $hasDate  ? $date   : $old['date'];
+        $newDone  = $HAS_DONE_COL ? ($hasDone ? $is_done : (int)($old['is_done'] ?? 0)) : 0;
         $oldUsername = $old['username'] ?? '';
         $newUsername = $oldUsername;
         if ($username && strpos($oldUsername, $username) === false) {
@@ -183,11 +244,21 @@ if ($method === 'POST') {
             $maxRes = $maxQ->get_result()->fetch_assoc();
             $nextOrder = ((int)$maxRes['m']) + 1;
 
-            $stmt = $conn->prepare("UPDATE notes SET type=?, title=?, description=?, date=?, sort_order=?, username=? WHERE id=?");
-            $stmt->bind_param("ssssisi", $newType, $newTitle, $newDesc, $newDate, $nextOrder, $newUsername, $id);
+            if ($HAS_DONE_COL) {
+              $stmt = $conn->prepare("UPDATE notes SET type=?, title=?, description=?, date=?, sort_order=?, username=?, is_done=? WHERE id=?");
+              $stmt->bind_param("ssssisii", $newType, $newTitle, $newDesc, $newDate, $nextOrder, $newUsername, $newDone, $id);
+            } else {
+              $stmt = $conn->prepare("UPDATE notes SET type=?, title=?, description=?, date=?, sort_order=?, username=? WHERE id=?");
+              $stmt->bind_param("ssssisi", $newType, $newTitle, $newDesc, $newDate, $nextOrder, $newUsername, $id);
+            }
         } else {
-            $stmt = $conn->prepare("UPDATE notes SET type=?, title=?, description=?, date=?, username=? WHERE id=?");
-            $stmt->bind_param("sssssi", $newType, $newTitle, $newDesc, $newDate, $newUsername, $id);
+            if ($HAS_DONE_COL) {
+              $stmt = $conn->prepare("UPDATE notes SET type=?, title=?, description=?, date=?, username=?, is_done=? WHERE id=?");
+              $stmt->bind_param("sssssii", $newType, $newTitle, $newDesc, $newDate, $newUsername, $newDone, $id);
+            } else {
+              $stmt = $conn->prepare("UPDATE notes SET type=?, title=?, description=?, date=?, username=? WHERE id=?");
+              $stmt->bind_param("sssssi", $newType, $newTitle, $newDesc, $newDate, $newUsername, $id);
+            }
         }
 
         $ok = $stmt->execute();
@@ -207,9 +278,16 @@ if ($method === 'POST') {
             $nextOrder = ((int)$maxRes['m']) + 1;
 
             $insType = $hasType ? (in_array($type, ['General','Issue','Inspection'], true) ? $type : 'General') : 'General';
-            $stmt = $conn->prepare("INSERT INTO notes (type, title, description, date, sort_order, created_at, username) VALUES (?, ?, ?, ?, ?, NOW(), ?)");
-            if (!$stmt) respond(['success'=>false,'message'=>'Prepare failed','error'=>$conn->error], 500);
-            $stmt->bind_param("ssssis", $insType, $title, $desc, $date, $nextOrder, $username);
+            if ($HAS_DONE_COL) {
+              $stmt = $conn->prepare("INSERT INTO notes (type, title, description, date, sort_order, created_at, username, is_done) VALUES (?, ?, ?, ?, ?, NOW(), ?, ?)");
+              if (!$stmt) respond(['success'=>false,'message'=>'Prepare failed','error'=>$conn->error], 500);
+              $insDone = $hasDone ? $is_done : 0;
+              $stmt->bind_param("ssssisi", $insType, $title, $desc, $date, $nextOrder, $username, $insDone);
+            } else {
+              $stmt = $conn->prepare("INSERT INTO notes (type, title, description, date, sort_order, created_at, username) VALUES (?, ?, ?, ?, ?, NOW(), ?)");
+              if (!$stmt) respond(['success'=>false,'message'=>'Prepare failed','error'=>$conn->error], 500);
+              $stmt->bind_param("ssssis", $insType, $title, $desc, $date, $nextOrder, $username);
+            }
 
             $ok = $stmt->execute();
             respond(['success'=>(bool)$ok,'id'=>$ok?(int)$conn->insert_id:null,'message'=>$ok?'Note saved':'Insert failed','error'=>$ok?null:$stmt->error], $ok?200:500);

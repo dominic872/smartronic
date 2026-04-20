@@ -4,28 +4,19 @@ require_once '../auth.php';
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 require '../config.php';
-
-// Check if the cookie exists and has the right value
-if (
-    !isset($_COOKIE['auth_role']) || 
-    ($_COOKIE['auth_role'] !== 'admin' && $_COOKIE['auth_role'] !== 'market')
-) {
-    echo "No access";
-    exit;
-}
+requireSmartPageAccess('lead', $role, $authPages);
 
 // Set timezone to India
 date_default_timezone_set('Asia/Kolkata');
 
 $isAdmin = isset($_COOKIE['auth_role']) && $_COOKIE['auth_role'] === 'admin';
-
-$onlyMineCode = null;
-if (isset($nameAssign)) {
-  $na = strtolower(trim((string)$nameAssign));
-  if (strpos($na, 'zoya') !== false) $onlyMineCode = 'zoy';
-  else if (strpos($na, 'varsha') !== false) $onlyMineCode = 'var';
-  else if (strpos($na, 'amreen') !== false) $onlyMineCode = 'amr';
-}
+$allowedSmartPages = getAllowedSmartPages($role, $authPages);
+$authName = $_COOKIE['auth_name'] ?? '';
+$authUser = $_COOKIE['auth_user'] ?? '';
+$codeSource = $authName !== '' ? $authName : $authUser;
+$letters = preg_replace('/[^a-zA-Z]/', '', $codeSource);
+$letters = strtoupper($letters);
+$userCode = $letters !== '' ? substr($letters, 0, 3) : '';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -173,6 +164,468 @@ if (isset($nameAssign)) {
     /* Fix flickering on hover by removing transform */
     .card.lead-card:hover { transform: none !important; }
     /* --- FIXES END --- */
+
+    .area-input-group { position: relative; }
+    .area-suggest {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: calc(100% + 6px);
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      box-shadow: 0 14px 40px rgba(0,0,0,0.14);
+      max-height: 240px;
+      overflow: auto;
+      z-index: 9999;
+      padding: 6px;
+    }
+    .area-suggest[hidden] { display: none !important; }
+    .area-suggest-item {
+      width: 100%;
+      text-align: left;
+      border: 0;
+      background: transparent;
+      padding: 8px 10px;
+      border-radius: 8px;
+      color: #0f172a;
+      cursor: pointer;
+      font: inherit;
+      line-height: 1.2;
+    }
+    .area-suggest-item:hover,
+    .area-suggest-item:focus-visible {
+      background: #f1f5f9;
+      outline: none;
+    }
+
+    .date-range-filter {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: 14px;
+      flex-wrap: wrap;
+    }
+    .date-range-label {
+      font-size: 12px;
+      color: #64748b;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .date-range-select {
+      height: 34px;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 0 10px;
+      background: #fff;
+      color: #0f172a;
+      font: inherit;
+      max-width: 210px;
+    }
+    .custom-date-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .date-input-wrap {
+      display: inline-flex;
+      align-items: center;
+    }
+    .date-input-wrap input[type="date"] {
+      cursor: pointer;
+    }
+    .custom-date-wrap input[type="date"] {
+      height: 34px;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 0 10px;
+      background: #fff;
+      color: #0f172a;
+      font: inherit;
+    }
+    .custom-go-btn {
+      border: none;
+      background: transparent;
+      color: #111827;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 6px;
+    }
+    .custom-go-btn:hover { color: #0f62fe; }
+	    .filter-counts-bar {
+	      position: fixed;
+	      top: 160px;
+	      left: 16px;
+	      z-index: 260;
+	      display: flex;
+	      flex-direction: column;
+	      align-items: flex-start;
+	      gap: 8px;
+	      padding: 0;
+	      color: #475569;
+	      font-size: 13px;
+	    }
+    .filter-count-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.92);
+      border: 1px solid #e2e8f0;
+      border-radius: 999px;
+      padding: 6px 10px;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+    }
+    .filter-count-toggle {
+      border: 1px solid #d7deea;
+      cursor: pointer;
+      font: inherit;
+      color: inherit;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+    .filter-count-toggle:hover {
+      border-color: #94a3b8;
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.1);
+    }
+    .filter-count-toggle i {
+      font-size: 11px;
+      color: #64748b;
+      transition: transform 0.2s ease;
+    }
+    .filter-count-toggle[aria-expanded="true"] i {
+      transform: rotate(180deg);
+    }
+    .filter-count-chip strong {
+      color: #0f172a;
+      font-weight: 800;
+    }
+    .filter-counts-bar.is-loading .filter-count-chip strong {
+      opacity: 0.6;
+    }
+	    .filter-counts-panel {
+	      display: none;
+	      flex-wrap: wrap;
+	      justify-content: normal;
+	      gap: 8px;
+	      max-width: min(420px, calc(100vw - 32px));
+	    }
+	    .filter-counts-panel.is-open {
+	      display: flex;
+	    }
+    .filter-count-detail {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.94);
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 6px 10px;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+    }
+	    .filter-count-detail strong {
+	      color: #0f172a;
+	      font-weight: 800;
+	    }
+	    @media (max-width: 768px) {
+	      .filter-counts-bar {
+	        top: 118px;
+	        right: 12px;
+	        max-width: calc(100vw - 24px);
+	      }
+	      .filter-counts-panel {
+	        max-width: calc(100vw - 24px);
+	      }
+	    }
+
+	    .qlm-backdrop {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: flex-end;
+      justify-content: flex-end;
+      padding: 90px 20px 160px 20px;
+      z-index: 10050;
+      background: rgba(15, 23, 42, 0.15);
+    }
+    .qlm-backdrop.is-open { display: flex; }
+    .qlm-card {
+      position: relative;
+      width: min(420px, 92vw);
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 18px 60px rgba(0,0,0,0.22);
+      overflow: hidden;
+    }
+    .qlm-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      background: #111827;
+      color: #fff;
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.2px;
+    }
+    .qlm-close {
+      border: none;
+      background: transparent;
+      color: #fff;
+      cursor: pointer;
+      padding: 6px 8px;
+      border-radius: 10px;
+    }
+    .qlm-close:hover { background: rgba(255,255,255,0.12); }
+    .qlm-body { padding: 12px; }
+    .qlm-grid { display: grid; gap: 10px; }
+    .qlm-field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #334155;
+      margin-bottom: 6px;
+    }
+    .qlm-row { display: flex; align-items: center; gap: 10px; }
+    .qlm-row input[type="range"] { flex: 1; }
+    .qlm-input {
+      width: 100%;
+      height: 36px;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 0 10px;
+      font: inherit;
+      color: #0f172a;
+      background: #fff;
+    }
+    .qlm-radio-group { display: flex; flex-wrap: wrap; gap: 8px; }
+    .qlm-radio {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid #e5e7eb;
+      border-radius: 9999px;
+      padding: 7px 10px;
+      cursor: pointer;
+      background: #fff;
+      user-select: none;
+      font-size: 13px;
+      color: #111827;
+    }
+    .qlm-radio input { margin: 0; }
+    .qlm-radio.is-selected {
+      border-color: #4f46e5;
+      background: #eef2ff;
+      color: #111827;
+    }
+    .qlm-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
+    .qlm-btn {
+      height: 36px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      padding: 0 12px;
+      cursor: pointer;
+      font: inherit;
+    }
+    .qlm-cancel { background: #f3f4f6; color: #111827; border-color: #e5e7eb; }
+    .qlm-save { background: #16a34a; color: #fff; }
+    .qlm-save:disabled { opacity: 0.65; cursor: not-allowed; }
+    .qlm-save.is-loading { position: relative; padding-right: 34px; }
+    .qlm-save.is-loading::after {
+      content: "";
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      width: 14px;
+      height: 14px;
+      margin-top: -7px;
+      border: 2px solid rgba(255, 255, 255, 0.55);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: qlmSpin 0.8s linear infinite;
+    }
+    @keyframes qlmSpin { to { transform: rotate(360deg); } }
+    @media (max-width: 768px) {
+      .qlm-backdrop { align-items: center; justify-content: center; padding: 20px; }
+    }
+
+    .qlm-dupe-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.95);
+      display: none;
+      flex-direction: column;
+      z-index: 2;
+    }
+    .qlm-dupe-overlay.is-open { display: flex; }
+    .qlm-dupe-title {
+      padding: 12px;
+      font-weight: 800;
+      color: #111827;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .qlm-dupe-list {
+      padding: 10px 12px;
+      overflow: auto;
+      max-height: 55vh;
+    }
+    .qlm-dupe-item {
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 10px;
+      margin-bottom: 10px;
+      background: #fff;
+      cursor: pointer;
+    }
+    .qlm-dupe-item:hover { background: #f8fafc; }
+    .qlm-dupe-line1 { font-weight: 800; color: #111827; font-size: 13px; }
+    .qlm-dupe-line2 { font-size: 12px; color: #475569; margin-top: 4px; }
+    .qlm-dupe-actions {
+      padding: 12px;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      background: #fff;
+    }
+    .qlm-btn.qlm-proceed { background: #16a34a; color: #fff; }
+    .qlm-btn.qlm-proceed:disabled { opacity: 0.65; cursor: not-allowed; }
+
+    .lead-card.is-dup-highlight {
+      outline: 3px solid #f59e0b;
+      outline-offset: 3px;
+      box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.18), 0 18px 60px rgba(0,0,0,0.22);
+    }
+
+    .paym-backdrop {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: flex-start;
+      justify-content: flex-end;
+      padding: 20px;
+      z-index: 10060;
+      background: rgba(15, 23, 42, 0.18);
+    }
+    .paym-backdrop.is-open { display: flex; }
+    .paym-card {
+      width: min(400px, 96vw);
+      height: 300px;
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 18px 60px rgba(0,0,0,0.22);
+      overflow: hidden;
+      position: relative;
+      margin: 0;
+    }
+    .paym-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      border: none;
+      background: rgba(0,0,0,0.6);
+      color: #fff;
+      cursor: pointer;
+      padding: 6px 8px;
+      border-radius: 50%;
+      z-index: 10;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .paym-close:hover { background: rgba(0,0,0,0.8); }
+    .paym-body { 
+      padding: 0;
+      height: 100%;
+    }
+    .paym-iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+    }
+    
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+      .paym-backdrop {
+        align-items: center;
+        justify-content: center;
+        padding: 10px;
+      }
+      .paym-card {
+        width: min(360px, 96vw);
+        height: 280px;
+      }
+    }
+    
+    /* Payment Creation Modal Styles */
+    .paycreate-backdrop {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 10070;
+      background: rgba(15, 23, 42, 0.18);
+    }
+    .paycreate-backdrop.is-open { display: flex; }
+    .paycreate-card {
+      width: min(500px, 96vw);
+      max-height: 90vh;
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 18px 60px rgba(0,0,0,0.22);
+      overflow: hidden;
+      position: relative;
+      margin: 0;
+    }
+    .paycreate-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      border: none;
+      background: rgba(0,0,0,0.6);
+      color: #fff;
+      cursor: pointer;
+      padding: 6px 8px;
+      border-radius: 50%;
+      z-index: 10;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .paycreate-close:hover { background: rgba(0,0,0,0.8); }
+    .paycreate-body { 
+      padding: 24px;
+      overflow-y: auto;
+    }
+    .paycreate-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .paycreate-form .input-field {
+      margin-bottom: 20px;
+    }
+    .paycreate-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 24px;
+    }
+    #paycreateStatus {
+      color: #6b7280;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body class="grey lighten-4">
@@ -198,19 +651,8 @@ if (isset($nameAssign)) {
     New <big>0</big> Lead
   </div>
 
-  <button id="favoritesFab" class="favorites-btn" type="button" aria-label="Favourites">
-    <i class="fa-regular fa-heart"></i>
-  </button>
-  <button id="historyFab" class="history-btn" type="button" aria-label="History">
-    <i class="fa-solid fa-clock-rotate-left"></i>
-  </button>
-
-  <button id="floatingMenuToggle" class="floating-menu-btn" type="button" aria-label="Toggle floating buttons">
-    <i class="fa-solid fa-xmark"></i>
-  </button>
-  
   <!-- Search Bar -->
-  <div id="searchBar" class="hidden">
+  <div id="searchBar">
     <div class="search-left">
       <img class="search-logo" src="https://smartronic.online/content/uploads/2025/01/smartronic_small_logo.png" alt="Smartronic" decoding="async">
       <?php if ($isAdmin) { ?>
@@ -223,10 +665,6 @@ if (isset($nameAssign)) {
           <span class="mine-sep">|</span>
           <a href="#" class="mine-filter-link" data-mine="amr">Amreen</a>
         </div>
-      <?php } else if (!empty($onlyMineCode)) { ?>
-        <div class="mine-links">
-          <a href="#" class="mine-filter-link" data-mine="<?php echo htmlspecialchars($onlyMineCode, ENT_QUOTES, 'UTF-8'); ?>">Only mine</a>
-        </div>
       <?php } ?>
       <div class="follow-links">
         <span class="follow-label">Follow:</span>
@@ -235,6 +673,24 @@ if (isset($nameAssign)) {
         <a href="#" class="follow-filter-link" data-follow="today">Today</a>
         <span class="follow-sep">|</span>
         <a href="#" class="follow-filter-link" data-follow="tomorrow">Tomorrow</a>
+      </div>
+      <div class="date-range-filter">
+        <span class="date-range-label">Date</span>
+        <select id="dateRangeSelect" class="date-range-select">
+          <option value="latest">Latest</option>
+          <option value="this_month">This month</option>
+          <option value="last_month">Last month</option>
+          <option value="month_minus_2">Current Month - 2</option>
+          <option value="last_two_months">Last two months</option>
+          <option value="custom">Custom date</option>
+        </select>
+        <div id="customDateWrap" class="custom-date-wrap" hidden>
+          <span class="date-input-wrap"><input type="date" id="customStartDate" aria-label="Start date"></span>
+          <span class="date-input-wrap"><input type="date" id="customEndDate" aria-label="End date"></span>
+          <button type="button" id="customDateGo" class="custom-go-btn" aria-label="Go">
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
       </div>
     </div>
     <div class="search-field">
@@ -247,6 +703,14 @@ if (isset($nameAssign)) {
       <i class="fa-solid fa-xmark"></i>
     </button>
     <datalist id="searchSuggestions"></datalist>
+  </div>
+  <div id="filterCountsBar" class="filter-counts-bar">
+    <button type="button" id="filterCountsToggle" class="filter-count-chip filter-count-toggle" aria-expanded="false" aria-controls="filterCountsPanel">
+      <span id="countThisMonthLabel">Current month</span>
+      <strong id="countThisMonth">-</strong>
+      <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+    </button>
+    <div id="filterCountsPanel" class="filter-counts-panel"></div>
   </div>
 
   <section class="crf-form-wrapper">
@@ -276,11 +740,127 @@ if (isset($nameAssign)) {
   </div>
 </div>
 
+<div id="quickLeadModal" class="qlm-backdrop" aria-hidden="true">
+  <div class="qlm-card" role="dialog" aria-modal="true" aria-label="New Lead">
+    <div class="qlm-head">
+      <div>New Lead</div>
+      <button type="button" id="quickLeadClose" class="qlm-close" aria-label="Close">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="qlm-body">
+      <form id="quickLeadForm" class="qlm-grid">
+        <div class="qlm-field">
+          <label for="qlmCams">Cameras You Need?</label>
+          <input type="number" id="qlmCams" class="qlm-input" min="1" max="32" value="6" inputmode="numeric">
+        </div>
+        <div class="qlm-field">
+          <label>Type of DVR Needed</label>
+          <div class="qlm-radio-group">
+            <label class="qlm-radio"><input type="radio" name="qlmDvr" value="DVR"> DVR</label>
+            <label class="qlm-radio"><input type="radio" name="qlmDvr" value="NVR"> NVR</label>
+            <label class="qlm-radio"><input type="radio" name="qlmDvr" value="dont-know" checked> Don't Know</label>
+          </div>
+        </div>
+        <div class="qlm-field">
+          <label>Hard Disk Size</label>
+          <div class="qlm-radio-group">
+            <label class="qlm-radio"><input type="radio" name="qlmHdd" value="500GB"> 500 GB</label>
+            <label class="qlm-radio"><input type="radio" name="qlmHdd" value="1TB"> 1 TB</label>
+            <label class="qlm-radio"><input type="radio" name="qlmHdd" value="2TB"> 2 TB</label>
+            <label class="qlm-radio"><input type="radio" name="qlmHdd" value="3TB"> 3 TB</label>
+            <label class="qlm-radio"><input type="radio" name="qlmHdd" value="4TB"> 4 TB</label>
+            <label class="qlm-radio"><input type="radio" name="qlmHdd" value="dont-know" checked> Don't know</label>
+          </div>
+        </div>
+        <div class="qlm-field">
+          <label>Camera Resolution</label>
+          <div class="qlm-radio-group">
+            <label class="qlm-radio"><input type="radio" name="qlmRes" value="2 MP"> 2 MP</label>
+            <label class="qlm-radio"><input type="radio" name="qlmRes" value="5 MP"> 5 MP</label>
+            <label class="qlm-radio"><input type="radio" name="qlmRes" value="dont-know" checked> Don't Know</label>
+          </div>
+        </div>
+        <div class="qlm-field">
+          <label for="qlmWa">WhatsApp number to receive the quotation</label>
+          <input type="tel" id="qlmWa" class="qlm-input" placeholder="WhatsApp number" inputmode="tel" autocomplete="off">
+        </div>
+        <div class="qlm-actions">
+          <button type="button" id="quickLeadCancel" class="qlm-btn qlm-cancel">Cancel</button>
+          <button type="submit" id="quickLeadSubmit" class="qlm-btn qlm-save" disabled>Create</button>
+        </div>
+      </form>
+    </div>
+    <div id="qlmDupOverlay" class="qlm-dupe-overlay" aria-hidden="true">
+      <div class="qlm-dupe-title">WhatsApp already exists</div>
+      <div id="qlmDupList" class="qlm-dupe-list"></div>
+      <div class="qlm-dupe-actions">
+        <button type="button" id="qlmDupCancel" class="qlm-btn qlm-cancel">Cancel</button>
+        <button type="button" id="qlmDupProceed" class="qlm-btn qlm-proceed">Add new row</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="paymentsModal" class="paym-backdrop" aria-hidden="true">
+  <div class="paym-card" role="dialog" aria-modal="true" aria-label="Payments">
+    <button type="button" id="paymentsClose" class="paym-close" aria-label="Close">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+    <div class="paym-body">
+      <iframe id="paymentsIframe" class="paym-iframe" src="https://smartronic.online/payments/" referrerpolicy="no-referrer" loading="eager"></iframe>
+    </div>
+  </div>
+</div>
+
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-  <script src="../js/install_form_component.js"></script>
-  <script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB7BKkBQEI0WpbFFjn8K4VWKRaYeIs3GhU&libraries=places&loading=async"></script>
+  <script src="../js/floating_icon_menu.js"></script>
 
+<!-- Payment Creation Modal -->
+<div id="paymentCreateModal" class="paycreate-backdrop" aria-hidden="true">
+  <div class="paycreate-card" role="dialog" aria-modal="true" aria-label="Create Payment Link">
+    <button type="button" id="paymentCreateClose" class="paycreate-close" aria-label="Close">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+    <div class="paycreate-body">
+      <div class="paycreate-title">Create Payment Link</div>
+      <form id="paymentCreateForm" class="paycreate-form">
+        <div class="input-field">
+          <i class="fa-solid fa-user prefix"></i>
+          <input id="paycreateName" name="name" type="text" required>
+          <label for="paycreateName">Customer Name</label>
+        </div>
+        <div class="input-field">
+          <i class="fa-solid fa-phone prefix"></i>
+          <input id="paycreatePhone" name="phone" type="tel" inputmode="numeric" required>
+          <label for="paycreatePhone">Customer Phone (10 digit)</label>
+        </div>
+        <div class="input-field">
+          <i class="fa-solid fa-indian-rupee-sign prefix"></i>
+          <input id="paycreateAmount" name="amount" type="number" value="500" min="1" step="1" required>
+          <label for="paycreateAmount">Amount (INR)</label>
+        </div>
+        <div class="input-field">
+          <i class="fa-solid fa-pen-to-square prefix"></i>
+          <input id="paycreateDescription" name="description" type="text" value="Smartronic CCTV Installation Booking" required>
+          <label for="paycreateDescription">Description</label>
+        </div>
+        <div class="paycreate-actions">
+          <button type="submit" class="btn waves-effect waves-light" id="paycreateSubmit">
+            Create Link <i class="fa-solid fa-arrow-right right"></i>
+          </button>
+          <span id="paycreateStatus"></span>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+  <script>
+    const IS_ADMIN = <?php echo $isAdmin ? 'true' : 'false'; ?>;
+    const CURRENT_USER_CODE = <?php echo json_encode($userCode); ?>;
     let lastScrollDirection = 'down';
     let offsetStart = 0;
     let offsetEnd = 0;
@@ -288,6 +868,13 @@ if (isset($nameAssign)) {
     let searchQuery = '';
     let mineQuery = '';
     let followQuery = '';
+    let statusQuery = '';
+    let col1Query = '';
+    let col2Query = '';
+    let dateMode = 'latest';
+    let customStartDate = '';
+    let customEndDate = '';
+    const INITIAL_PAGE_SIZE = 50;
     const PAGE_SIZE = 100;
     const MAX_ROWS = 200;
     let editedCards = new Map(); // Track edited cards
@@ -656,6 +1243,159 @@ if (isset($nameAssign)) {
       return escapeHtml(str).replace(/`/g, '&#96;');
     }
 
+    function getCol2BadgeInnerHtml(value) {
+      const raw = String(value || '').trim();
+      if (!raw) return '';
+
+      const normalized = raw
+        .toLowerCase()
+        .replace(/[_-]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      const iconMap = {
+        'main mobile': {
+          label: 'Main Mobile',
+          icons: ['fa-house', 'fa-mobile-screen-button']
+        },
+        'main desk': {
+          label: 'Main Desktop',
+          icons: ['fa-house', 'fa-desktop']
+        },
+        'main desktop': {
+          label: 'Main Desktop',
+          icons: ['fa-house', 'fa-desktop']
+        },
+        'pop mobile': {
+          label: 'Popup Mobile',
+          icons: ['fa-window-restore', 'fa-mobile-screen-button']
+        },
+        'popup mobile': {
+          label: 'Popup Mobile',
+          icons: ['fa-window-restore', 'fa-mobile-screen-button']
+        },
+        'pop desktop': {
+          label: 'Popup Desktop',
+          icons: ['fa-window-restore', 'fa-desktop']
+        },
+        'pop desk': {
+          label: 'Popup Desktop',
+          icons: ['fa-window-restore', 'fa-desktop']
+        },
+        'popup desktop': {
+          label: 'Popup Desktop',
+          icons: ['fa-window-restore', 'fa-desktop']
+        }
+      };
+
+      const match = iconMap[normalized];
+      if (!match) return escapeHtml(raw);
+
+      return `
+        <span class="col2-badge-icons" aria-hidden="true">
+          <i class="fa-solid ${match.icons[0]}"></i>
+          <i class="fa-solid ${match.icons[1]}"></i>
+        </span>
+        <span class="sr-only">${escapeHtml(match.label)}</span>
+      `;
+    }
+
+    const areaSuggestState = new WeakMap();
+
+    function googlePlacesReady() {
+      return !!(window.google && google.maps && google.maps.places && google.maps.places.AutocompleteService);
+    }
+
+    function getBangaloreBounds() {
+      return new google.maps.LatLngBounds(
+        new google.maps.LatLng(12.80, 77.40),
+        new google.maps.LatLng(13.20, 77.80)
+      );
+    }
+
+    function getAreaSuggestBox(input) {
+      const group = input ? input.closest('.area-input-group') : null;
+      return group ? group.querySelector('.area-suggest') : null;
+    }
+
+    function hideAreaSuggest(input) {
+      const box = getAreaSuggestBox(input);
+      if (!box) return;
+      box.hidden = true;
+      box.innerHTML = '';
+    }
+
+    function formatPredictionValue(pred) {
+      const sf = pred && pred.structured_formatting ? pred.structured_formatting : null;
+      const main = (sf && sf.main_text) ? sf.main_text : (pred && pred.description ? pred.description : '');
+      return String(main || '').trim();
+    }
+
+    function formatPredictionLabel(pred) {
+      const sf = pred && pred.structured_formatting ? pred.structured_formatting : null;
+      const main = (sf && sf.main_text) ? sf.main_text : (pred && pred.description ? pred.description : '');
+      const secondary = (sf && sf.secondary_text) ? sf.secondary_text : '';
+      const m = String(main || '').trim();
+      const s = String(secondary || '').trim();
+      return s ? `${m} • ${s}` : m;
+    }
+
+    function getAreaState(input) {
+      let st = areaSuggestState.get(input);
+      if (!st) {
+        st = { timer: null, seq: 0, svc: null, token: null };
+        areaSuggestState.set(input, st);
+      }
+      if (googlePlacesReady()) {
+        if (!st.svc) st.svc = new google.maps.places.AutocompleteService();
+        if (!st.token && google.maps.places.AutocompleteSessionToken) st.token = new google.maps.places.AutocompleteSessionToken();
+      }
+      return st;
+    }
+
+    function renderAreaSuggest(input, predictions) {
+      const box = getAreaSuggestBox(input);
+      if (!box) return;
+
+      const items = Array.isArray(predictions) ? predictions.slice(0, 8) : [];
+      if (items.length === 0) {
+        hideAreaSuggest(input);
+        return;
+      }
+
+      box.innerHTML = items.map((p) => {
+        const val = formatPredictionValue(p);
+        const label = formatPredictionLabel(p);
+        return `<button type="button" class="area-suggest-item" data-value="${escapeAttr(val)}">${escapeHtml(label)}</button>`;
+      }).join('');
+
+      box.hidden = false;
+    }
+
+    function requestAreaPredictions(input, q, seq) {
+      const st = getAreaState(input);
+      if (!st.svc) return renderAreaSuggest(input, []);
+
+      const req = {
+        input: q,
+        bounds: getBangaloreBounds(),
+        componentRestrictions: { country: 'in' },
+        types: ['geocode']
+      };
+      if (st.token) req.sessionToken = st.token;
+
+      st.svc.getPlacePredictions(req, (predictions, status) => {
+        const current = areaSuggestState.get(input);
+        if (!current || current.seq !== seq) return;
+        if (status !== google.maps.places.PlacesServiceStatus.OK || !predictions) {
+          renderAreaSuggest(input, []);
+          return;
+        }
+        const filtered = predictions.filter(p => /bengaluru|bangalore/i.test(p.description || ''));
+        renderAreaSuggest(input, filtered.length ? filtered : predictions);
+      });
+    }
+
     function buildTraceCalloutHtml(raw) {
       const trace = String(raw || '').trim();
       if (!trace) return '<div class="trace-empty">No history</div>';
@@ -970,6 +1710,258 @@ if (isset($nameAssign)) {
       return `${String(day).padStart(2, '0')} ${months[monthIndex]} ${String(year).slice(-2)}`;
     }
 
+    function formatWaNumber(phoneRaw) {
+      const digits = String(phoneRaw || '').replace(/\D/g, '');
+      if (!digits) return '';
+      if (digits.length === 10) return '91' + digits;
+      if (digits.length === 12 && digits.startsWith('91')) return digits;
+      if (digits.length > 10) return digits;
+      return '';
+    }
+
+    function formatSentAtDisplay(mysqlDateTime) {
+      const d = parseMysqlDateTime(mysqlDateTime);
+      if (!d || isNaN(d.getTime())) return String(mysqlDateTime || '');
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const dd = String(d.getDate()).padStart(2, '0');
+      const mm = months[d.getMonth()];
+      const yy = String(d.getFullYear()).slice(-2);
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mi = String(d.getMinutes()).padStart(2, '0');
+      return `${dd} ${mm} ${yy} ${hh}:${mi}`;
+    }
+
+    function initWhatsAppDrafts(cardElement, leadData) {
+      const rid = String(leadData && leadData.id ? leadData.id : '').trim();
+      if (!rid) return;
+      const wrap = cardElement.querySelector(`.wa-drafts-wrap[data-lead-id="${CSS.escape(rid)}"]`);
+      if (!wrap) return;
+      if (wrap.getAttribute('data-initialized') === '1') return;
+      wrap.setAttribute('data-initialized', '1');
+      const isAdmin = (typeof IS_ADMIN !== 'undefined') ? !!IS_ADMIN : (wrap.getAttribute('data-is-admin') === '1');
+
+      const textarea = wrap.querySelector('.wa-draft-text');
+      const listEl = wrap.querySelector('.wa-drafts-list');
+      const addBtn = wrap.querySelector('.wa-add-template');
+      const sendBtn = wrap.querySelector('.wa-send-message');
+      const statusEl = wrap.querySelector('.wa-drafts-status');
+      const phoneInput = cardElement.querySelector('input[name="whatsapp_number"]');
+      const leadName = String(leadData && leadData.Name ? leadData.Name : '').trim();
+
+      const setStatus = (t) => {
+        if (!statusEl) return;
+        statusEl.textContent = t || '';
+      };
+
+      const applyTemplateVars = (messageText) => {
+        const raw = String(messageText || '');
+        if (!raw) return '';
+        const name = leadName;
+        return raw.replace(/\[Customer Name\]/gi, name ? name : '');
+      };
+
+      const fetchTemplates = () => {
+        return fetch('lead_fetch.php?wa_templates=1', { credentials: 'same-origin' })
+          .then(r => r.json())
+          .then(rows => Array.isArray(rows) ? rows : []);
+      };
+
+      const fetchHistory = () => {
+        return fetch(`lead_fetch.php?wa_history=1&lead_id=${encodeURIComponent(rid)}`, { credentials: 'same-origin' })
+          .then(r => r.json())
+          .then(rows => Array.isArray(rows) ? rows : []);
+      };
+
+      const addTemplate = (messageText) => {
+        const fd = new FormData();
+        fd.append('message_text', messageText);
+        return fetch('lead_fetch.php?wa_template_add=1', { method: 'POST', body: fd, credentials: 'same-origin' })
+          .then(r => r.json());
+      };
+
+      const deleteTemplate = (templateId) => {
+        const fd = new FormData();
+        fd.append('id', String(templateId || ''));
+        return fetch('lead_fetch.php?wa_template_delete=1', { method: 'POST', body: fd, credentials: 'same-origin' })
+          .then(r => r.json());
+      };
+
+      const logSend = (messageText) => {
+        const fd = new FormData();
+        fd.append('lead_id', rid);
+        fd.append('message_text', messageText);
+        return fetch('lead_fetch.php?wa_send=1', { method: 'POST', body: fd, credentials: 'same-origin' })
+          .then(r => r.json());
+      };
+
+      const render = (templates, historyGroups) => {
+        if (!listEl) return;
+        const templateMap = new Map();
+        (templates || []).forEach(t => {
+          const msg = String(t && t.message_text ? t.message_text : '');
+          const id = (t && t.id !== undefined && t.id !== null) ? String(t.id) : '';
+          if (!msg || !id) return;
+          templateMap.set(msg, id);
+        });
+
+        const sentMap = new Map();
+        (historyGroups || []).forEach(g => {
+          const key = String(g && g.message_text ? g.message_text : '');
+          if (!key) return;
+          sentMap.set(key, Array.isArray(g.sent_times) ? g.sent_times : []);
+        });
+
+        const sentItems = [];
+        sentMap.forEach((times, messageText) => {
+          sentItems.push({ message_text: messageText, sent_times: times });
+        });
+        sentItems.sort((a, b) => {
+          const at = (a.sent_times && a.sent_times[0]) ? String(a.sent_times[0]) : '';
+          const bt = (b.sent_times && b.sent_times[0]) ? String(b.sent_times[0]) : '';
+          return bt.localeCompare(at);
+        });
+
+        const templateItems = Array.from(templateMap.keys());
+        const unseenTemplates = templateItems.filter(t => !sentMap.has(t));
+
+        const buildItemHtml = (messageText, sentTimes) => {
+          const templateId = templateMap.has(messageText) ? templateMap.get(messageText) : '';
+          const trimmed = messageText.length > 180 ? (messageText.slice(0, 180) + '…') : messageText;
+          const safeTrimmed = escapeHtml(trimmed);
+          const dates = (sentTimes || []).map(dt => `<span class="wa-draft-date">${escapeHtml(formatSentAtDisplay(dt))}</span>`).join('');
+          const meta = dates ? `<div class="wa-draft-meta"><div class="wa-draft-dates">${dates}</div></div>` : '';
+          const removeBtn = (isAdmin && templateId) ? `
+            <button type="button" class="wa-draft-remove" data-template-id="${escapeAttr(templateId)}" aria-label="Remove message" title="Remove">
+              <i class="fa fa-times"></i>
+            </button>
+          ` : '';
+          return `
+            <div class="wa-draft-item" role="button" tabindex="0" data-message="${escapeAttr(messageText)}">
+              <div class="wa-draft-text-preview">${safeTrimmed}</div>
+              ${meta}
+              ${removeBtn}
+            </div>
+          `;
+        };
+
+        const htmlParts = [];
+        sentItems.forEach(item => {
+          htmlParts.push(buildItemHtml(item.message_text, item.sent_times));
+        });
+        unseenTemplates.forEach(messageText => {
+          htmlParts.push(buildItemHtml(messageText, []));
+        });
+        if (htmlParts.length === 0) {
+          listEl.innerHTML = `<span class="saved-quotes-empty">No saved messages</span>`;
+          return;
+        }
+        listEl.innerHTML = htmlParts.join('');
+      };
+
+      const refresh = () => {
+        setStatus('Loading...');
+        return Promise.all([fetchTemplates(), fetchHistory()])
+          .then(([templates, history]) => {
+            render(templates, history);
+            setStatus('');
+          })
+          .catch(() => setStatus('Error'));
+      };
+
+      if (listEl) {
+        listEl.addEventListener('click', (e) => {
+          const removeBtn = e.target && e.target.closest ? e.target.closest('.wa-draft-remove') : null;
+          if (removeBtn) {
+            e.preventDefault();
+            if (!isAdmin) return;
+            const templateId = removeBtn.getAttribute('data-template-id') || '';
+            if (!templateId) return;
+            setStatus('Removing...');
+            deleteTemplate(templateId)
+              .then(res => {
+                if (res && res.success) {
+                  setStatus('Removed');
+                  refresh();
+                } else {
+                  setStatus((res && res.error) ? res.error : 'Error');
+                }
+              })
+              .catch(() => setStatus('Error'));
+            return;
+          }
+
+          const item = e.target && e.target.closest ? e.target.closest('.wa-draft-item') : null;
+          if (!item) return;
+          e.preventDefault();
+          const msg = item.getAttribute('data-message') || '';
+          if (textarea) {
+            textarea.value = applyTemplateVars(msg);
+            M.textareaAutoResize(textarea);
+            textarea.focus();
+          }
+        });
+      }
+
+      if (addBtn) {
+        addBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          if (!isAdmin) return;
+          const msg = textarea ? String(textarea.value || '').trim() : '';
+          if (!msg) {
+            setStatus('Type a message first');
+            return;
+          }
+          setStatus('Saving...');
+          addTemplate(msg)
+            .then(res => {
+              if (res && res.success) {
+                setStatus('Saved');
+                refresh();
+              } else {
+                setStatus((res && res.error) ? res.error : 'Error');
+              }
+            })
+            .catch(() => setStatus('Error'));
+        });
+      }
+
+      if (sendBtn) {
+        sendBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const msg = textarea ? String(textarea.value || '').trim() : '';
+          if (!msg) {
+            setStatus('Type a message first');
+            return;
+          }
+          const resolvedMsg = applyTemplateVars(msg);
+          const waNum = formatWaNumber(phoneInput ? phoneInput.value : (leadData.whatsapp_number || ''));
+          if (!waNum) {
+            setStatus('Missing WhatsApp number');
+            return;
+          }
+          const url = `https://wa.me/${waNum}?text=${encodeURIComponent(resolvedMsg)}`;
+          window.open(url, '_blank', 'noopener');
+          setStatus('Sending...');
+          logSend(resolvedMsg)
+            .then(res => {
+              if (res && res.success) {
+                setStatus('Sent');
+                refresh();
+              } else {
+                setStatus((res && res.error) ? res.error : 'Error');
+              }
+            })
+            .catch(() => setStatus('Error'));
+        });
+      }
+
+      if (textarea) {
+        textarea.addEventListener('input', () => setStatus(''));
+      }
+
+      refresh();
+    }
+
     // Function to create inline edit form
     function createInlineEditForm(leadData) {
       const rid = leadData.id || '';
@@ -987,7 +1979,7 @@ if (isset($nameAssign)) {
       const draft = readOrderDraft(rid);
       const draftQuote = draft && draft.quote !== undefined && String(draft.quote).trim() !== '' ? String(draft.quote) : '';
       const quoteValue = draftQuote !== '' ? draftQuote : (leadData.quote || '');
-      const installationIso = draft && draft.installation_date ? String(draft.installation_date) : '';
+      const installationIso = (draft && draft.installation_date) ? String(draft.installation_date) : (leadData.installation_date ? String(leadData.installation_date) : '');
       const installationText = installationIso ? formatIsoToDisplay(installationIso) : 'Installation date';
       const isAlreadyOrdered = String(leadData.call_status || '').toLowerCase().includes('ordered');
       const lockOrderInputs = isAlreadyOrdered && String(quoteValue || '').trim() !== '' && String(installationIso || '').trim() !== '';
@@ -1006,9 +1998,10 @@ if (isset($nameAssign)) {
                     <label for="leadName-${rid}">Name</label>
                     <input id="leadName-${rid}" type="text" name="Name" value="${leadData.Name || ''}" placeholder="Enter Lead Name">
                   </div>
-                  <div class="input-group">
+                  <div class="input-group area-input-group">
                     <label for="leadArea-${rid}">Area</label>
-                    <input id="leadArea-${rid}" type="text" name="Area" value="${leadData.Area || ''}" placeholder="Location">
+                    <input id="leadArea-${rid}" type="text" name="Area" value="${leadData.Area || ''}" placeholder="Location" autocomplete="off">
+                    <div class="area-suggest" hidden></div>
                   </div>
                 </div>
 
@@ -1063,6 +2056,9 @@ if (isset($nameAssign)) {
               <div class="grid-right">
                 <!-- Moved QR Code here -->
                 <div class="lead-qr-code" data-phone="${leadData.whatsapp_number || ''}" style="margin-bottom: 12px;"></div>
+                <a href="tel:${leadData.whatsapp_number || ''}" class="call-icon-mobile">
+                  <i class="fas fa-phone"></i>
+                </a>
 
                 <div class="input-group">
                   <label for="callStatus-${rid}">Call Status</label>
@@ -1143,6 +2139,39 @@ if (isset($nameAssign)) {
                 </div>
               </div>
             </div>
+
+            <div class="input-group wa-drafts-wrap" data-lead-id="${rid}">
+              <div class="wa-drafts-grid">
+                <div class="wa-drafts-left">
+                  <label for="waDraftText-${rid}">WhatsApp Message</label>
+                  <div class="wa-drafts-textarea-wrap">
+                    <textarea id="waDraftText-${rid}" class="materialize-textarea wa-draft-text" rows="3" placeholder="Type or select a message"></textarea>
+                    <div class="wa-drafts-buttons">
+                      <button type="button" class="wa-draft-btn wa-payment-btn" title="Create Payment Link" aria-label="Create payment link" data-lead-id="${rid}">
+                        <i class="fa-solid fa-indian-rupee-sign"></i>
+                      </button>
+                      ${IS_ADMIN ? `
+                        <button type="button" class="wa-draft-btn wa-add-template" title="Add new" aria-label="Add new message">
+                          <i class="fa fa-plus"></i>
+                        </button>
+                      ` : ``}
+                      <button type="button" class="wa-draft-btn wa-send-message" title="Send message" aria-label="Send WhatsApp message">
+                        <i class="fa-brands fa-whatsapp"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="wa-drafts-actions">
+                    <span class="wa-drafts-status"></span>
+                  </div>
+                </div>
+                <div class="wa-drafts-right-col">
+                  <div class="wa-drafts-subtitle">Saved Messages</div>
+                  <div class="wa-drafts-right">
+                    <div class="wa-drafts-list" data-lead-id="${rid}"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </form>
         </div>
       `;
@@ -1189,6 +2218,29 @@ if (isset($nameAssign)) {
         M.updateTextFields();
         const selectElements = cardElement.querySelectorAll('select');
         M.FormSelect.init(selectElements);
+
+        initWhatsAppDrafts(cardElement, leadData);
+        
+        // Initialize payment button functionality
+        const paymentBtn = cardElement.querySelector('.wa-payment-btn[data-lead-id="' + rid + '"]');
+        if (paymentBtn) {
+          paymentBtn.addEventListener('click', () => {
+            const nameInput = cardElement.querySelector('input[name="Name"]');
+            const phoneInput = cardElement.querySelector('input[name="whatsapp_number"]');
+            const name = nameInput ? nameInput.value.trim() : '';
+            const phone = phoneInput ? phoneInput.value.replace(/\D+/g, '').slice(-10) : '';
+            
+            if (name && phone.length === 10) {
+              openPaymentCreateModal(name, phone, rid);
+            } else {
+              if (window.M && M.toast) {
+                M.toast({html: 'Please fill name and valid 10-digit phone number first'});
+              } else {
+                alert('Please fill name and valid 10-digit phone number first');
+              }
+            }
+          });
+        }
 
         const callStatusSelect = cardElement.querySelector(`#callStatus-${rid}`);
         if (callStatusSelect) {
@@ -1418,6 +2470,7 @@ if (isset($nameAssign)) {
       const map = row.map_link || '';
       const call_status = row.call_status || '';
       const col1 = row.Column_1 || '';
+      const col2 = row.Column_2 || row.column_2 || '';
       const originallyAssigned = (row.originally_assigned || '').trim();
       const editTrace = (row.edit_trace || '').trim();
       
@@ -1494,11 +2547,14 @@ if (isset($nameAssign)) {
         <div class="card lead-card ${markerClass}"
              data-created-at="${created}"
              data-lead-id="${rid}"
+             data-quote="${escapeAttr(row.quote || '')}"
+             data-installation-date="${escapeAttr(row.installation_date || '')}"
              data-quote-links="${escapeAttr(row.quote_links || '')}"
              data-day-total="${row.day_total || ''}"
              data-day-rank="${row.day_rank || ''}"
              data-mid="${row.MID || ''}"
              data-column-1="${col1}"
+             data-column-2="${escapeAttr(col2)}"
              data-name="${name}"
              data-whatsapp-number="${phone}"
              data-num-cameras="${cams}"
@@ -1564,7 +2620,7 @@ if (isset($nameAssign)) {
                 ${maskedPhone ? `<div class="lead-masked-phone" style="font-size: 13px; color: #666; font-family: monospace; letter-spacing: 0.5px; font-weight: 500;">${maskedPhone}</div>` : ''}
               </div>
 
-              ${call_status ? `<div class="lead-status-row"><span class="status-badge ${getCallStatusClass(call_status)}">${getCallStatusIcon(call_status)} ${call_status}</span></div>` : ''}
+              ${call_status ? `<div class="lead-status-row"><span class="status-badge ${getCallStatusClass(call_status)}" data-status-value="${escapeAttr(call_status)}">${getCallStatusIcon(call_status)} ${call_status}</span></div>` : ''}
               <div class="lead-marker-strip" data-lead-id="${rid}">
                 ${markerButtonsHtml}
               </div>
@@ -1584,7 +2640,8 @@ if (isset($nameAssign)) {
           <div class="lead-controls-section">
             <div class="lead-controls-left">
                ${assign && assign !== '-' ? `<span class="assign-badge${isAssignOpenExact ? ' is-open open-animate' : ''}">${assign}</span>` : ''}
-               ${col1 ? `<span class="col1-badge">${col1}</span>` : ''}
+               ${col2 ? `<span class="col2-badge" data-col2-value="${escapeAttr(col2)}" title="${escapeAttr(col2)}" aria-label="${escapeAttr(col2)}">${getCol2BadgeInnerHtml(col2)}</span>` : ''}
+               ${col1 ? `<span class="col1-badge" data-col1-value="${escapeAttr(col1)}">${col1}</span>` : ''}
                <span class="lead-phone" style="font-size: 12px;">${formattedDate}${relativeTime ? ` • ${relativeTime}` : ''}${showWas ? ` | Was: ${escapeAttr(originallyAssigned)}` : ''}</span>
             </div>
             <div class="lead-actions">
@@ -1690,8 +2747,12 @@ if (isset($nameAssign)) {
       status.innerText = 'Loading...';
 
       let fetchOffset;
+      let fetchLimit = PAGE_SIZE;
       if (direction === 'down') {
         fetchOffset = offsetEnd;
+        if (offsetEnd === 0) {
+          fetchLimit = INITIAL_PAGE_SIZE;
+        }
       } else {
         if (offsetStart === 0) {
           status.innerText = '';
@@ -1703,7 +2764,23 @@ if (isset($nameAssign)) {
 
       const gen = viewGeneration;
       listFetchController = new AbortController();
-      fetch(`lead_fetch.php?offset=${fetchOffset}&search=${encodeURIComponent(searchQuery)}&mine=${encodeURIComponent(mineQuery)}&follow=${encodeURIComponent(followQuery)}`, { signal: listFetchController.signal })
+      const dateParams = (() => {
+        const raw = String(searchQuery || '').trim();
+        const digits = (raw.match(/\d/g) || []).length;
+        const letters = (raw.match(/[A-Za-z]/g) || []).length;
+        const isPhoneLike = raw !== '' && letters === 0 && digits >= 7;
+        if (isPhoneLike) return '';
+        const mode = String(dateMode || '').trim();
+        if (!mode || mode === 'latest') return '';
+        if (mode === 'custom') {
+          const s = String(customStartDate || '').trim();
+          const e = String(customEndDate || '').trim();
+          if (!s || !e) return '';
+          return `&date_mode=custom&date_start=${encodeURIComponent(s)}&date_end=${encodeURIComponent(e)}`;
+        }
+        return `&date_mode=${encodeURIComponent(mode)}`;
+      })();
+      fetch(`lead_fetch.php?offset=${fetchOffset}&limit=${fetchLimit}&search=${encodeURIComponent(searchQuery)}&mine=${encodeURIComponent(mineQuery)}&follow=${encodeURIComponent(followQuery)}&status=${encodeURIComponent(statusQuery)}&col1=${encodeURIComponent(col1Query)}&col2=${encodeURIComponent(col2Query)}${dateParams}`, { signal: listFetchController.signal })
         .then(res => {
           if (gen !== viewGeneration) return null;
           if (!res.ok) throw new Error("Server error");
@@ -1712,7 +2789,7 @@ if (isset($nameAssign)) {
         .then(data => {
           if (gen !== viewGeneration) return;
           if (!Array.isArray(data) || data.length === 0) {
-            status.innerText = 'No more records.';
+            status.innerHTML = '<img src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExenNydGE2ZDYweHU2ZjBvNzF2OHN6enBiNTl3aXltanFzMWJ5b3BudSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/9Poa3NkkYsdbPZNzrK/giphy.gif" alt="No more records" style="display:block;width:120px;max-width:100%;height:auto;margin:12px auto;">';
             isLoading = false;
             return;
           }
@@ -1943,6 +3020,19 @@ if (isset($nameAssign)) {
       }
     }
 
+    function syncFloatingDateOffset() {
+      const floatingDateElement = document.getElementById('floatingDate');
+      if (!floatingDateElement) return;
+      const pageHeader = document.getElementById('pageHeader');
+      const searchBar = document.getElementById('searchBar');
+      const headerVisible = pageHeader && !pageHeader.classList.contains('hidden');
+      const searchVisible = searchBar && !searchBar.classList.contains('hidden');
+      const headerHeight = headerVisible ? pageHeader.offsetHeight : 0;
+      const searchHeight = searchVisible ? searchBar.offsetHeight : 0;
+      const topOffset = Math.max(16, headerHeight + searchHeight + 10);
+      floatingDateElement.style.setProperty('--floating-date-top', `${topOffset}px`);
+    }
+
     // ✅ Auto-save all currently edited cards and collapse them
     function autoSaveAllEditedCards() {
       if (editedCards.size === 0) return;
@@ -2079,6 +3169,57 @@ if (isset($nameAssign)) {
         }
     }
 
+    function renderFilterCountDetails(monthCounts) {
+      if (!filterCountsPanel) return;
+      const items = Array.isArray(monthCounts) ? monthCounts : [];
+      filterCountsPanel.innerHTML = items.map((item) => {
+        const label = item && item.label ? String(item.label) : '-';
+        const count = Number(item && item.count);
+        const safeCount = Number.isFinite(count) ? String(count) : '-';
+        return `<span class="filter-count-detail"><span>${label}</span><strong>${safeCount}</strong></span>`;
+      }).join('');
+    }
+
+    function setFilterCountsExpanded(expanded) {
+      if (!filterCountsToggle || !filterCountsPanel) return;
+      const isOpen = !!expanded;
+      filterCountsToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      filterCountsPanel.classList.toggle('is-open', isOpen);
+    }
+
+    function updateFilterCounts() {
+      if (!countThisMonthEl) return;
+      if (filterCountsBar) filterCountsBar.classList.add('is-loading');
+      const params = new URLSearchParams({
+        count_summary: '1',
+        search: searchQuery || '',
+        mine: mineQuery || '',
+        follow: followQuery || '',
+        status: statusQuery || '',
+        col1: col1Query || '',
+        col2: col2Query || ''
+      });
+      fetch(`lead_fetch.php?${params.toString()}`)
+        .then((res) => {
+          if (!res.ok) throw new Error('Failed to load counts');
+          return res.json();
+        })
+        .then((data) => {
+          const monthCounts = Array.isArray(data && data.month_counts) ? data.month_counts : [];
+          const firstMonth = monthCounts[0] || null;
+          const thisMonth = Number(firstMonth && firstMonth.count);
+          countThisMonthEl.textContent = Number.isFinite(thisMonth) ? String(thisMonth) : '-';
+          renderFilterCountDetails(monthCounts);
+        })
+        .catch(() => {
+          countThisMonthEl.textContent = '-';
+          renderFilterCountDetails([]);
+        })
+        .finally(() => {
+          if (filterCountsBar) filterCountsBar.classList.remove('is-loading');
+        });
+    }
+
     function resetStateAndReload() {
       bumpViewGeneration();
       isLoading = false;
@@ -2095,11 +3236,24 @@ if (isset($nameAssign)) {
       editedCards.clear();
       container.querySelectorAll('.day-separator').forEach(el => el.remove());
       container.querySelectorAll('.col.s12').forEach(el => el.remove());
+      updateFilterCounts();
       fetchRows('down');
+    }
+
+    function sanitizeQuoteAmount(value) {
+      const raw = value === null || typeof value === 'undefined' ? '' : String(value);
+      const cleaned = raw.replace(/[^\d.]/g, '');
+      const parts = cleaned.split('.');
+      if (parts.length <= 2) return cleaned;
+      return parts[0] + '.' + parts.slice(1).join('');
     }
     
     // ✅ Save lead data
     function saveLead(leadData, showNotification = true, leadId = null) {
+      if (leadData && typeof leadData === 'object' && Object.prototype.hasOwnProperty.call(leadData, 'quote')) {
+        const cleanedQuote = sanitizeQuoteAmount(leadData.quote);
+        leadData.quote = cleanedQuote;
+      }
       fetch('lead_save.php', {
         method: 'POST',
         body: JSON.stringify(leadData),
@@ -2262,6 +3416,9 @@ if (isset($nameAssign)) {
       const existingCard = existingEditBtn.closest('.lead-card');
       const currentMid = existingCard ? (existingCard.getAttribute('data-mid') || '') : '';
       const currentCol1 = existingCard ? (existingCard.getAttribute('data-column-1') || '') : '';
+      const currentCol2 = existingCard ? (existingCard.getAttribute('data-column-2') || '') : '';
+      const currentQuote = existingCard ? (existingCard.getAttribute('data-quote') || '') : '';
+      const currentInstallationDate = existingCard ? (existingCard.getAttribute('data-installation-date') || '') : '';
       const currentQuoteLinks = existingCard ? (existingCard.getAttribute('data-quote-links') || '') : '';
       const currentCreatedAt = existingCard ? (existingCard.getAttribute('data-created-at') || '') : '';
       const currentDayTotal = existingCard ? (existingCard.getAttribute('data-day-total') || '') : '';
@@ -2273,6 +3430,7 @@ if (isset($nameAssign)) {
         id: leadId,
         MID: currentMid,
         Column_1: currentCol1,
+        Column_2: currentCol2,
         created_at: currentCreatedAt,
         day_total: currentDayTotal,
         day_rank: currentDayRank,
@@ -2291,7 +3449,8 @@ if (isset($nameAssign)) {
         Message: existingCard ? (existingCard.getAttribute('data-message') || '') : '',
         map_link: existingCard ? (existingCard.getAttribute('data-map-link') || '') : '',
         call_status: existingCard ? (existingCard.getAttribute('data-call-status') || '') : '',
-        quote: updatedData.quote || '',
+        quote: (typeof updatedData.quote !== 'undefined' && updatedData.quote !== null) ? updatedData.quote : currentQuote,
+        installation_date: (typeof updatedData.installation_date !== 'undefined' && updatedData.installation_date !== null) ? updatedData.installation_date : currentInstallationDate,
         quote_links: currentQuoteLinks
       };
 
@@ -2322,7 +3481,7 @@ if (isset($nameAssign)) {
       }
     }
 
-    let container, topSentinel, bottomSentinel, searchInput, clearBtn, status, searchSubmit, searchSuggestions; // Declare variables here
+    let container, topSentinel, bottomSentinel, searchInput, clearBtn, status, searchSubmit, searchSuggestions, filterCountsBar, countThisMonthEl, countThisMonthLabelEl, filterCountsToggle, filterCountsPanel; // Declare variables here
     
     document.addEventListener('DOMContentLoaded', function() {
       const bgImages = [
@@ -2394,15 +3553,165 @@ if (isset($nameAssign)) {
       searchSubmit = document.getElementById('searchSubmit');
       searchSuggestions = document.getElementById('searchSuggestions');
       status = document.getElementById('status');
+      filterCountsBar = document.getElementById('filterCountsBar');
+      countThisMonthEl = document.getElementById('countThisMonth');
+      countThisMonthLabelEl = document.getElementById('countThisMonthLabel');
+      filterCountsToggle = document.getElementById('filterCountsToggle');
+      filterCountsPanel = document.getElementById('filterCountsPanel');
       const mineLinks = Array.from(document.querySelectorAll('.mine-filter-link'));
       const followLinks = Array.from(document.querySelectorAll('.follow-filter-link'));
+      const dateRangeSelect = document.getElementById('dateRangeSelect');
+      const customDateWrap = document.getElementById('customDateWrap');
+      const customStartInput = document.getElementById('customStartDate');
+      const customEndInput = document.getElementById('customEndDate');
+      const customGoBtn = document.getElementById('customDateGo');
+
+      const monthLabel = (d) => d.toLocaleString('default', { month: 'short' });
+      const updateDateOptionLabels = () => {
+        const selects = [dateRangeSelect].filter(Boolean);
+        const now = new Date();
+        const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const minus2 = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+        if (countThisMonthLabelEl) countThisMonthLabelEl.textContent = `Current month (${monthLabel(now)})`;
+        if (!selects.length) return;
+        selects.forEach(sel => {
+          Array.from(sel.options).forEach(opt => {
+            if (opt.value === 'last_month') opt.textContent = `Last month (${monthLabel(lastMonth)})`;
+            if (opt.value === 'month_minus_2') opt.textContent = `Current Month - 2 (${monthLabel(minus2)})`;
+          });
+        });
+      };
+      updateDateOptionLabels();
+
+      if (filterCountsToggle && filterCountsPanel) {
+        setFilterCountsExpanded(false);
+        filterCountsToggle.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const expanded = filterCountsToggle.getAttribute('aria-expanded') === 'true';
+          setFilterCountsExpanded(!expanded);
+        });
+      }
+
+      const syncCustomWrap = () => {
+        const isCustom = String(dateMode) === 'custom';
+        if (customDateWrap) customDateWrap.hidden = !isCustom;
+      };
+      const syncDateUi = () => {
+        if (dateRangeSelect) dateRangeSelect.value = dateMode;
+        if (customStartInput && customStartDate) customStartInput.value = customStartDate;
+        if (customEndInput && customEndDate) customEndInput.value = customEndDate;
+        syncCustomWrap();
+      };
+      syncDateUi();
+
+      if (dateRangeSelect) {
+        dateRangeSelect.addEventListener('change', () => {
+          dateMode = dateRangeSelect.value;
+          syncDateUi();
+          if (dateMode !== 'custom') {
+            customStartDate = '';
+            customEndDate = '';
+            resetStateAndReload();
+          }
+        });
+      }
+
+      const applyCustomRange = (startEl, endEl) => {
+        if (!startEl || !endEl) return;
+        const s = String(startEl.value || '').trim();
+        const e = String(endEl.value || '').trim();
+        if (!s || !e) return;
+        if (s > e) return;
+        customStartDate = s;
+        customEndDate = e;
+        dateMode = 'custom';
+        syncDateUi();
+        resetStateAndReload();
+      };
+
+      if (customGoBtn) customGoBtn.addEventListener('click', () => applyCustomRange(customStartInput, customEndInput));
+      const bindDatePickerOpen = (inputEl) => {
+        if (!inputEl) return;
+        const wrap = inputEl.closest('.date-input-wrap');
+        const open = () => {
+          if (typeof inputEl.showPicker === 'function') {
+            try { inputEl.showPicker(); return; } catch (e) {}
+          }
+          try { inputEl.focus(); } catch (e) {}
+          try { inputEl.click(); } catch (e) {}
+        };
+        if (wrap) wrap.addEventListener('click', open);
+      };
+      bindDatePickerOpen(customStartInput);
+      bindDatePickerOpen(customEndInput);
+
+      const syncDateConstraints = () => {
+        if (!customStartInput || !customEndInput) return;
+        const s = String(customStartInput.value || '').trim();
+        const e = String(customEndInput.value || '').trim();
+        if (s) customEndInput.min = s;
+        else customEndInput.removeAttribute('min');
+        if (s && e && e < s) {
+          customEndInput.value = s;
+        }
+      };
+      if (customStartInput) customStartInput.addEventListener('change', () => { syncDateConstraints(); });
+      if (customEndInput) customEndInput.addEventListener('change', () => { syncDateConstraints(); });
+      syncDateConstraints();
 
       // Initialize lastScrollCardsCount
       lastScrollCardsCount = 0;
+      syncFloatingDateOffset();
 
       // Event delegation for 'Edit Lead' buttons
       if (container) { // Check if container is not null before adding event listener
         container.addEventListener('click', function(event) {
+          const statusBadge = event.target.closest('.status-badge');
+          if (statusBadge) {
+            event.preventDefault();
+            event.stopPropagation();
+            const val = (statusBadge.getAttribute('data-status-value') || '').trim();
+            if (val) {
+              if (statusQuery.toLowerCase() === val.toLowerCase()) {
+                statusQuery = '';
+              } else {
+                statusQuery = val;
+              }
+              resetStateAndReload();
+            }
+            return;
+          }
+          const col1Badge = event.target.closest('.col1-badge');
+          if (col1Badge) {
+            event.preventDefault();
+            event.stopPropagation();
+            const val = (col1Badge.getAttribute('data-col1-value') || col1Badge.textContent || '').trim();
+            if (val) {
+              if (col1Query.toLowerCase() === val.toLowerCase()) {
+                col1Query = '';
+              } else {
+                col1Query = val;
+              }
+              resetStateAndReload();
+            }
+            return;
+          }
+          const col2Badge = event.target.closest('.col2-badge');
+          if (col2Badge) {
+            event.preventDefault();
+            event.stopPropagation();
+            const val = (col2Badge.getAttribute('data-col2-value') || col2Badge.textContent || '').trim();
+            if (val) {
+              if (col2Query.toLowerCase() === val.toLowerCase()) {
+                col2Query = '';
+              } else {
+                col2Query = val;
+              }
+              resetStateAndReload();
+            }
+            return;
+          }
           const favBtn = event.target.closest('.fav-toggle');
           if (favBtn) {
             event.preventDefault();
@@ -2513,6 +3822,7 @@ if (isset($nameAssign)) {
             if (cardElement && ds.leadId) {
               const localLeadData = {
                 id: ds.leadId || rid,
+                MID: ds.mid || '',
                 Name: ds.name || '',
                 whatsapp_number: ds.whatsappNumber || '',
                 num_cameras: ds.numCameras || '',
@@ -2526,6 +3836,8 @@ if (isset($nameAssign)) {
                 Message: ds.message || '',
                 map_link: ds.mapLink || '',
                 call_status: ds.callStatus || '',
+                quote: ds.quote || '',
+                installation_date: ds.installationDate || '',
                 quote_links: ds.quoteLinks || ''
               };
               toggleInlineEdit(cardElement, localLeadData);
@@ -2709,7 +4021,14 @@ if (isset($nameAssign)) {
               leadData[key] = value;
             }
             leadData.leadId = leadId;
-            leadData.quote = quoteInput.value.trim();
+            const cleanedQuote = sanitizeQuoteAmount(quoteInput.value);
+            if (!cleanedQuote) {
+              showAutoSaveNotification("Invalid quote amount.", leadId, 'error');
+              quoteInput.focus();
+              return;
+            }
+            quoteInput.value = cleanedQuote;
+            leadData.quote = cleanedQuote;
             leadData.installation_date = installationDate;
             leadData.call_status = 'Ordered';
             leadData.place_order = 1;
@@ -2779,6 +4098,72 @@ if (isset($nameAssign)) {
             toggleInlineEdit(cardElement, { id: leadId });
           }
         });
+
+        const closeAllAreaSuggests = () => {
+          const boxes = container.querySelectorAll('.area-suggest:not([hidden])');
+          for (const box of boxes) {
+            box.hidden = true;
+            box.innerHTML = '';
+          }
+        };
+
+        container.addEventListener('click', (event) => {
+          const item = event.target.closest('.area-suggest-item');
+          if (!item) return;
+          const group = item.closest('.area-input-group');
+          const input = group ? group.querySelector('input[name="Area"]') : null;
+          const val = item.getAttribute('data-value') || '';
+          if (input) input.value = val;
+          if (input) hideAreaSuggest(input);
+          event.preventDefault();
+          event.stopPropagation();
+        }, true);
+
+        container.addEventListener('keydown', (event) => {
+          const input = event.target && event.target.matches && event.target.matches('input[name="Area"]') ? event.target : null;
+          if (!input) return;
+          if (event.key === 'Escape') {
+            hideAreaSuggest(input);
+          }
+        });
+
+        container.addEventListener('input', (event) => {
+          const input = event.target && event.target.matches && event.target.matches('input[name="Area"]') ? event.target : null;
+          if (!input) return;
+          const q = input.value.trim();
+          if (q.length < 3) {
+            hideAreaSuggest(input);
+            return;
+          }
+          const st = getAreaState(input);
+          st.seq += 1;
+          const seq = st.seq;
+          clearTimeout(st.timer);
+          st.timer = setTimeout(() => {
+            const currentQ = input.value.trim();
+            if (currentQ.length < 3) {
+              hideAreaSuggest(input);
+              return;
+            }
+            requestAreaPredictions(input, currentQ, seq);
+          }, 180);
+        });
+
+        container.addEventListener('focusin', (event) => {
+          const input = event.target && event.target.matches && event.target.matches('input[name="Area"]') ? event.target : null;
+          if (!input) return;
+          const q = input.value.trim();
+          if (q.length < 3) return;
+          const st = getAreaState(input);
+          st.seq += 1;
+          requestAreaPredictions(input, q, st.seq);
+        });
+
+        document.addEventListener('click', (event) => {
+          if (event.target && event.target.closest && event.target.closest('.area-input-group')) return;
+          closeAllAreaSuggests();
+        }, true);
+
         console.log('Click event listener set up on container.');
       } else {
         console.error('Container element not found, cannot set up click listener.');
@@ -2926,6 +4311,8 @@ if (isset($nameAssign)) {
       // Initialize Materialize components that need it
       M.updateTextFields(); // For input labels
 
+      updateFilterCounts();
+
       // Load initial leads
       fetchRows('down');
       
@@ -2960,21 +4347,23 @@ if (isset($nameAssign)) {
           const currentScroll = window.pageYOffset;
           
           if (currentScroll <= 0) {
-            // At top: Show Header, Hide Search
+            // At top: Show Header, keep Search visible
             pageHeader.classList.remove('hidden');
-            searchBar.classList.add('hidden');
+            searchBar.classList.remove('hidden');
           } else if (currentScroll > lastScroll && currentScroll > 50) {
             // Scrolling down: Hide Header, Show Search
             pageHeader.classList.add('hidden');
             searchBar.classList.remove('hidden');
           } else if (currentScroll < lastScroll) {
-            // Scrolling up: Show Header, Hide Search (Rule: Never Together)
+            // Scrolling up: Show Header, keep Search visible
             pageHeader.classList.remove('hidden');
-            searchBar.classList.add('hidden');
+            searchBar.classList.remove('hidden');
           }
           
           lastScroll = currentScroll;
+          syncFloatingDateOffset();
         });
+        window.addEventListener('resize', syncFloatingDateOffset);
       }
     });
 
@@ -3009,6 +4398,7 @@ if (isset($nameAssign)) {
         clearTimeout(scrollTimeout);
         scrollTimeout = setTimeout(() => {
           console.log('Scroll event triggered');
+          syncFloatingDateOffset();
           checkAndAutoSaveOnScroll();
         }, 100); // More frequent check for floating date
       });
@@ -3291,6 +4681,7 @@ quoteModal.addEventListener('click', (e) => {
       const camsInput = cardElement.querySelector(`#leadNumCameras-${rid}`);
       const dvrInput = cardElement.querySelector(`#leadDvrType-${rid}`);
       const assignInput = cardElement.querySelector(`#leadAssign-${rid}`);
+      const callStatusInput = cardElement.querySelector(`#callStatus-${rid}`);
       const quoteInput = cardElement.querySelector(`#leadQuote-${rid}`);
       const installInput = cardElement.querySelector(`#installDate-${rid}`);
 
@@ -3306,6 +4697,21 @@ quoteModal.addEventListener('click', (e) => {
       if (assignInput) {
         assignInput.addEventListener('keyup', () => updateAssignFromForm(cardElement, rid));
         updateAssignFromForm(cardElement, rid);
+      }
+
+      if (callStatusInput && assignInput) {
+        callStatusInput.addEventListener('change', () => {
+          if (IS_ADMIN) return;
+          const nextStatus = String(callStatusInput.value || '').trim();
+          if (!nextStatus) return;
+          const currentAssign = String(assignInput.value || '').trim();
+          const currentAssignNorm = currentAssign.toLowerCase();
+          const isOpen = currentAssignNorm === '' || currentAssignNorm === 'open' || currentAssignNorm === '-' || currentAssignNorm === 'na';
+          const code = String(CURRENT_USER_CODE || '').trim();
+          if (!isOpen || !code) return;
+          assignInput.value = code;
+          updateAssignFromForm(cardElement, rid);
+        });
       }
 
       if (quoteInput) {
@@ -3359,47 +4765,512 @@ quoteModal.addEventListener('click', (e) => {
     
     document.body.appendChild(refreshBtn);
 
-    const favoritesBtn = document.getElementById('favoritesFab');
-    const historyBtn = document.getElementById('historyFab');
     const newLeadsFab = document.getElementById('newLeadsFab');
-    const floatingMenuToggle = document.getElementById('floatingMenuToggle');
-    let floatingButtonsHidden = false;
 
-    function syncFloatingMenuState() {
-      document.body.classList.toggle('floating-hidden', floatingButtonsHidden);
-      if (floatingMenuToggle) {
-        floatingMenuToggle.innerHTML = floatingButtonsHidden
-          ? '<i class="fa-solid fa-bars"></i>'
-          : '<i class="fa-solid fa-xmark"></i>';
+    const quickLeadModal = document.getElementById('quickLeadModal');
+    const quickLeadForm = document.getElementById('quickLeadForm');
+    const quickLeadClose = document.getElementById('quickLeadClose');
+    const quickLeadCancel = document.getElementById('quickLeadCancel');
+    const quickLeadSubmit = document.getElementById('quickLeadSubmit');
+    const qlmCams = document.getElementById('qlmCams');
+    const qlmWa = document.getElementById('qlmWa');
+    const qlmDupOverlay = document.getElementById('qlmDupOverlay');
+    const qlmDupList = document.getElementById('qlmDupList');
+    const qlmDupProceed = document.getElementById('qlmDupProceed');
+    const qlmDupCancel = document.getElementById('qlmDupCancel');
+    let pendingQuickLeadPayload = null;
+    const paymentsModal = document.getElementById('paymentsModal');
+    const paymentsClose = document.getElementById('paymentsClose');
+    const paymentsIframe = document.getElementById('paymentsIframe');
+
+    const normalizeWaDigits = (raw) => {
+      let s = String(raw || '').trim();
+      if (s.startsWith('+')) s = s.slice(1);
+      let digits = s.replace(/\D/g, '');
+      if (digits.startsWith('91') && digits.length > 10) digits = digits.slice(-10);
+      if (digits.length > 10) digits = digits.slice(-10);
+      return digits;
+    };
+
+    const syncQuickLeadSubmit = () => {
+      if (!quickLeadSubmit) return;
+      const digits = normalizeWaDigits(qlmWa ? qlmWa.value : '');
+      quickLeadSubmit.disabled = digits.length < 10 || quickLeadSubmit.classList.contains('is-loading');
+    };
+
+    const openQuickLeadModal = () => {
+      if (!quickLeadModal) return;
+      quickLeadModal.classList.add('is-open');
+      quickLeadModal.setAttribute('aria-hidden', 'false');
+      if (qlmCams) qlmCams.value = qlmCams.value || '6';
+      if (qlmWa) qlmWa.value = '';
+      if (qlmDupOverlay) {
+        qlmDupOverlay.classList.remove('is-open');
+        qlmDupOverlay.setAttribute('aria-hidden', 'true');
       }
-      const shouldShowScrollButtons = window.scrollY > 300;
-      if (shouldShowScrollButtons && !floatingButtonsHidden) {
-        scrollToTopBtn.style.display = 'flex';
-        refreshBtn.style.display = 'flex';
+      pendingQuickLeadPayload = null;
+      syncQuickLeadSubmit();
+      setTimeout(() => { if (qlmWa) qlmWa.focus(); }, 0);
+    };
+    const closeQuickLeadModal = () => {
+      if (!quickLeadModal) return;
+      quickLeadModal.classList.remove('is-open');
+      quickLeadModal.setAttribute('aria-hidden', 'true');
+      if (qlmDupOverlay) {
+        qlmDupOverlay.classList.remove('is-open');
+        qlmDupOverlay.setAttribute('aria-hidden', 'true');
+      }
+      pendingQuickLeadPayload = null;
+      if (quickLeadSubmit) {
+        quickLeadSubmit.classList.remove('is-loading');
+        quickLeadSubmit.disabled = true;
+      }
+    };
+    window.openQuickLeadModal = openQuickLeadModal;
+
+    if (quickLeadClose) quickLeadClose.addEventListener('click', closeQuickLeadModal);
+    if (quickLeadCancel) quickLeadCancel.addEventListener('click', closeQuickLeadModal);
+    if (quickLeadModal) {
+      quickLeadModal.addEventListener('click', (e) => {
+        if (e.target === quickLeadModal) closeQuickLeadModal();
+      });
+    }
+    const openPaymentsModal = () => {
+      if (!paymentsModal) return;
+      if (paymentsIframe && paymentsIframe.src) {
+        try { paymentsIframe.contentWindow && paymentsIframe.contentWindow.postMessage({ type: 'ping' }, '*'); } catch(e) {}
+      }
+      paymentsModal.classList.add('is-open');
+      paymentsModal.setAttribute('aria-hidden', 'false');
+    };
+    const closePaymentsModal = () => {
+      if (!paymentsModal) return;
+      paymentsModal.classList.remove('is-open');
+      paymentsModal.setAttribute('aria-hidden', 'true');
+    };
+    if (paymentsClose) paymentsClose.addEventListener('click', closePaymentsModal);
+    if (paymentsModal) paymentsModal.addEventListener('click', (e) => { if (e.target === paymentsModal) closePaymentsModal(); });
+    
+    // Payment Creation Modal Functions
+    const paymentCreateModal = document.getElementById('paymentCreateModal');
+    const paymentCreateClose = document.getElementById('paymentCreateClose');
+    const paymentCreateForm = document.getElementById('paymentCreateForm');
+    const paycreateName = document.getElementById('paycreateName');
+    const paycreatePhone = document.getElementById('paycreatePhone');
+    const paycreateAmount = document.getElementById('paycreateAmount');
+    const paycreateDescription = document.getElementById('paycreateDescription');
+    const paycreateSubmit = document.getElementById('paycreateSubmit');
+    const paycreateStatus = document.getElementById('paycreateStatus');
+    
+    const openPaymentCreateModal = (name, phone, leadId) => {
+      if (!paymentCreateModal) return;
+      if (paycreateName) paycreateName.value = name || '';
+      if (paycreatePhone) paycreatePhone.value = phone || '';
+      if (paycreateAmount) paycreateAmount.value = '500';
+      if (paycreateDescription) paycreateDescription.value = 'Smartronic CCTV Installation Booking';
+      
+      // Store lead ID for later use
+      paymentCreateModal.setAttribute('data-lead-id', leadId || '');
+      
+      paymentCreateModal.classList.add('is-open');
+      paymentCreateModal.setAttribute('aria-hidden', 'false');
+      
+      // Initialize Materialize fields
+      if (window.M && M.updateTextFields) M.updateTextFields();
+    };
+    
+    const closePaymentCreateModal = () => {
+      if (!paymentCreateModal) return;
+      paymentCreateModal.classList.remove('is-open');
+      paymentCreateModal.setAttribute('aria-hidden', 'true');
+      
+      // Clear form status
+      if (paycreateStatus) paycreateStatus.textContent = '';
+      if (paycreateSubmit) paycreateSubmit.disabled = false;
+    };
+    
+    if (paymentCreateClose) paymentCreateClose.addEventListener('click', closePaymentCreateModal);
+    if (paymentCreateModal) paymentCreateModal.addEventListener('click', (e) => { 
+      if (e.target === paymentCreateModal) closePaymentCreateModal(); 
+    });
+    
+    // Payment form submission
+    if (paymentCreateForm) {
+      paymentCreateForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const name = paycreateName ? paycreateName.value.trim() : '';
+        const phone = paycreatePhone ? paycreatePhone.value.replace(/\D+/g, '').slice(-10) : '';
+        const amount = paycreateAmount ? parseFloat(paycreateAmount.value) : 0;
+        const description = paycreateDescription ? paycreateDescription.value.trim() : '';
+        const leadId = paymentCreateModal.getAttribute('data-lead-id') || '';
+        
+        if (!name || phone.length !== 10 || amount <= 0 || !description) {
+          if (window.M && M.toast) {
+            M.toast({html: 'Please fill all fields correctly'});
+          }
+          return;
+        }
+        
+        if (paycreateSubmit) paycreateSubmit.disabled = true;
+        if (paycreateStatus) paycreateStatus.textContent = 'Creating payment link...';
+        
+        try {
+          const response = await fetch('/payments/index.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, phone, amount, description })
+          });
+          
+          const data = await response.json();
+          
+          if (data.success && data.link) {
+            // Add payment link to WhatsApp textarea
+            if (leadId) {
+              const textarea = document.querySelector(`#waDraftText-${leadId}`);
+              if (textarea) {
+                const currentText = textarea.value.trim();
+                const customerName = paycreateName ? paycreateName.value.trim() : '';
+                const paymentMessage = `Dear ${customerName},
+
+To confirm your booking and quickly schedule installation, please send ₹500 to 8884831000.
+
+Or please use the RazorPay link below:
+${data.link}
+
+This will help us reserve your preferred slot and immediately assign a technician.
+
+Once assigned, you'll receive a notification with the exact installation time for you to have a look at.
+
+The best part — the remaining amount can be paid online only after the installation is completed to your satisfaction.
+
+Looking forward to getting this set up for you soon!`;
+                textarea.value = currentText ? `${currentText}\n\n${paymentMessage}` : paymentMessage;
+                
+                // Trigger Materialize update
+                if (window.M && M.textareaAutoResize) M.textareaAutoResize(textarea);
+              }
+            }
+            
+            if (window.M && M.toast) {
+              M.toast({html: 'Payment link created and added to WhatsApp message!'});
+            }
+            
+            closePaymentCreateModal();
+          } else {
+            throw new Error(data.error || 'Failed to create payment link');
+          }
+        } catch (error) {
+          if (paycreateStatus) paycreateStatus.textContent = 'Error: ' + error.message;
+          if (window.M && M.toast) {
+            M.toast({html: 'Error creating payment link: ' + error.message});
+          }
+        } finally {
+          if (paycreateSubmit) paycreateSubmit.disabled = false;
+        }
+      });
+    }
+    
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeQuickLeadModal();
+        closePaymentsModal();
+      }
+    });
+    const clampCams = () => {
+      if (!qlmCams) return;
+      const raw = String(qlmCams.value || '').trim();
+      const num = parseInt(raw, 10);
+      if (!isFinite(num) || isNaN(num)) return;
+      const clamped = Math.max(1, Math.min(32, num));
+      if (String(clamped) !== raw) qlmCams.value = String(clamped);
+    };
+    if (qlmCams) qlmCams.addEventListener('input', () => setTimeout(clampCams, 0));
+    if (qlmWa) qlmWa.addEventListener('input', () => setTimeout(syncQuickLeadSubmit, 0));
+    const syncRadioSelected = (name) => {
+      if (!quickLeadForm) return;
+      const inputs = Array.from(quickLeadForm.querySelectorAll(`input[name="${CSS.escape(name)}"]`));
+      inputs.forEach((inp) => {
+        const label = inp.closest('.qlm-radio');
+        if (!label) return;
+        label.classList.toggle('is-selected', !!inp.checked);
+      });
+    };
+    ['qlmDvr', 'qlmHdd', 'qlmRes'].forEach((n) => {
+      if (!quickLeadForm) return;
+      quickLeadForm.addEventListener('change', (e) => {
+        const t = e.target;
+        if (!(t instanceof HTMLInputElement)) return;
+        if (t.name === n) syncRadioSelected(n);
+      });
+      syncRadioSelected(n);
+    });
+
+    const highlightLeadById = (leadId) => {
+      const targetId = leadId ? String(leadId) : '';
+      if (!targetId) return;
+      const startedAt = Date.now();
+      const tick = () => {
+        const card = document.querySelector(`.lead-card[data-lead-id="${CSS.escape(targetId)}"]`);
+        if (card) {
+          card.classList.add('is-dup-highlight');
+          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setTimeout(() => { card.classList.remove('is-dup-highlight'); }, 4000);
+          return;
+        }
+        if (Date.now() - startedAt < 6000) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    };
+
+    const showDupOverlay = (payload, matches) => {
+      if (!qlmDupOverlay || !qlmDupList) return;
+      pendingQuickLeadPayload = payload;
+      console.log('[QuickLead] Showing duplicate overlay', { payload, matchesCount: Array.isArray(matches) ? matches.length : 0 });
+      qlmDupList.innerHTML = '';
+      const list = Array.isArray(matches) ? matches : [];
+      if (list.length === 0) {
+        qlmDupList.innerHTML = '<div class="hint">No matches returned.</div>';
       } else {
-        scrollToTopBtn.style.display = 'none';
-        refreshBtn.style.display = 'none';
+        qlmDupList.innerHTML = list.map((m) => {
+          const lid = String(m.lead_id || '');
+          const mid = String(m.mid || '');
+          const wa = String(m.whatsapp_number || '');
+          return `
+            <div class="qlm-dupe-item" data-lead-id="${escapeAttr(lid)}">
+              <div class="qlm-dupe-line1">${mid ? escapeHtml(mid) : 'Lead'}${lid ? ` · #${escapeHtml(lid)}` : ''}</div>
+              <div class="qlm-dupe-line2">${wa ? escapeHtml(wa) : ''}</div>
+            </div>
+          `;
+        }).join('');
       }
-    }
+      qlmDupOverlay.classList.add('is-open');
+      qlmDupOverlay.setAttribute('aria-hidden', 'false');
 
-    function syncMidViewButtons() {
-      if (!favoritesBtn || !historyBtn) return;
-      favoritesBtn.innerHTML = favoritesViewActive ? '<i class="fa-solid fa-xmark"></i>' : '<i class="fa-regular fa-heart"></i>';
-      historyBtn.innerHTML = historyViewActive ? '<i class="fa-solid fa-xmark"></i>' : '<i class="fa-solid fa-clock-rotate-left"></i>';
-    }
+      qlmDupOverlay.querySelectorAll('.qlm-dupe-item').forEach((el) => {
+        el.addEventListener('click', () => {
+          const leadId = el.getAttribute('data-lead-id') || '';
+          const digits = normalizeWaDigits(payload && payload.whatsapp_number ? payload.whatsapp_number : '');
+          const searchEl = document.getElementById('searchInput');
+          searchQuery = digits;
+          if (searchEl) searchEl.value = digits;
+          mineQuery = '';
+          followQuery = '';
+          statusQuery = '';
+          col1Query = '';
+          col2Query = '';
+          resetStateAndReload();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          highlightLeadById(leadId);
+        });
+      });
+    };
 
-    syncMidViewButtons();
-    syncFloatingMenuState();
+    const hideDupOverlay = () => {
+      if (!qlmDupOverlay) return;
+      qlmDupOverlay.classList.remove('is-open');
+      qlmDupOverlay.setAttribute('aria-hidden', 'true');
+    };
 
-    if (floatingMenuToggle) {
-      floatingMenuToggle.addEventListener('click', () => {
-        floatingButtonsHidden = !floatingButtonsHidden;
-        syncFloatingMenuState();
+    if (qlmDupCancel) qlmDupCancel.addEventListener('click', () => { closeQuickLeadModal(); });
+    if (qlmDupProceed) {
+      qlmDupProceed.addEventListener('click', async () => {
+        if (!pendingQuickLeadPayload) return;
+        console.log('[QuickLead] Duplicate overlay: proceed clicked', pendingQuickLeadPayload);
+        qlmDupProceed.disabled = true;
+        try {
+          const res = await fetch('lead_quick_add.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(Object.assign({}, pendingQuickLeadPayload, { force_create: 1, debug: 1 }))
+          });
+          const raw = await res.text();
+          console.log('[QuickLead] Force-create HTTP', res.status, raw);
+          const data = (() => { try { return JSON.parse(raw); } catch (e) { return null; } })();
+          if (!data) throw new Error('Invalid response');
+          console.log('[QuickLead] Force-create parsed', data);
+          if (data.success) {
+            hideDupOverlay();
+            closeQuickLeadModal();
+            if (typeof showAutoSaveNotification === 'function') {
+              const msg = data.mid ? `Lead created: ${data.mid}` : 'Lead created';
+              showAutoSaveNotification(msg, data.id || null, 'success');
+            }
+            resetStateAndReload();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+          }
+          if (typeof showAutoSaveNotification === 'function') showAutoSaveNotification(data.message || 'Failed to create lead', null, 'error');
+        } catch (e) {
+          console.error('[QuickLead] Force-create error', e);
+          if (typeof showAutoSaveNotification === 'function') showAutoSaveNotification('Error creating lead', null, 'error');
+        } finally {
+          qlmDupProceed.disabled = false;
+        }
       });
     }
 
+    if (quickLeadForm) {
+      quickLeadForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const camsVal = qlmCams ? String(qlmCams.value || '').trim() : '';
+        const dvrVal = (quickLeadForm.querySelector('input[name="qlmDvr"]:checked') || {}).value || '';
+        const hddVal = (quickLeadForm.querySelector('input[name="qlmHdd"]:checked') || {}).value || '';
+        const resVal = (quickLeadForm.querySelector('input[name="qlmRes"]:checked') || {}).value || '';
+        const waDigits = normalizeWaDigits(qlmWa ? qlmWa.value : '');
+        console.log('[QuickLead] Submit clicked', { camsVal, dvrVal, hddVal, resVal, waDigits });
+        if (!waDigits || waDigits.length < 10) {
+          if (typeof showAutoSaveNotification === 'function') showAutoSaveNotification('Enter a valid WhatsApp number', null, 'error');
+          syncQuickLeadSubmit();
+          return;
+        }
+        const camsNum = parseInt(camsVal, 10);
+        if (!isFinite(camsNum) || isNaN(camsNum) || camsNum < 1) {
+          if (typeof showAutoSaveNotification === 'function') showAutoSaveNotification('Enter cameras (1 to 32)', null, 'error');
+          syncQuickLeadSubmit();
+          return;
+        }
+        if (!dvrVal || !hddVal || !resVal) {
+          if (typeof showAutoSaveNotification === 'function') showAutoSaveNotification('Fill all fields', null, 'error');
+          syncQuickLeadSubmit();
+          return;
+        }
+        quickLeadSubmit.classList.add('is-loading');
+        quickLeadSubmit.disabled = true;
+        try {
+          const payload = {
+            num_cameras: String(Math.max(1, Math.min(32, camsNum))),
+            dvr_type: dvrVal,
+            hdd_size: hddVal,
+            camera_resolution: resVal,
+            whatsapp_number: waDigits,
+            debug: 1
+          };
+          console.log('[QuickLead] POST lead_quick_add payload', payload);
+          const res = await fetch('lead_quick_add.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const raw = await res.text();
+          console.log('[QuickLead] Create HTTP', res.status, raw);
+          const data = (() => { try { return JSON.parse(raw); } catch (e) { return null; } })();
+          if (!data) throw new Error('Invalid response');
+          console.log('[QuickLead] Create parsed', data);
+
+          if (data.success) {
+            closeQuickLeadModal();
+            if (typeof showAutoSaveNotification === 'function') {
+              const msg = data.mid ? `Lead created: ${data.mid}` : 'Lead created';
+              showAutoSaveNotification(msg, data.id || null, 'success');
+            }
+            resetStateAndReload();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+          }
+
+          if (data.duplicate) {
+            console.log('[QuickLead] Duplicate detected', data.matches_count, data.matches);
+            if (typeof showAutoSaveNotification === 'function') {
+              const countText = data.matches_count ? ` (${data.matches_count})` : '';
+              const msg = data.mid ? `WhatsApp already exists${countText}: ${data.mid}` : `WhatsApp already exists${countText}`;
+              showAutoSaveNotification(msg, data.lead_id || null, 'error');
+            }
+            showDupOverlay(payload, data.matches || []);
+            return;
+          }
+
+          if (typeof showAutoSaveNotification === 'function') showAutoSaveNotification(data.message || 'Failed to create lead', null, 'error');
+        } catch (err) {
+          console.error('[QuickLead] Create error', err);
+          if (typeof showAutoSaveNotification === 'function') showAutoSaveNotification('Error creating lead', null, 'error');
+        } finally {
+          if (quickLeadSubmit) quickLeadSubmit.classList.remove('is-loading');
+          syncQuickLeadSubmit();
+        }
+      });
+    }
+
+    function mountLeadFloatingMenu() {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('floating_menu') === '0') return;
+      if (!window.SmartFloatingMenu || typeof window.SmartFloatingMenu.mount !== 'function') return;
+      const allowedPages = <?php echo json_encode($allowedSmartPages); ?>;
+      const links = [
+        {
+          label: 'Favourites',
+          icon: favoritesViewActive ? 'fa-solid fa-xmark' : 'fa-regular fa-heart',
+          color: '#e11d48',
+          action: () => {
+            if (favoritesViewActive) {
+              exitMidsView();
+            } else {
+              historyViewActive = false;
+              loadMidsView('favorites', readStoredList(FAVORITES_KEY));
+            }
+            mountLeadFloatingMenu();
+          }
+        },
+        {
+          label: 'History',
+          icon: historyViewActive ? 'fa-solid fa-xmark' : 'fa-solid fa-clock-rotate-left',
+          color: '#2563eb',
+          action: () => {
+            if (historyViewActive) {
+              exitMidsView();
+            } else {
+              favoritesViewActive = false;
+              loadMidsView('history', readStoredList(HISTORY_KEY));
+            }
+            mountLeadFloatingMenu();
+          }
+        }
+      ];
+      if (allowedPages.includes('install')) {
+        links.push({
+          label: 'Installs',
+          icon: 'fa-solid fa-screwdriver-wrench',
+          color: '#2563eb',
+          url: `${window.location.origin}/admin_v2/smart/installs.php`
+        });
+      }
+      if (allowedPages.includes('quote')) {
+        links.push({
+          label: 'Quote Tool',
+          icon: 'fas fa-calculator',
+          color: '#6f42c1',
+          url: `${window.location.origin}/admin_v2/smart/quote.php`
+        });
+      }
+      links.push(
+        {
+          label: 'Payments',
+          icon: 'fa-solid fa-indian-rupee-sign',
+          color: '#059669',
+          action: () => {
+            openPaymentsModal();
+          }
+        },
+        {
+          label: 'New Lead',
+          icon: 'fa-solid fa-plus',
+          color: '#16a34a',
+          action: () => {
+            if (typeof window.openQuickLeadModal === 'function') window.openQuickLeadModal();
+          }
+        }
+      );
+      window.SmartFloatingMenu.mount({
+        links,
+        baseBottom: 140,
+        step: 60
+      });
+    }
+
+    mountLeadFloatingMenu();
+
     window.addEventListener('scroll', () => {
-      if (!floatingButtonsHidden && window.scrollY > 300) {
+      if (window.scrollY > 300) {
         scrollToTopBtn.style.display = 'flex';
         refreshBtn.style.display = 'flex';
       } else {
@@ -3421,26 +5292,6 @@ quoteModal.addEventListener('click', (e) => {
         top: 0,
         behavior: 'smooth'
       });
-    });
-
-    if (favoritesBtn) favoritesBtn.addEventListener('click', () => {
-      if (favoritesViewActive) {
-        exitMidsView();
-      } else {
-        historyViewActive = false;
-        loadMidsView('favorites', readStoredList(FAVORITES_KEY));
-      }
-      syncMidViewButtons();
-    });
-
-    if (historyBtn) historyBtn.addEventListener('click', () => {
-      if (historyViewActive) {
-        exitMidsView();
-      } else {
-        favoritesViewActive = false;
-        loadMidsView('history', readStoredList(HISTORY_KEY));
-      }
-      syncMidViewButtons();
     });
 
     // ==========================================

@@ -313,10 +313,33 @@
 
     // If maps are already shown, remove them (toggle functionality)
     const existingMaps = day.querySelectorAll('.map-preview-img');
+    const globeBtn = day.querySelector('.day-map-toggle');
+    const globeIcon = globeBtn ? globeBtn.querySelector('i') : null;
+
     if (existingMaps.length > 0) {
       existingMaps.forEach(img => img.remove());
+      if (globeIcon) {
+        globeIcon.classList.remove('fa-spinner', 'fa-spin');
+        globeIcon.classList.add('fa-globe');
+      }
       return;
     }
+
+    if (globeIcon) {
+      globeIcon.classList.remove('fa-globe');
+      globeIcon.classList.add('fa-spinner', 'fa-spin');
+    }
+
+    // Reset loading state after maps are loaded (simulated for sync logic or async if needed)
+    // Since this legacy version seems synchronous or direct img creation, we might not need complex loading state,
+    // but the user asked to rotate the globe.
+    setTimeout(() => {
+        if (globeIcon) {
+            globeIcon.classList.remove('fa-spinner', 'fa-spin');
+            globeIcon.classList.add('fa-globe');
+        }
+    }, 1000); // Small delay to show feedback if instant, or remove if not needed.
+
 
     const events = day.querySelectorAll('.event');
     events.forEach(ev => {

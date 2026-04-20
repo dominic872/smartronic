@@ -81,21 +81,36 @@
     <h2>Terms & Conditions</h2>
 <ul>
   <li><strong>Invoice validity:</strong> This invoice is valid only for the mentioned transaction.</li>
-  <li><strong>Returns &amp; refunds:</strong> No returns or refunds are accepted after installation.</li>
-  <li><strong>Manufacturer warranty:</strong> Warranty coverage as per the manufacturer’s policy — 2 years.</li>
-  <li><strong>Barcode:</strong> Please do not remove the product barcode to claim warranty.</li>
-  <li><strong>Service warranty:</strong> A 2-year service warranty is applicable for all Hikvision products.</li>
-  <li><strong>Exclusions:</strong> Warranty does not cover pins, cables, loose connections, oxidation, corrosion, SMPS, or network issues.</li>
-  <li><strong>Additional exclusions:</strong> SD cards, adapters, and camera stands are not covered under warranty. Wi-Fi, solar, and SIM-based cameras are covered only under brand/manufacturer warranty.</li>
-  <li><strong>Out-of-warranty service:</strong> A visiting charge of ₹750 will apply for out-of-warranty products.</li>
-  <li><strong>Office hours:</strong> Monday – Friday, 10:00 AM to 6:00 PM.</li>
-  <li><strong>Emergency service:</strong> Emergency or 24×7 service is not available.</li>
-  <li><strong>Service requests:</strong> Please send all service requests via WhatsApp for proper tracking and timely resolution.</li>
-  <li><strong>Support:</strong> <a href="tel:+918496080849">849 6080849</a> (WhatsApp preferred)</li>
-  <li><strong>Conduct policy:</strong> Any defamatory actions such as posting negative blogs, public complaints, or bad reviews will result in immediate termination of the service warranty.</li>
-</ul>
 
-  </div>
+  <li><strong>Returns &amp; refunds:</strong> No returns or refunds are accepted after installation.</li>
+
+  <li><strong>Manufacturer warranty:</strong> Warranty coverage as per the manufacturer’s policy — 2 years.</li>
+
+  <li><strong>Barcode:</strong> Please do not remove the product barcode to claim warranty.</li>
+
+  <li><strong>Service warranty:</strong> A 2-year service warranty is applicable for all Hikvision products, subject to the conditions below.</li>
+
+  <li><strong>Payment condition for warranty activation:</strong> Full payment must be completed on the same day of installation or within 72 hours. Service warranty benefits will be activated only after payment confirmation. Delayed payments may result in suspension or cancellation of service warranty.</li>
+
+  <li><strong>Installation visit condition:</strong> Customers are requested to ensure site readiness at the time of installation. If the technician is required to revisit the site multiple times due to customer-side delays, incomplete arrangements, or rescheduling beyond company control, the service warranty may stand void.</li>
+
+  <li><strong>Exclusions:</strong> Warranty does not cover pins, cables, loose connections, oxidation, corrosion, SMPS, or network issues.</li>
+
+  <li><strong>Additional exclusions:</strong> SD cards, adapters, and camera stands are not covered under warranty. Wi-Fi, solar, and SIM-based cameras are covered only under brand/manufacturer warranty.</li>
+
+  <li><strong>Out-of-warranty service:</strong> A visiting charge of ₹750 will apply for out-of-warranty products.</li>
+
+  <li><strong>Office hours:</strong> Monday – Friday, 10:00 AM to 6:00 PM.</li>
+
+  <li><strong>Emergency service:</strong> Emergency or 24×7 service is not available.</li>
+
+  <li><strong>Service requests:</strong> Please send all service requests via WhatsApp for proper tracking and timely resolution.</li>
+
+  <li><strong>Support:</strong> <a href="tel:+918496080849">849 6080849</a> (WhatsApp preferred)</li>
+
+  <li><strong>Conduct policy:</strong> Any defamatory actions such as posting negative blogs, public complaints, or bad reviews without allowing resolution through official communication channels may result in immediate termination of the service warranty.</li>
+</ul>
+</div>
 
   <div class="footer">
     Mobile: 8496080849 | hello@smartronic.online | www.smartronic.online<br>

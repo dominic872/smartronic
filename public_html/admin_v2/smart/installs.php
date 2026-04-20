@@ -12,19 +12,73 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // Check if the cookie exists and has the right value
-if (
-    !isset($_COOKIE['auth_role']) || 
-    ($_COOKIE['auth_role'] !== 'admin' && $_COOKIE['auth_role'] !== 'market')
-) {
-    echo "No access";
-    exit; // Stop processing the rest of the page
-}
+requireSmartPageAccess('install', $role, $authPages);
 
 // If the user passes the check, the rest of your page code runs below...
 
 
 // Set timezone to India
 date_default_timezone_set('Asia/Kolkata');
+
+function findDompdfAutoloadPath(): ?string {
+    $candidates = [
+        __DIR__ . '/../../vendor/autoload.php',
+        __DIR__ . '/../../../vendor/autoload.php',
+        __DIR__ . '/../vendor/autoload.php',
+        __DIR__ . '/../../admin/vendor/autoload.php',
+    ];
+
+    foreach ($candidates as $candidate) {
+        if (is_file($candidate)) {
+            return $candidate;
+        }
+    }
+
+    return null;
+}
+
+function streamInstallInvoicePdf(string $html, string $filename = 'Smartronic_Invoice.pdf'): void {
+    $autoloadPath = findDompdfAutoloadPath();
+    if ($autoloadPath === null) {
+        http_response_code(500);
+        header('Content-Type: text/plain; charset=utf-8');
+        echo 'Dompdf autoload not found.';
+        exit;
+    }
+
+    require_once $autoloadPath;
+
+    $optionsClass = 'Dompdf\\Options';
+    $dompdfClass = 'Dompdf\\Dompdf';
+
+    if (!class_exists($optionsClass) || !class_exists($dompdfClass)) {
+        http_response_code(500);
+        header('Content-Type: text/plain; charset=utf-8');
+        echo 'Dompdf is not available.';
+        exit;
+    }
+
+    $cleanHtml = preg_replace('#<script\b[^>]*>.*?</script>#is', '', $html);
+    $documentHtml = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"></head><body style="margin:0;padding:16px;background:#fff;font-family:\'DejaVu Sans\',sans-serif;">'
+        . ($cleanHtml ?: '')
+        . '</body></html>';
+
+    $options = new $optionsClass();
+    $options->set('isRemoteEnabled', true);
+    $options->set('isHtml5ParserEnabled', true);
+    $options->set('defaultFont', 'DejaVu Sans');
+    $options->set('tempDir', sys_get_temp_dir());
+
+    $dompdf = new $dompdfClass($options);
+    $dompdf->setPaper('A4', 'portrait');
+    $dompdf->loadHtml($documentHtml, 'UTF-8');
+    $dompdf->render();
+
+    $safeFilename = preg_replace('/[^A-Za-z0-9._-]+/', '_', $filename);
+    header('Content-Type: application/pdf');
+    $dompdf->stream($safeFilename ?: 'Smartronic_Invoice.pdf', ['Attachment' => 1]);
+    exit;
+}
 
 // Handle query string parameters - this is legacy code that should be removed
 // as it conflicts with the proper API endpoints below
@@ -124,9 +178,12 @@ if (isset($_GET['id']) && !isset($_GET['get_extras']) && !isset($_GET['get_payme
             'helper' => $row['helper'],
             'order' => $row['order'],
             'resolution' => $row['resolution'],
+            'brand' => isset($row['brand']) ? $row['brand'] : '',
+            'cam_type' => isset($row['cam_type']) ? $row['cam_type'] : '',
             'map' => $row['Map'],
             'rack' => $row['rack'],
-            'notes' => isset($row['notes']) ? $row['notes'] : ''
+            'notes' => isset($row['notes']) ? $row['notes'] : '',
+            'pdf_sent' => isset($row['pdf_sent']) ? $row['pdf_sent'] : ''
         ];
         echo json_encode($data);
     } else {
@@ -167,15 +224,6 @@ if ($isApiCall && $_SERVER['REQUEST_METHOD'] === 'PATCH') {
 }
 
 if ($isApiCall && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    header('Content-Type: application/json');
-
-
-    if ($conn->connect_error) {
-        http_response_code(500);
-        echo json_encode(['error' => 'DB connection failed']);
-        exit;
-    }
-
     $data = json_decode(file_get_contents('php://input'), true);
     
     // Debug: Log the received data
@@ -183,7 +231,38 @@ if ($isApiCall && $_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if (!$data) {
         http_response_code(400);
+        header('Content-Type: application/json');
         echo json_encode(['status' => 'error', 'message' => 'No data received or invalid JSON']);
+        exit;
+    }
+
+    if (isset($data['invoicePdf']) && $data['invoicePdf'] === true) {
+        $invoiceHtml = isset($data['html']) ? (string)$data['html'] : '';
+        $orderId = isset($data['id']) ? trim((string)$data['id']) : 'invoice';
+        if ($invoiceHtml === '') {
+            http_response_code(400);
+            header('Content-Type: application/json');
+            echo json_encode(['status' => 'error', 'message' => 'Invoice HTML is required']);
+            exit;
+        }
+
+        if ($orderId !== '' && !$conn->connect_error) {
+            $pdfStmt = $conn->prepare("UPDATE orders SET pdf_sent = 'yes' WHERE idno = ?");
+            if ($pdfStmt) {
+                $pdfStmt->bind_param("s", $orderId);
+                $pdfStmt->execute();
+                $pdfStmt->close();
+            }
+        }
+
+        streamInstallInvoicePdf($invoiceHtml, 'Smartronic_Invoice_' . $orderId . '.pdf');
+    }
+
+    header('Content-Type: application/json');
+
+    if ($conn->connect_error) {
+        http_response_code(500);
+        echo json_encode(['error' => 'DB connection failed']);
         exit;
     }
 
@@ -211,12 +290,18 @@ if ($isApiCall && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $type = $data['type'] ?? '';
     $location = $data['location'] ?? '';
     $time = $data['time'] ?? '';
-    $date = $data['date'] ?? '';
+    $date = array_key_exists('date', $data) ? $data['date'] : null;
+    if (is_string($date)) {
+        $t = trim($date);
+        if ($t === '' || strtolower($t) === 'null') $date = null;
+    }
     $owner = $data['owner'] ?? '';
     $technician = $data['technician'] ?? '';
     $helper = $data['helper'] ?? '';
     $order = (int)($data['order'] ?? 0);
     $resolution = $data['resolution'] ?? '';
+    $brand = $data['brand'] ?? '';
+    $cam_type = $data['cam_type'] ?? '';
     $map = $data['map'] ?? '';
     $rack = $data['rack'] ?? '';
     $notes = isset($data['notes']) ? $data['notes'] : '';
@@ -230,12 +315,12 @@ if ($isApiCall && $_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if ($exists) {
         // Update existing record
-        $stmt = $conn->prepare("UPDATE orders SET name=?, quantity=?, bullets=?, dome=?, storage=?, monitor=?, product=?, area=?, time=?, date=?, Owner=?, technician=?, helper=?, `order`=?, resolution=?, Map=?, rack=?, notes=? WHERE idno=?");
-        $stmt->bind_param("siiisssssssssisssss", $name, $cams, $bullets, $dome, $hdd, $monitor, $type, $location, $time, $date, $owner, $technician, $helper, $order, $resolution, $map, $rack, $notes, $id);
+        $stmt = $conn->prepare("UPDATE orders SET name=?, quantity=?, bullets=?, dome=?, storage=?, monitor=?, product=?, area=?, time=?, date=?, Owner=?, technician=?, helper=?, `order`=?, resolution=?, brand=?, cam_type=?, Map=?, rack=?, notes=? WHERE idno=?");
+        $stmt->bind_param("siiisssssssssisssssss", $name, $cams, $bullets, $dome, $hdd, $monitor, $type, $location, $time, $date, $owner, $technician, $helper, $order, $resolution, $brand, $cam_type, $map, $rack, $notes, $id);
     } else {
         // Insert new record
-        $stmt = $conn->prepare("INSERT INTO orders (idno, name, quantity, bullets, dome, storage, monitor, product, area, time, date, Owner, technician, helper, `order`, resolution, Map, rack, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssiiissssssssissss", $id, $name, $cams, $bullets, $dome, $hdd, $monitor, $type, $location, $time, $date, $owner, $technician, $helper, $order, $resolution, $map, $rack, $notes);
+        $stmt = $conn->prepare("INSERT INTO orders (idno, name, quantity, bullets, dome, storage, monitor, product, area, time, date, Owner, technician, helper, `order`, resolution, brand, cam_type, Map, rack, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssiiissssssssissssss", $id, $name, $cams, $bullets, $dome, $hdd, $monitor, $type, $location, $time, $date, $owner, $technician, $helper, $order, $resolution, $brand, $cam_type, $map, $rack, $notes);
     }
     $stmt->execute();
     
@@ -277,17 +362,28 @@ if ($isApiCall && $_SERVER['REQUEST_METHOD'] === 'DELETE') {
         exit;
     }
 
-    // ✅ Check if user is admin
-    if (!isset($_COOKIE['auth_role']) || $_COOKIE['auth_role'] !== 'admin') {
-        http_response_code(403);
-        echo json_encode(['success' => false, 'message' => 'You do not have permission to delete this.']);
-        exit;
-    }
-
     $data = json_decode(file_get_contents('php://input'), true);
     $id = $data['id'] ?? '';
 
     if ($id) {
+        $role = isset($_COOKIE['auth_role']) ? $_COOKIE['auth_role'] : '';
+        if ($role !== 'admin') {
+            $check = $conn->prepare("SELECT `date` FROM orders WHERE idno = ? LIMIT 1");
+            $check->bind_param("s", $id);
+            $check->execute();
+            $res = $check->get_result();
+            $row = $res ? $res->fetch_assoc() : null;
+            $check->close();
+            $dateVal = $row && array_key_exists('date', $row) ? $row['date'] : null;
+            $dateTrim = is_string($dateVal) ? trim($dateVal) : '';
+            $isUnscheduled = ($dateVal === null) || ($dateTrim === '') || ($dateTrim === '0000-00-00');
+            if (!$isUnscheduled) {
+                http_response_code(403);
+                echo json_encode(['success' => false, 'message' => 'You do not have permission to delete this.']);
+                exit;
+            }
+        }
+
         $stmt = $conn->prepare("UPDATE orders SET record_status = 'DELETED' WHERE idno = ?");
         $stmt->bind_param("s", $id);
         if ($stmt->execute()) {
@@ -333,12 +429,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$isApiCall) {
     $type = $data['type'] ?? '';
     $location = $data['location'] ?? '';
     $time = $data['time'] ?? '';
-    $date = $data['date'] ?? '';
+    $date = array_key_exists('date', $data) ? $data['date'] : null;
+    if (is_string($date)) {
+        $t = trim($date);
+        if ($t === '' || strtolower($t) === 'null') $date = null;
+    }
     $owner = $data['owner'] ?? '';
     $technician = $data['technician'] ?? '';
     $helper = $data['helper'] ?? '';
     $order = (int)($data['order'] ?? 0);
     $resolution = $data['resolution'] ?? '';
+    $brand = $data['brand'] ?? '';
+    $cam_type = $data['cam_type'] ?? '';
     $map = $data['map'] ?? '';
     $rack = $data['rack'] ?? '';
     $notes = isset($data['notes']) ? $data['notes'] : '';
@@ -352,12 +454,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$isApiCall) {
     
     if ($exists) {
         // Update existing record
-        $stmt = $conn->prepare("UPDATE orders SET name=?, quantity=?, bullets=?, dome=?, storage=?, monitor=?, product=?, area=?, time=?, date=?, Owner=?, technician=?, helper=?, `order`=?, resolution=?, Map=?, rack=?, notes=? WHERE idno=?");
-        $stmt->bind_param("siiisssssssssisssss", $name, $cams, $bullets, $dome, $hdd, $monitor, $type, $location, $time, $date, $owner, $technician, $helper, $order, $resolution, $map, $rack, $notes, $id);
+        $stmt = $conn->prepare("UPDATE orders SET name=?, quantity=?, bullets=?, dome=?, storage=?, monitor=?, product=?, area=?, time=?, date=?, Owner=?, technician=?, helper=?, `order`=?, resolution=?, brand=?, cam_type=?, Map=?, rack=?, notes=? WHERE idno=?");
+        $stmt->bind_param("siiisssssssssisssssss", $name, $cams, $bullets, $dome, $hdd, $monitor, $type, $location, $time, $date, $owner, $technician, $helper, $order, $resolution, $brand, $cam_type, $map, $rack, $notes, $id);
     } else {
         // Insert new record
-        $stmt = $conn->prepare("INSERT INTO orders (idno, name, quantity, bullets, dome, storage, monitor, product, area, time, date, Owner, technician, helper, `order`, resolution, Map, rack, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssiiissssssssissss", $id, $name, $cams, $bullets, $dome, $hdd, $monitor, $type, $location, $time, $date, $owner, $technician, $helper, $order, $resolution, $map, $rack, $notes);
+        $stmt = $conn->prepare("INSERT INTO orders (idno, name, quantity, bullets, dome, storage, monitor, product, area, time, date, Owner, technician, helper, `order`, resolution, brand, cam_type, Map, rack, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssiiissssssssissssss", $id, $name, $cams, $bullets, $dome, $hdd, $monitor, $type, $location, $time, $date, $owner, $technician, $helper, $order, $resolution, $brand, $cam_type, $map, $rack, $notes);
     }
     $stmt->execute();
     
@@ -400,12 +502,32 @@ if (isset($_GET['render_material'])) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>CCTV Install Calendar</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <link rel="stylesheet" href="../css/installs.css">
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB7BKkBQEI0WpbFFjn8K4VWKRaYeIs3GhU&libraries=places,geometry"></script>
+  <link rel="stylesheet" href="../css/installs.css?v=20260420a">
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB7BKkBQEI0WpbFFjn8K4VWKRaYeIs3GhU&libraries=places,geometry&loading=async"></script>
   <script src="../js/openlocationcode.js"></script>
   <!-- Transaction Scanner Dependencies -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js" crossorigin="anonymous"></script>
   <script src="../../invoice/scanner.js"></script>
+  <script>
+    window.INSTALLS_WA_USERS = <?php
+      $usersFile = dirname(__DIR__) . '/users.json';
+      $waUsers = [];
+      if (is_file($usersFile)) {
+        $rawUsers = json_decode(file_get_contents($usersFile), true);
+        if (is_array($rawUsers)) {
+          foreach ($rawUsers as $u) {
+            if (!is_array($u)) continue;
+            $name = isset($u['name']) ? trim((string)$u['name']) : '';
+            if ($name === '' && isset($u['username'])) $name = trim((string)$u['username']);
+            $phone = isset($u['phone']) ? trim((string)$u['phone']) : '';
+            if ($name === '' || $phone === '') continue;
+            $waUsers[] = ['name' => $name, 'phone' => $phone];
+          }
+        }
+      }
+      echo json_encode($waUsers, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    ?>;
+  </script>
   <style>
     @media (max-width: 768px) {
       #main-logo {
@@ -425,14 +547,6 @@ if (isset($_GET['render_material'])) {
       <?php echo "<h2>Hello, $nameAssign!</h2>";?>
     </div>
 
-      
-    <div class="nav-buttons">
-     
-      <i class="fas fa-chevron-up" onclick="changeWeek(-1)" title="Previous Week"></i>
-      <i class="fas fa-chevron-down" onclick="changeWeek(1)" title="Next Week"></i>
-     
-      
-    </div>
   </div>
 
   <div class="calendar">
@@ -486,6 +600,167 @@ if (isset($_GET['render_material'])) {
       
       .collapsible-section .section-content {
         transition: all 0.3s ease;
+      }
+
+      .paylink-collapsible-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 14px 0 10px;
+        cursor: pointer;
+        color: #1e40af;
+        font-weight: 700;
+      }
+
+      .paylink-caret {
+        margin-left: auto;
+        transition: transform 0.3s ease;
+      }
+
+      .paylink-panel {
+        margin-bottom: 24px;
+        display: none;
+      }
+
+      .paylink-form-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 18px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+        padding: 18px;
+      }
+
+      .paylink-form-title {
+        margin: 0 0 12px;
+        font-weight: 700;
+        font-size: 16px;
+        color: #111827;
+      }
+
+      .paylink-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      @media (max-width: 900px) {
+        .paylink-grid { grid-template-columns: 1fr; }
+      }
+
+      .paylink-field label {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 6px;
+      }
+
+      .paylink-field input {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+        outline: none;
+        font-size: 14px;
+        background: #fff;
+      }
+
+      .paylink-field input:focus {
+        border-color: #93c5fd;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+      }
+
+      .paylink-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-top: 12px;
+      }
+
+      .paylink-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px 14px;
+        border-radius: 10px;
+        border: 1px solid transparent;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 13px;
+      }
+
+      .paylink-btn-primary {
+        background: #2563eb;
+        color: #fff;
+      }
+
+      .paylink-btn-primary:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+      }
+
+      .paylink-btn-flat {
+        background: transparent;
+        border-color: #e5e7eb;
+        color: #374151;
+      }
+
+      .paylink-btn-wa {
+        background: #16a34a;
+        color: #fff;
+        text-decoration: none;
+      }
+
+      .paylink-status {
+        color: #6b7280;
+        font-weight: 700;
+        font-size: 13px;
+      }
+
+      .paylink-result-box {
+        margin-top: 14px;
+        padding: 12px;
+        border: 1px dashed #d1d5db;
+        border-radius: 12px;
+        background: rgba(248, 250, 252, 0.6);
+      }
+
+      .paylink-result-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+
+      .paylink-result-link {
+        word-break: break-all;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 13px;
+      }
+
+      .invoice-proforma-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 8px;
+      }
+
+      .invoice-proforma-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 800;
+        color: #374151;
+        font-size: 13px;
+        cursor: pointer;
+      }
+
+      .invoice-proforma-label input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        margin: 0;
       }
       
       /* Extras overlay styling */
@@ -679,10 +954,104 @@ if (isset($_GET['render_material'])) {
     </div>
 
     <div id="tab-requirement" class="tab-content" style="flex:1; overflow: auto; padding: 10px; display: block;">
-      <div id="popupForm" class="inline-edit-form install-inline-edit-form">
-        <div class="install-popup-title">Add/Edit Install</div>
-        <form id="installForm"></form>
+   
+    <div class="popup" id="popupForm">
+    <h2>Add/Edit Install</h2>
+    <form id="installForm">
+      <input type="text" id="id" placeholder="ID" required>
+      <input type="text" id="name" placeholder="Name" required>
+      <div class="form-row">
+        <select id="resolution" required>
+          <option value="">Resolution</option>
+          <option value="2 MP">2 MP</option>
+          <option value="5 MP">5 MP</option>
+        </select>
+        <select id="brand">
+          <option value="">Brand</option>
+          <option value="PRAMA" selected>PRAMA</option>
+          <option value="CP PLUS">CP PLUS</option>
+          <option value="Hikvision">Hikvision</option>
+        </select>
+        <select id="cam_type">
+          <option value="">Camera Type</option>
+          <option value="Normal with mic">Normal with mic</option>
+          <option value="Hybrid">Hybrid</option>
+          <option value="Full colour">Full colour</option>
+        </select>
+       
       </div>
+      <div class="form-row">
+         <input type="number" id="cams" placeholder="Total Cams" required>
+        <input type="number" id="bullets" placeholder="Bullets">
+        <input type="number" id="dome" placeholder="Dome">
+      </div>
+      <select id="type">
+        <option value="">Select Type</option>
+        <option value="DVR">DVR</option>
+        <option value="NVR">NVR</option>
+        <option value="WIFI">WIFI</option>
+      </select>
+      
+      <select id="hdd">
+        <option value="">Select HDD</option>
+        <option value="500GB">500GB</option>
+        <option value="1TB">1TB</option> 
+        <option value="2TB">2TB</option>
+        <option value="3TB">3TB</option>
+        <option value="4TB">4TB</option>
+        <option value="6TB">6TB</option>
+      </select>
+      <select id="monitor">
+        <option value="">Select Monitor</option>
+        <option value="15 Inches">15 Inches</option>
+        <option value="19 Inches">19 Inches</option>
+        <option value="22 Inches">22 Inches</option>
+        <option value="24 Inches">24 Inches</option>
+      </select>
+      <select id="rack">
+        <option value="">Rack</option>
+        <option value="2U">2U</option>
+        <option value="4U">4U</option> 
+      </select>
+      
+      <input type="text" id="location" placeholder="Location">
+      
+      <input type="text" id="map" placeholder="Map Link">
+      <input type="time" id="time">
+      <input type="date" id="date" required>
+      <select id="owner">
+        <option value="">Select Owner</option>
+        <option value="VAR">VAR</option>
+        <option value="AMR">AMR</option>
+        <option value="ZOY">ZOY</option>
+        <option value="DOM">DOM</option>
+      </select>
+      <select id="technician">
+        <option value="">Select Technician</option>
+        <option value="SYED">SYED</option>
+        
+        <option value="KARTHICK">KARTHICK</option>
+        <option value="ABDUL">ABDUL</option>
+        
+        <option value="DAVID">DAVID</option>
+        <option value="PAWAN">PAWAN</option>
+        <option value="SIREN">SIREN</option>
+      </select>
+      <select id="helper">
+        <option value="">Select Helper</option>
+        <option value="KARTHIK">KARTHIK</option>
+        <option value="ABDUL">ABDUL</option>
+        <option value="SYED 2">SYED 2</option>
+        <option value="Gowtham">Gowtham</option>
+      </select>
+      <input type="text" id="notes" placeholder="Notes" />
+      <button type="submit">Save</button>
+      
+    </form>
+   
+  </div>
+        
+      
     </div>
     <div id="tab-material" class="tab-content" style="flex:1; overflow: auto; padding: 10px; align-items: center; margin: auto; width: 80%; display: none;">
       <div id="material-content">Click 'Get Material' to load content...</div>
@@ -772,25 +1141,17 @@ if (isset($_GET['render_material'])) {
     </div>
   </div>
 </div> 
-<script src="../js/install_form_component.js"></script>
-<script>
-  (function () {
-    const form = document.getElementById('installForm');
-    if (form && window.SmartronicComponents && window.SmartronicComponents.InstallRequirementForm) {
-      window.SmartronicComponents.InstallRequirementForm.mount(form);
-    }
-  })();
-</script>
-<script src="../js/installs.utils.js"></script>
-<script src="../js/installs.core.js"></script>
-<script src="../js/installs.notes.js"></script>
-<script src="../js/installs.stats.js"></script>
-<script src="../js/installs.modals.js"></script>
-<script src="../js/installs.content.js"></script>
-<script src="../js/installs.overlay.js"></script>
-<script src="../js/installs.payments.js"></script>
-<script src="../js/installs.integrations.js"></script>
-<script src="../js/installs.main.js"></script>
+<script src="../js/installs.utils.js?v=20260404"></script>
+<script src="../js/installs.core.js?v=20260417a"></script>
+<script src="../js/installs.notes.js?v=20260420a"></script>
+<script src="../js/floating_icon_menu.js?v=20260404c"></script>
+<script src="../js/installs.stats.js?v=20260404b"></script>
+<script src="../js/installs.modals.js?v=20260404"></script>
+<script src="../js/installs.content.js?v=20260404"></script>
+<script src="../js/installs.overlay.js?v=20260404"></script>
+<script src="../js/installs.payments.js?v=20260404"></script>
+<script src="../js/installs.integrations.js?v=20260417a"></script>
+<script src="../js/installs.main.js?v=20260417a"></script>
 
 <script>
 // Helper function to get current order ID
@@ -828,7 +1189,7 @@ function generateQuoteFromForm() {
     const fields = [
         'id', 'name', 'cams', 'bullets', 'dome', 'hdd', 'monitor', 'type',
         'location', 'time', 'date', 'owner', 'technician', 'helper', 
-        'resolution', 'map', 'rack', 'notes'
+        'resolution', 'brand', 'cam_type', 'map', 'rack', 'notes'
     ];
     
     const formData = {};
@@ -910,10 +1271,16 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Wait for all modules to load
     setTimeout(function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const shouldOpenStats = urlParams.get('open_stats') === '1';
         if (typeof window.render === 'function') {
             window.render(function() {
                 if (typeof window.openOwnerStatsModal === 'function') {
-                    window.openOwnerStatsModal(true);
+                    if (shouldOpenStats) {
+                        window.openOwnerStatsModal(false);
+                    } else {
+                        window.openOwnerStatsModal(true);
+                    }
                 }
                 if (window.innerWidth <= 768) {
                     const todayElement = document.querySelector('.day.today');

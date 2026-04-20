@@ -1,4 +1,3 @@
-
 <?php
 
 // ==========================================
@@ -33,6 +32,39 @@ if (file_exists($configPhp)) {
             // Fallback if schedule missing: Use first in list
             if (isset($whatsappNumberList) && count($whatsappNumberList) > 0) {
                 $whatsappNumber = preg_replace('/\D+/', '', $whatsappNumberList[0]);
+            }
+        }
+    }
+
+    $whatsappPickedByAssignee = null;
+    $whatsappAssigneeCookie = isset($_COOKIE['assignee']) ? (string)$_COOKIE['assignee'] : '';
+    $whatsappAssigneeMatch = null;
+    if ($whatsappAssigneeCookie !== '' && isset($whatsappNumberLabels) && is_array($whatsappNumberLabels)) {
+        $cookieRaw = trim($whatsappAssigneeCookie);
+        $cookieName = strtolower($cookieRaw);
+        $cookieCode = strtoupper(preg_replace('/[^a-zA-Z]/', '', $cookieRaw));
+        if ($cookieCode !== '') $cookieCode = substr($cookieCode, 0, 3);
+        $cookieDigits = preg_replace('/\D+/', '', $cookieRaw);
+        if (strlen($cookieDigits) > 10 && substr($cookieDigits, 0, 2) === '91') $cookieDigits = substr($cookieDigits, -10);
+        if (strlen($cookieDigits) > 10) $cookieDigits = substr($cookieDigits, -10);
+
+        foreach ($whatsappNumberLabels as $num => $label) {
+            if (!is_string($label)) continue;
+            $numDigits = preg_replace('/\D+/', '', (string)$num);
+            $labelName = strtolower(trim($label));
+            $labelCode = strtoupper(preg_replace('/[^a-zA-Z]/', '', $label));
+            if ($labelCode !== '') $labelCode = substr($labelCode, 0, 3);
+            $numLast10 = strlen($numDigits) >= 10 ? substr($numDigits, -10) : $numDigits;
+
+            if (($cookieDigits !== '' && $numLast10 !== '' && $cookieDigits === $numLast10) ||
+                ($cookieName !== '' && $cookieName === $labelName) ||
+                ($cookieCode !== '' && $labelCode !== '' && $cookieCode === $labelCode)) {
+                if ($numDigits !== '') {
+                    $whatsappPickedByAssignee = $numDigits;
+                    $whatsappAssigneeMatch = ['label' => $label, 'code' => $labelCode, 'number' => $numDigits];
+                    $whatsappNumber = $numDigits;
+                }
+                break;
             }
         }
     }

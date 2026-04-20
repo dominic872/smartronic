@@ -30,6 +30,11 @@ jQuery(document).ready(function($) {
             camera_resolution: $('input[name="camera-resolution"]:checked').val(),
             whatsapp_number: $('#num-whatsapp').val(),
         };
+        const urlParams = new URLSearchParams(window.location.search);
+        const dryRunParam = urlParams.get('dry_run') || urlParams.get('no_db');
+        if (dryRunParam && dryRunParam !== '0') {
+            formData.dry_run = dryRunParam;
+        }
 
         console.log(formData, "hello");
 

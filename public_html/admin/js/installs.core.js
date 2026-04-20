@@ -135,14 +135,24 @@
       const monthIndex = dayDate.getMonth() % w.monthColors.length;
       if (dateStr === window.formatDate(new Date())) day.classList.add('today');
       const dateBgColor = w.monthColors[monthIndex];
-      day.innerHTML = `<span class="date" style="background-color:${dateBgColor}" onclick="console.log('Date clicked'); window.toggleDayMaps(this)" title="Click to show/hide map locations">${dayDate.getDate()} ${dayDate.toLocaleString('default', { month: 'short' }).toUpperCase()}</span>`;
+      day.innerHTML = `
+        <div class="day-header">
+          <span class="date" style="background-color:${dateBgColor}" title="Click to show/hide map locations" data-original-text="${dayDate.getDate()} ${dayDate.toLocaleString('default', { month: 'short' }).toUpperCase()}">
+            ${dayDate.getDate()} ${dayDate.toLocaleString('default', { month: 'short' }).toUpperCase()}
+          </span>
+          <button class="day-map-toggle" onclick="console.log('Globe clicked'); window.toggleDayMaps(this)" title="Show Map">
+            <i class="fa-solid fa-globe"></i>
+          </button>
+        </div>
+      `;
       // console.log('Building day:', dateStr); // Debug log
       fetchLeaves(dateStr).then(leaves => {
         if (leaves.length > 0) {
           const leaveDiv = document.createElement('div');
           leaveDiv.className = 'leaves';
           leaveDiv.innerHTML = `<strong><i class="fas fa-user-times"></i></strong> ${leaves.map(l => l.fullname).join(', ')}`;
-          day.querySelector('.date').after(leaveDiv);
+          const headerEl = day.querySelector('.day-header') || day.querySelector('.date');
+          headerEl.after(leaveDiv);
         }
       });
 

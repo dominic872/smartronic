@@ -24,7 +24,7 @@ ini_set('display_errors', 1);
   <style>
     /* Base layout — scoped to invoice wrapper to avoid affecting parent page */
     .invoice-body { 
-      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; 
+      font-family: "DejaVu Sans", Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; 
       color: #1f2937; 
       line-height: 1.5; 
     }
@@ -159,7 +159,7 @@ $invoice_number = $formatted_date . "-" . $id . "-" . $code;
 <div class="invoice-body">
 
   <!-- Controls: textarea and Proforma toggle -->
-  <div id="scannerCollapsibleHeader" style="display:flex; align-items:center; gap:8px; margin-bottom:10px; cursor:pointer; color:#1e40af; font-weight:700;">
+  <div id="scannerCollapsibleHeader" class="paylink-collapsible-header">
     <i class="fas fa-receipt"></i> Transaction Scanner
     <i class="fas fa-caret-down" style="margin-left:auto;"></i>
   </div>
@@ -252,7 +252,7 @@ $invoice_number = $formatted_date . "-" . $id . "-" . $code;
 <div id="invoice">
   <div class="wp-block-site-logo">
     <a href="/" class="custom-logo-link" rel="home">
-      <img width="200" height="49" src="/content/uploads/2025/01/smarthome-black2.svg" class="custom-logo" alt="Smartronic">
+      <img width="200" height="49" src="https://www.smartronic.online/content/uploads/2025/01/smarttronic-1200-300-trans.png" class="custom-logo" alt="Smartronic">
     </a>
   </div>
 
@@ -301,8 +301,8 @@ $invoice_number = $formatted_date . "-" . $id . "-" . $code;
             
           
           <td>1</td>
-          <td>₹<?php echo @htmlspecialchars($price); ?></td>
-          <td> <strong>₹<?php echo @htmlspecialchars($price); ?> </strong></td>
+          <td>&#8377;<?php echo @htmlspecialchars($price); ?></td>
+          <td> <strong>&#8377;<?php echo @htmlspecialchars($price); ?> </strong></td>
         </tr>
         <tr>
           <td colspan="4">
@@ -319,34 +319,51 @@ $invoice_number = $formatted_date . "-" . $id . "-" . $code;
     <table>
       <tr>
         <td>Total Amount Payable</td>
-        <td id="payable">₹<?php echo @htmlspecialchars($price); ?> </td>
+        <td id="payable">&#8377;<?php echo @htmlspecialchars($price); ?> </td>
       </tr>
       <tr id="paidRow">
         <td>Total Amount PAID</td>
-        <td id="paid"><strong>₹<?php echo @htmlspecialchars($price); ?> </strong></td>
+        <td id="paid"><strong>&#8377;<?php echo @htmlspecialchars($price); ?> </strong></td>
       </tr>
     </table>
   </div>
 
   <div class="terms" id="termsSection">
-    <h2>Terms & Conditions</h2>
 
+<div class="terms">
+    <h2>Terms & Conditions</h2>
 <ul>
   <li><strong>Invoice validity:</strong> This invoice is valid only for the mentioned transaction.</li>
+
   <li><strong>Returns &amp; refunds:</strong> No returns or refunds are accepted after installation.</li>
+
   <li><strong>Manufacturer warranty:</strong> Warranty coverage as per the manufacturer’s policy — 2 years.</li>
+
   <li><strong>Barcode:</strong> Please do not remove the product barcode to claim warranty.</li>
-  <br><br><br>
-  <li><strong>Service warranty:</strong> A 2-year service warranty is applicable for all Hikvision products.</li>
+
+  <li><strong>Service warranty:</strong> A 2-year service warranty is applicable for all Hikvision products, subject to the conditions below.</li>
+
+  <li><strong>Payment condition for warranty activation:</strong> Full payment must be completed on the same day of installation or within 72 hours. Service warranty benefits will be activated only after payment confirmation. Delayed payments may result in suspension or cancellation of service warranty.</li>
+
+  <li><strong>Installation visit condition:</strong> Customers are requested to ensure site readiness at the time of installation. If the technician is required to revisit the site multiple times due to customer-side delays, incomplete arrangements, or rescheduling beyond company control, the service warranty may stand void.</li>
+
   <li><strong>Exclusions:</strong> Warranty does not cover pins, cables, loose connections, oxidation, corrosion, SMPS, or network issues.</li>
+
   <li><strong>Additional exclusions:</strong> SD cards, adapters, and camera stands are not covered under warranty. Wi-Fi, solar, and SIM-based cameras are covered only under brand/manufacturer warranty.</li>
-  <li><strong>Out-of-warranty service:</strong> A visiting charge of ₹750 will apply for out-of-warranty products.</li>
+
+  <li><strong>Out-of-warranty service:</strong> A visiting charge of &#8377;750 will apply for out-of-warranty products.</li>
+
   <li><strong>Office hours:</strong> Monday – Friday, 10:00 AM to 6:00 PM.</li>
+
   <li><strong>Emergency service:</strong> Emergency or 24×7 service is not available.</li>
+
   <li><strong>Service requests:</strong> Please send all service requests via WhatsApp for proper tracking and timely resolution.</li>
+
   <li><strong>Support:</strong> <a href="tel:+918496080849">849 6080849</a> (WhatsApp preferred)</li>
-  <li><strong>Conduct policy:</strong> Any defamatory actions such as posting negative blogs, public complaints, or bad reviews will result in immediate termination of the service warranty.</li>
+
+  <li><strong>Conduct policy:</strong> Any defamatory actions such as posting negative blogs, public complaints, or bad reviews without allowing resolution through official communication channels may result in immediate termination of the service warranty.</li>
 </ul>
+</div>
 
 
   </div>

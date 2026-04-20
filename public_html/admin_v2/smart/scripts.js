@@ -42,6 +42,7 @@
 
   /* ---------- WhatsApp Textarea Copy to Clipboard ---------- */
   const textareaCopyIcon = document.getElementById('textarea-copy-icon');
+  const textareaPdfIcon = document.getElementById('textarea-pdf-icon');
   
   if (textareaCopyIcon && whatsappPreview) {
     textareaCopyIcon.addEventListener('click', function() {
@@ -79,8 +80,119 @@
       // Deselect the text
       window.getSelection().removeAllRanges();
     });
+  }
+
+  /* ---------- PDF Generation ---------- */
+  if (textareaPdfIcon) {
+    textareaPdfIcon.addEventListener('click', function() {
+      console.log('📄 PDF icon clicked!');
+      generatePDF();
+    });
   } else {
-    console.error('❌ Copy icon or textarea not found!', {textareaCopyIcon, whatsappPreview});
+    console.error('❌ PDF icon not found!');
+  }
+
+  // Fallback PDF button
+  const pdfButton = document.getElementById('textarea-pdf-button');
+  if (pdfButton) {
+    pdfButton.addEventListener('click', function() {
+      console.log('📄 PDF button clicked!');
+      generatePDF();
+    });
+  }
+
+  // Check if Font Awesome loaded and show fallback if needed
+  setTimeout(() => {
+    const pdfIcon = document.getElementById('textarea-pdf-icon');
+    const pdfButton = document.getElementById('textarea-pdf-button');
+    
+    if (pdfIcon && pdfButton) {
+      // Check if icon is visible (has width/height)
+      const iconStyles = window.getComputedStyle(pdfIcon);
+      if (iconStyles.display === 'none' || iconStyles.width === '0px' || iconStyles.height === '0px') {
+        console.log('📄 Font Awesome icon not loaded, showing PDF button');
+        pdfButton.style.display = 'inline-block';
+      }
+    }
+  }, 1000);
+
+  // Function to generate PDF
+  function generatePDF() {
+    // Extract required data from the form
+    const formData = extractFormData();
+    
+    if (formData.name && formData.phone) {
+      const pdfUrl = `/pdf/index.php?type=proforma&id=1&download=1`;
+      const payload = {
+        name: formData.name,
+        phone: formData.phone,
+        location: formData.location || 'Bangalore',
+        message: formData.message || '',
+        num_cameras: formData.num_cameras || '',
+        brand: formData.brand || '',
+        category: formData.category || '',
+        mp: formData.mp || '',
+        hdd_size: formData.hdd_size || ''
+      };
+
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = pdfUrl;
+      form.target = '_blank';
+      form.style.display = 'none';
+
+      Object.entries(payload).forEach(([key, value]) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = value;
+        form.appendChild(input);
+      });
+
+      document.body.appendChild(form);
+      form.submit();
+      setTimeout(() => form.remove(), 1000);
+      console.log('📄 Generating PDF for:', formData);
+    } else {
+      alert('Please fill in customer name and phone number first!');
+    }
+  }
+
+  // Function to extract form data for PDF generation
+  function extractFormData() {
+    const name = document.getElementById('customer-name')?.value?.trim() || '';
+    const phone = document.getElementById('num-whatsapp')?.value?.trim() || '';
+    const location = document.getElementById('customer-location')?.value?.trim() || '';
+    const message = document.getElementById('whatsapp-preview')?.value || '';
+    const numCameras = document.getElementById('num-cameras-input')?.value?.trim() || '';
+    
+    // Extract selected brand, category, mp from form
+    const selectedBrand = document.getElementById('selected-brand')?.value?.trim() || 'PRAMA';
+    const selectedCategory = document.getElementById('selected-category')?.value?.trim() || 'NVR';
+    const selectedMP = document.getElementById('selected-mp')?.value?.trim() || '4MP';
+    
+    // Get HDD size from selected items
+    let hddSize = '1TB';
+    if (window.selectedItems && window.selectedItems.length > 0) {
+      const hddItem = window.selectedItems.find(item => 
+        item.meta && item.meta.component === 'HDD'
+      );
+      if (hddItem && hddItem.meta && hddItem.meta.capacity) {
+        hddSize = hddItem.meta.capacity;
+      }
+    }
+    
+    return { 
+      name, 
+      phone, 
+      location, 
+      message,
+      num_cameras: numCameras,
+      brand: selectedBrand,
+      category: selectedCategory,
+      mp: selectedMP,
+      hdd_size: hddSize
+    };
   }
 
   /* ---------- HDD Toggle Link ---------- */
@@ -133,10 +245,55 @@
   const btnWP = document.getElementById('btn-generate-wp');
   const btnClear = document.getElementById('btn-clear');
   let originalBtnWPHtml = btnWP ? btnWP.innerHTML : '';
+  const marketBtnClear = document.getElementById('market-btn-clear');
   
   // Discount and percentage controls
   let additionalDiscount = 0;
   let additionalPercentage = 0;
+  let whatsappPriceMode = 'max';
+  const wpSelectedPriceIndicator = document.getElementById('wp-selected-price-indicator');
+  const isMarketUser = !!(document.body && document.body.classList && document.body.classList.contains('is-market'));
+  const marketSummaryItemsEl = document.getElementById('market-summary-items');
+
+  const parseMoneyText = (txt) => {
+    const digits = String(txt || '').replace(/[^\d]/g, '');
+    return digits ? parseInt(digits, 10) : 0;
+  };
+
+  const getPriceModeLabel = (mode) => {
+    if (mode === 'min') return 'MIN';
+    if (mode === 'mid') return 'MID';
+    return 'MAX';
+  };
+
+  const syncWhatsAppPriceUi = (totals) => {
+    const stickyIds = ['sticky-total', 'sticky-half-diff-total', 'sticky-profit-amount'];
+    stickyIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('wa-selected-price');
+    });
+
+    const selectedId = whatsappPriceMode === 'min'
+      ? 'sticky-total'
+      : whatsappPriceMode === 'mid'
+        ? 'sticky-half-diff-total'
+        : 'sticky-profit-amount';
+
+    const selectedEl = document.getElementById(selectedId);
+    if (selectedEl) selectedEl.classList.add('wa-selected-price');
+
+    if (!wpSelectedPriceIndicator) return;
+    if (!totals) {
+      wpSelectedPriceIndicator.textContent = '';
+      return;
+    }
+    const selectedAmount = whatsappPriceMode === 'min'
+      ? totals.min
+      : whatsappPriceMode === 'mid'
+        ? totals.mid
+        : totals.max;
+    wpSelectedPriceIndicator.textContent = `${getPriceModeLabel(whatsappPriceMode)} ${formatINR(selectedAmount)}`;
+  };
   
   const discountDropdown = document.getElementById('discount-dropdown');
   const discountAmount = document.getElementById('discount-amount');
@@ -207,11 +364,159 @@
     });
   }
 
+  const stickyTotalEl = document.getElementById('sticky-total');
+  const stickyHalfDiffEl = document.getElementById('sticky-half-diff-total');
+  const stickyProfitEl = document.getElementById('sticky-profit-amount');
+
+  const setWhatsAppPriceMode = (mode) => {
+    whatsappPriceMode = mode === 'min' || mode === 'mid' ? mode : 'max';
+    updateSummary();
+  };
+
+  if (stickyTotalEl && !stickyTotalEl._hasWpModeHandler) {
+    stickyTotalEl._hasWpModeHandler = true;
+    stickyTotalEl.addEventListener('click', () => setWhatsAppPriceMode('min'));
+  }
+  if (stickyHalfDiffEl && !stickyHalfDiffEl._hasWpModeHandler) {
+    stickyHalfDiffEl._hasWpModeHandler = true;
+    stickyHalfDiffEl.addEventListener('click', () => setWhatsAppPriceMode('mid'));
+  }
+  if (stickyProfitEl && !stickyProfitEl._hasWpModeHandler) {
+    stickyProfitEl._hasWpModeHandler = true;
+    stickyProfitEl.addEventListener('click', () => setWhatsAppPriceMode('max'));
+  }
+
   const btnTogglePreferred = document.getElementById('btn-preferred-hdd');
   const btnToggleBrandwise = document.getElementById('btn-brandwise-hdd');
 
   const GST_RATE = 0.18;
   let selectedItems = [];
+
+  function ensureMarketSummaryHandlers() {
+    if (!isMarketUser) return;
+    const panel = document.getElementById('market-summary-panel');
+    if (!panel || panel._hasMarketHandlers) return;
+    panel._hasMarketHandlers = true;
+
+    panel.addEventListener('click', (e) => {
+      const minus = e.target.closest('.market-minus-btn');
+      const plus = e.target.closest('.market-plus-btn');
+      const any = minus || plus;
+      if (!any) return;
+
+      const id = any.getAttribute('data-id') || '';
+      const item = selectedItems.find(i => i.id === id);
+      if (!item) return;
+
+      if (minus) {
+        if (item.meta?.component === 'Camera') {
+          item.qty = (item.qty || 0) - 1;
+          if (item.qty <= 0) {
+            selectedItems = selectedItems.filter(i => i.id !== id);
+          }
+        } else {
+          if ((item.qty || 1) <= 1) return;
+          item.qty -= 1;
+        }
+      } else if (plus) {
+        if (item.meta?.component === 'Camera') {
+          item.qty = (item.qty || 0) + 1;
+        } else {
+          item.qty = (item.qty || 1) + 1;
+        }
+      }
+
+      updateSummary();
+      saveSessionData();
+
+      if (item.meta?.component === 'Camera') {
+        const cameraButtons = document.querySelectorAll('.camera-btn');
+        cameraButtons.forEach(btn => {
+          if (btn.dataset.cameraLabel === item.meta.cameraLabel) {
+            const updated = selectedItems.find(i => i.id === id);
+            const qty = updated ? (updated.qty || 0) : 0;
+            if (qty > 0) btn.classList.add('selected');
+            else btn.classList.remove('selected');
+            updateCameraButtonText(btn, qty);
+          }
+        });
+      }
+    });
+
+    if (marketBtnClear && !marketBtnClear._hasMarketClearHandler) {
+      marketBtnClear._hasMarketClearHandler = true;
+      marketBtnClear.addEventListener('click', (e) => {
+        e.preventDefault();
+        selectedItems = [];
+        document.querySelectorAll('.option-btn,.choice-btn').forEach(b => b.classList.remove('selected'));
+        if (num && range) { num.value = 6; range.value = 6; }
+        const popup = document.getElementById("componentPopup");
+        if (popup) popup.style.display = "none";
+        renderCategoryButtons();
+        renderAccessories();
+        updateSummary();
+        clearSessionData();
+      });
+    }
+  }
+
+  function updateMarketProductSummary() {
+    if (!isMarketUser) return;
+    if (!marketSummaryItemsEl) return;
+    if (!currentCategory || !currentBrand) return;
+    if (currentCategory === 'DVR' && !currentMP) return;
+
+    ensureMarketSummaryHandlers();
+
+    const contextFilteredItems = selectedItems.filter(item => {
+      const contextKey = currentCategory === 'NVR' ? `${currentCategory}::${currentBrand}` : `${currentCategory}::${currentBrand}::${currentMP}`;
+      if (item.meta?.type === 'accessory') return true;
+      if (item.meta?.component === 'HDD') return item.meta?.contextKey === contextKey;
+      if (item.meta?.category === currentCategory && item.meta?.brand === currentBrand) {
+        if (currentCategory === 'DVR') return item.meta?.mp === currentMP;
+        if (currentCategory === 'NVR') return true;
+        return item.meta?.mp === currentMP;
+      }
+      return false;
+    });
+
+    const sorted = [...contextFilteredItems].sort((a, b) => {
+      const getOrder = (item) => {
+        if (item.meta?.component === 'Camera') return 1;
+        if (item.meta?.component === 'Recorder') return 2;
+        if (item.meta?.component === 'HDD') return 3;
+        if (item.meta?.type === 'accessory') return 4;
+        return 5;
+      };
+      return getOrder(a) - getOrder(b);
+    });
+
+    marketSummaryItemsEl.innerHTML = '';
+    sorted.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'summary-item';
+
+      const qty = (item.qty || 1);
+      const isCam = item.meta?.component === 'Camera';
+      const controls = isCam ? `
+        <div class="camera-qty-controls">
+          <button class="qty-btn market-minus-btn" data-id="${item.id}">-</button>
+          <span class="qty-display">${qty}</span>
+          <button class="qty-btn market-plus-btn" data-id="${item.id}">+</button>
+        </div>
+      ` : `<div class="small">Qty: ${qty}</div>`;
+
+      row.innerHTML = `
+        <div class="meta">
+          <div style="font-weight:700;">${item.label}</div>
+          ${controls}
+        </div>
+        <div class="price">${qty}</div>
+      `;
+
+      marketSummaryItemsEl.appendChild(row);
+    });
+  }
 
   /* ---------- Session Storage ---------- */
   const SESSION_KEY = 'smartronic_dvr_selections';
@@ -824,6 +1129,20 @@
   let currentCategory = '';
   let currentBrand = '';
   let currentMP = '';
+  const PREFERRED_BRAND = 'PRAMA';
+  const BRAND_LOGOS = {
+    'PRAMA': '/content/uploads/2025/01/Prama_logo.png',
+    'HIKVISION': '/content/uploads/2025/01/Hikvision_logo.svg',
+    'CP PLUS': '/content/uploads/2025/01/cp-plus_logo.svg'
+  };
+
+  function getPreferredBrand(categoryData, requestedBrand = '') {
+    if (!categoryData || typeof categoryData !== 'object') return requestedBrand || '';
+    if (requestedBrand && categoryData[requestedBrand] && requestedBrand !== 'HIKVISION') return requestedBrand;
+    if (categoryData[PREFERRED_BRAND]) return PREFERRED_BRAND;
+    if (requestedBrand && categoryData[requestedBrand]) return requestedBrand;
+    return Object.keys(categoryData)[0] || '';
+  }
 
   function renderCategoryButtons() {
     const typeRoot = safeGetTypeRoot();
@@ -911,7 +1230,7 @@
             // For NVR, MP should be null/empty; for DVR, use saved MP or default
             targetMP = category === 'NVR' ? '' : (sessionData.mp || Object.keys(categoryData[sessionData.brand])[0]);
           } else {
-            targetBrand = Object.keys(categoryData)[0];
+            targetBrand = getPreferredBrand(categoryData);
             targetMP = category === 'NVR' ? '' : Object.keys(categoryData[targetBrand])[0];
           }
 
@@ -932,7 +1251,7 @@
           const typeRoot = safeGetTypeRoot();
           const categoryData = typeRoot?.[category];
           if (categoryData) {
-            const defaultBrand = Object.keys(categoryData)[0];
+            const defaultBrand = getPreferredBrand(categoryData);
             if (defaultBrand) {
               currentBrand = defaultBrand;
               const selBrand = document.getElementById("selected-brand");
@@ -958,12 +1277,29 @@
     brandContainer.style.display = "flex";
     brandContainer.classList.add("button-row");
 
-    const brands = Object.keys(categoryData);
+    const brands = Object.keys(categoryData).sort((a, b) => {
+      if (a === PREFERRED_BRAND) return -1;
+      if (b === PREFERRED_BRAND) return 1;
+      return 0;
+    });
     brands.forEach(brand => {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "choice-btn";
-      btn.textContent = brand;
+      const logoSrc = BRAND_LOGOS[brand.toUpperCase()];
+      if (logoSrc) {
+        const logo = document.createElement("img");
+        logo.className = "brand-btn-logo";
+        logo.src = logoSrc;
+        logo.alt = "";
+        logo.loading = "lazy";
+        btn.appendChild(logo);
+      }
+      if (!logoSrc) {
+        const label = document.createElement("span");
+        label.textContent = brand;
+        btn.appendChild(label);
+      }
       btn.dataset.brand = brand;
       btn.addEventListener("click", () => selectBrand(brand));
       brandContainer.appendChild(btn);
@@ -983,7 +1319,7 @@
       b.classList.remove("selected");
     });
     brandContainer.querySelectorAll(".choice-btn").forEach(b => {
-      if (b.textContent === brand) {
+      if (b.dataset.brand === brand) {
         b.classList.add("selected");
       }
     });
@@ -1592,46 +1928,66 @@
     function selectCamera() {
       const totalCameras = getTotalCameraCount();
       const id = `cam::${category}::${brand}::${mp}::${cam.label}`;
-      const isAlreadySelected = btn.classList.contains('selected');
+      const isSameContextItem = (item) =>
+        item.meta?.component === 'Camera' &&
+        item.meta?.category === category &&
+        item.meta?.brand === brand &&
+        (category === 'NVR' ? true : item.meta?.mp === mp);
+      const isSameCameraItem = (item) =>
+        isSameContextItem(item) && item.meta?.cameraLabel === cam.label;
 
       console.log('--- selectCamera START ---');
-      console.log('Clicked camera:', { category, brand, mp, label: cam.label, isAlreadySelected });
+      console.log('Clicked camera:', { category, brand, mp, label: cam.label });
 
-      // If the clicked camera is already selected, do nothing.
-      if (isAlreadySelected) {
-        console.log('Camera already selected. No change.');
-        console.log('--- selectCamera END ---');
-        return;
+      const existingIndex = selectedItems.findIndex(isSameCameraItem);
+      if (existingIndex !== -1) {
+        selectedItems.splice(existingIndex, 1);
+        btn.classList.remove('selected');
+        updateCameraButtonText(btn, 0);
+      } else {
+        const currentTypeCount = selectedItems.filter(isSameContextItem).length;
+        if (currentTypeCount >= totalCameras) {
+          console.log('Too many camera types selected for total cameras:', { currentTypeCount, totalCameras });
+          console.log('--- selectCamera END ---');
+          return;
+        }
+
+        selectedItems.push({
+          id,
+          label: `${category} ${brand} ${mp} - Camera: ${cam.label}`,
+          price: parsePrice(cam.value),
+          qty: 1,
+          meta: { component: 'Camera', raw: cam, brand, mp, category, cameraLabel: cam.label },
+        });
+        btn.classList.add('selected');
       }
 
-      // Visually deselect all other camera buttons in the same context (brand/category/mp)
-      document.querySelectorAll('.camera-btn').forEach(otherBtn => {
-        if (otherBtn._brand === brand && otherBtn._category === category && otherBtn._mp === mp) {
-          otherBtn.classList.remove('selected');
-          updateCameraButtonText(otherBtn, 0);
+      const contextCameraItems = selectedItems.filter(isSameContextItem);
+      if (contextCameraItems.length) {
+        const baseQty = Math.floor(totalCameras / contextCameraItems.length);
+        const remainder = totalCameras % contextCameraItems.length;
+        contextCameraItems.forEach((item, idx) => {
+          item.qty = baseQty + (idx < remainder ? 1 : 0);
+        });
+      }
+
+      const isSameContextBtn = (b) =>
+        b._brand === brand &&
+        b._category === category &&
+        (category === 'NVR' ? true : b._mp === mp);
+      const qtyByLabel = new Map();
+      selectedItems.forEach(item => {
+        if (isSameContextItem(item) && item.meta?.cameraLabel) {
+          qtyByLabel.set(item.meta.cameraLabel, item.qty || 0);
         }
       });
-
-      // Remove cameras from selectedItems that match the specific context (cat, brand, mp)
-      selectedItems = selectedItems.filter(item =>
-        !(item.meta?.component === 'Camera' && 
-          item.meta.category === category && 
-          item.meta.brand === brand && 
-          item.meta.mp === mp)
-      );
-
-      // Add the new camera
-      selectedItems.push({
-        id,
-        label: `${category} ${brand} ${mp} - Camera: ${cam.label}`,
-        price: parsePrice(cam.value),
-        qty: totalCameras,
-        meta: { component: 'Camera', raw: cam, brand, mp, category, cameraLabel: cam.label },
+      document.querySelectorAll('.camera-btn').forEach(b => {
+        if (!isSameContextBtn(b)) return;
+        const q = qtyByLabel.get(b.dataset.cameraLabel) || 0;
+        if (q > 0) b.classList.add('selected');
+        else b.classList.remove('selected');
+        updateCameraButtonText(b, q);
       });
-
-      // Select the clicked button and update its text
-      btn.classList.add('selected');
-      updateCameraButtonText(btn, totalCameras);
 
       console.log('selectedItems AFTER logic:', selectedItems.map(i => i.id));
       updateSummary();
@@ -2126,77 +2482,105 @@
       });
     }
 
-    summaryItemsEl.innerHTML = '';
-    sortedContextFilteredItems.forEach(item => {
-      const row = document.createElement('div');
-      row.className = 'summary-item';
-      
-      // Create quantity controls for cameras
-      let qtyControls = '';
-      if (item.meta?.component === 'Camera') {
-        qtyControls = `
-          <div class="camera-qty-controls">
-            <button class="qty-btn minus-btn" data-id="${item.id}">-</button>
-            <span class="qty-display">${item.qty || 1}</span>
-            <button class="qty-btn plus-btn" data-id="${item.id}">+</button>
+    if (summaryItemsEl) {
+      summaryItemsEl.innerHTML = '';
+      sortedContextFilteredItems.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'summary-item';
+        
+        // Create quantity controls for cameras
+        let qtyControls = '';
+        if (item.meta?.component === 'Camera') {
+          qtyControls = `
+            <div class="camera-qty-controls">
+              <button class="qty-btn minus-btn" data-id="${item.id}">-</button>
+              <span class="qty-display">${item.qty || 1}</span>
+              <button class="qty-btn plus-btn" data-id="${item.id}">+</button>
+            </div>
+          `;
+        } else {
+          qtyControls = `<div class="small">Qty: ${item.qty || 1}</div>`;
+        }
+        
+        row.innerHTML = `
+          <div class="meta">
+            <div style="font-weight:700;">${item.label}</div>
+            ${qtyControls}
           </div>
+          <div class="price">${item.price ? formatINR(item.price * (item.qty || 1)) : 'Price on Inquiry'}</div>
         `;
-      } else {
-        qtyControls = `<div class="small">Qty: ${item.qty || 1}</div>`;
-      }
-      
-      row.innerHTML = `
-        <div class="meta">
-          <div style="font-weight:700;">${item.label}</div>
-          ${qtyControls}
-        </div>
-        <div class="price">${item.price ? formatINR(item.price * (item.qty || 1)) : 'Price on Inquiry'}</div>
-      `;
-      summaryItemsEl.appendChild(row);
-    });
+        summaryItemsEl.appendChild(row);
+      });
 
-    // Add event listeners to quantity buttons
-    document.querySelectorAll('.minus-btn').forEach(btn => {
-      btn.addEventListener('click', function() {
-        const id = this.dataset.id;
-        const item = selectedItems.find(i => i.id === id);
-        if (item && item.qty > 1) {
-          item.qty -= 1;
+      // Add event listeners to quantity buttons
+      document.querySelectorAll('.minus-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const id = this.dataset.id;
+          const item = selectedItems.find(i => i.id === id);
+          if (!item) return;
+
+          if (item.meta?.component === 'Camera') {
+            item.qty = (item.qty || 0) - 1;
+            if (item.qty <= 0) {
+              selectedItems = selectedItems.filter(i => i.id !== id);
+            }
+          } else {
+            if ((item.qty || 1) <= 1) return;
+            item.qty -= 1;
+          }
+
           updateSummary();
           saveSessionData();
-          // Update camera button text if this is a camera
+
           if (item.meta?.component === 'Camera') {
             const cameraButtons = document.querySelectorAll('.camera-btn');
             cameraButtons.forEach(btn => {
               if (btn.dataset.cameraLabel === item.meta.cameraLabel) {
-                updateCameraButtonText(btn, item.qty);
+                const updated = selectedItems.find(i => i.id === id);
+                const qty = updated ? (updated.qty || 0) : 0;
+                if (qty > 0) btn.classList.add('selected');
+                else btn.classList.remove('selected');
+                updateCameraButtonText(btn, qty);
               }
             });
           }
-        }
+        });
       });
-    });
 
-    document.querySelectorAll('.plus-btn').forEach(btn => {
-      btn.addEventListener('click', function() {
-        const id = this.dataset.id;
-        const item = selectedItems.find(i => i.id === id);
-        if (item) {
-          item.qty += 1;
+      document.querySelectorAll('.plus-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const id = this.dataset.id;
+          const item = selectedItems.find(i => i.id === id);
+          if (!item) return;
+
+          if (item.meta?.component === 'Camera') {
+            const requiredCount = parseInt(document.getElementById('num-cameras-input')?.value || 0, 10);
+            const selectedCount = selectedItems
+              .filter(i =>
+                i.meta?.component === 'Camera' &&
+                i.meta?.category === currentCategory &&
+                i.meta?.brand === currentBrand &&
+                (currentCategory === 'NVR' ? true : i.meta?.mp === currentMP)
+              )
+              .reduce((sum, i) => sum + (i.qty || 0), 0);
+            if (selectedCount >= requiredCount) return;
+          }
+
+          item.qty = (item.qty || 0) + 1;
           updateSummary();
           saveSessionData();
-          // Update camera button text if this is a camera
+
           if (item.meta?.component === 'Camera') {
             const cameraButtons = document.querySelectorAll('.camera-btn');
             cameraButtons.forEach(btn => {
               if (btn.dataset.cameraLabel === item.meta.cameraLabel) {
-                updateCameraButtonText(btn, item.qty);
+                updateCameraButtonText(btn, item.qty || 0);
               }
             });
           }
-        }
+        });
       });
-    });
+    }
 
     // Update camera status bar
     updateCameraStatusBar();
@@ -2257,35 +2641,38 @@
     const installationCharge = 600 * cameraCount;
     const total = finalSubtotal + gst + installationCharge;
 
-    // Display additional items in summary
-    additionalItems.forEach(item => {
-      const row = document.createElement('div');
-      row.className = 'summary-item auto-calculated';
-      row.innerHTML = `
-        <div class="meta">
-          <div style="font-weight:700; color: #666;">${item.label} <small>(auto)</small></div>
-          <div class="small">Qty: ${item.qty}</div>
-        </div>
-        <div class="price" style="color: #666;">${formatINR(item.price * item.qty)}</div>
-      `;
-      summaryItemsEl.appendChild(row);
-    });
+    if (summaryItemsEl) {
+      // Display additional items in summary
+      additionalItems.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'summary-item auto-calculated';
+        row.innerHTML = `
+          <div class="meta">
+            <div style="font-weight:700; color: #666;">${item.label} <small>(auto)</small></div>
+            <div class="small">Qty: ${item.qty}</div>
+          </div>
+          <div class="price" style="color: #666;">${formatINR(item.price * item.qty)}</div>
+        `;
+        summaryItemsEl.appendChild(row);
+      });
+    }
 
-    summarySubtotalEl.textContent = formatINR(finalSubtotal);
-    summaryGstEl.textContent = formatINR(gst);
-    
-    summaryTotalEl.textContent = formatINR(total);
+    if (summarySubtotalEl) summarySubtotalEl.textContent = formatINR(finalSubtotal);
+    if (summaryGstEl) summaryGstEl.textContent = formatINR(gst);
+    if (summaryTotalEl) summaryTotalEl.textContent = formatINR(total);
 
-    // Compute MIN cost (Total + 3000) and update sticky totals display
-    const minTotal = total + 3000;
+    // Add profit row (use values from data.additionalItems)
+    const profitPercentage = parseFloat(data.additionalItems?.profitPercentage?.value) || 15; // Changed from 0.15 to 15 (15%)
+    const profitFlatParsed = parseFloat(data.additionalItems?.profit?.value);
+    const profitFlat = Number.isFinite(profitFlatParsed) ? profitFlatParsed : 3000;
+
+    // Compute MIN cost (Total + flat profit) and update sticky totals display
+    const minTotal = total + profitFlat;
     const stickyTotal = document.getElementById('sticky-total');
     if (stickyTotal) {
       stickyTotal.textContent = formatINR(minTotal);
     }
     
-    // Add profit row (use values from data.additionalItems)
-    const profitPercentage = parseFloat(data.additionalItems?.profitPercentage?.value) || 15; // Changed from 0.15 to 15 (15%)
-    const profitFlat = parseFloat(data.additionalItems?.profit?.value) || 0;
     // First add flat profit, then apply percentage on the grand total
     const totalWithFlatProfit = total + profitFlat;
     const profitAmount = totalWithFlatProfit * (profitPercentage / 100); // Convert percentage to decimal
@@ -2308,7 +2695,7 @@
     // Add Material Cost row (subtotal + GST) - BEFORE installation charge
     const materialCost = finalSubtotal + gst;
     const summaryTotalsEl = document.querySelector('.summary-totals');
-    const totalRow = summaryTotalsEl.querySelector('.total-row');
+    const totalRow = summaryTotalsEl ? summaryTotalsEl.querySelector('.total-row') : null;
     
     let materialCostRow = document.getElementById('material-cost-row');
     if (!materialCostRow && summaryTotalsEl) {
@@ -2354,7 +2741,7 @@
       installationRow.querySelector('#installation-charge-amount').textContent = formatINR(installationCharge);
     }
 
-    // Add Min Cost to Customer row (shows Total + 3000)
+    // Add Min Cost to Customer row (shows Total + flat profit)
     let profitRow = document.getElementById('profit-row');
     if (!profitRow && summaryTotalsEl) {
       profitRow = document.createElement('div');
@@ -2372,8 +2759,10 @@
       profitRow.querySelector('#profit-amount').textContent = formatINR(minTotal);
     }
 
-    // Add Profit row (Cost to Customer - Material Cost) with eye icon toggle
-    const profitValue = finalTotal - materialCost;
+    // Add Profit row (Min cost to the customer - Material Cost) with eye icon toggle
+    const profitValue = minTotal - materialCost;
+    const isMobile = !!(window.matchMedia && window.matchMedia('(hover: none), (pointer: coarse)').matches);
+    const isAdmin = typeof document !== 'undefined' && typeof document.cookie === 'string' && document.cookie.includes('auth_role=admin');
     let profitDisplayRow = document.getElementById('profit-display-row');
     if (!profitDisplayRow && summaryTotalsEl) {
       profitDisplayRow = document.createElement('div');
@@ -2390,8 +2779,10 @@
       const eyeIcon = profitDisplayRow.querySelector('#profit-eye-icon');
       const profitAmount = profitDisplayRow.querySelector('#profit-display-amount');
       
-      if (eyeIcon) {
-        // Support both mouse and touch events for mobile
+      if (profitAmount && isMobile && isAdmin) {
+        profitAmount.textContent = formatINR(profitValue);
+        if (eyeIcon) eyeIcon.style.display = 'none';
+      } else if (eyeIcon && profitAmount) {
         const showProfit = function() {
           profitAmount.textContent = formatINR(profitValue);
           eyeIcon.classList.add('fa-eye-slash');
@@ -2407,25 +2798,29 @@
         };
         
         eyeIcon.addEventListener('mousedown', showProfit);
-        eyeIcon.addEventListener('touchstart', function(e) {
-          e.preventDefault();
-          showProfit();
-        });
-        
         document.addEventListener('mouseup', hideProfit);
-        document.addEventListener('touchend', hideProfit);
+        if (isMobile) {
+          eyeIcon.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            showProfit();
+          });
+          document.addEventListener('touchend', hideProfit);
+        }
       }
     } else if (profitDisplayRow) {
-      profitDisplayRow.querySelector('#profit-display-amount').textContent = '•••';
-      
-      // Re-attach handlers if they don't exist
       const eyeIcon = profitDisplayRow.querySelector('#profit-eye-icon');
       const profitAmount = profitDisplayRow.querySelector('#profit-display-amount');
+      if (profitAmount && isMobile && isAdmin) {
+        profitAmount.textContent = formatINR(profitValue);
+        if (eyeIcon) eyeIcon.style.display = 'none';
+      } else if (profitAmount) {
+        profitAmount.textContent = '•••';
+        if (eyeIcon) eyeIcon.style.display = '';
+      }
       
       if (eyeIcon && !eyeIcon._hasHandlers) {
         eyeIcon._hasHandlers = true;
         
-        // Support both mouse and touch events for mobile
         const showProfit = function() {
           profitAmount.textContent = formatINR(profitValue);
           eyeIcon.classList.add('fa-eye-slash');
@@ -2441,13 +2836,14 @@
         };
         
         eyeIcon.addEventListener('mousedown', showProfit);
-        eyeIcon.addEventListener('touchstart', function(e) {
-          e.preventDefault();
-          showProfit();
-        });
-        
         document.addEventListener('mouseup', hideProfit);
-        document.addEventListener('touchend', hideProfit);
+        if (isMobile) {
+          eyeIcon.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            showProfit();
+          });
+          document.addEventListener('touchend', hideProfit);
+        }
       }
     }
     
@@ -2476,49 +2872,75 @@
       stickyProfitAmount.textContent = formatINR(maxAfterDiscount);
     }
 
-    // Update sticky profit margin (MAX - materialCost) with eye icon toggle
+    const diff = Math.max(0, maxAfterDiscount - minTotal);
+    const midTotal = Math.round(minTotal + (diff / 2));
+    if (differenceAmount) {
+      differenceAmount.textContent = '+ ' + formatINR(diff);
+    }
+
+    const stickyHalfDiffTotal = document.getElementById('sticky-half-diff-total');
+    if (stickyHalfDiffTotal) {
+      stickyHalfDiffTotal.textContent = formatINR(midTotal);
+    }
+
+    syncWhatsAppPriceUi({ min: minTotal, mid: midTotal, max: maxAfterDiscount });
+
+    // Update sticky profit margin (Selected price - materialCost) with eye icon toggle
     const stickyProfitMarginAmount = document.getElementById('sticky-profit-margin-amount');
     const stickyProfitMarginRow = document.getElementById('sticky-profit-margin-row');
     const stickyProfitEyeIcon = document.getElementById('sticky-profit-eye-icon');
 
-    const stickyProfitMargin = maxAfterDiscount - materialCost;
+    const selectedQuoteForProfit = whatsappPriceMode === 'min'
+      ? minTotal
+      : whatsappPriceMode === 'mid'
+        ? midTotal
+        : maxAfterDiscount;
+    const stickyProfitMargin = selectedQuoteForProfit - materialCost;
 
     console.log('💼 Sticky Profit Margin:', { stickyProfitMargin, maxAfterDiscount, materialCost, elementFound: !!stickyProfitMarginAmount });
 
     if (stickyProfitMarginAmount) {
-      stickyProfitMarginAmount.textContent = '•••';
       stickyProfitMarginAmount.dataset.profitValue = stickyProfitMargin;
-      // Support both mouse and touch events for mobile
+      if (isMobile && isAdmin) {
+        stickyProfitMarginAmount.textContent = formatINR(stickyProfitMargin);
+        if (stickyProfitEyeIcon) stickyProfitEyeIcon.style.display = 'none';
+      } else {
+        stickyProfitMarginAmount.textContent = '•••';
+        if (stickyProfitEyeIcon) stickyProfitEyeIcon.style.display = '';
+      }
+      
       const showProfit = function() {
         stickyProfitMarginAmount.textContent = formatINR(parseFloat(stickyProfitMarginAmount.dataset.profitValue));
-        stickyProfitEyeIcon.classList.add('fa-eye-slash');
-        stickyProfitEyeIcon.classList.remove('fa-eye');
+        if (stickyProfitEyeIcon) {
+          stickyProfitEyeIcon.classList.add('fa-eye-slash');
+          stickyProfitEyeIcon.classList.remove('fa-eye');
+        }
       };
       
       const hideProfit = function() {
         if (stickyProfitMarginAmount.textContent !== '•••') {
           stickyProfitMarginAmount.textContent = '•••';
-          stickyProfitEyeIcon.classList.add('fa-eye');
-          stickyProfitEyeIcon.classList.remove('fa-eye-slash');
+          if (stickyProfitEyeIcon) {
+            stickyProfitEyeIcon.classList.add('fa-eye');
+            stickyProfitEyeIcon.classList.remove('fa-eye-slash');
+          }
         }
       };
       
-      stickyProfitEyeIcon.addEventListener('mousedown', showProfit);
-      stickyProfitEyeIcon.addEventListener('touchstart', function(e) {
-        e.preventDefault();
-        showProfit();
-      });
-      
-      document.addEventListener('mouseup', hideProfit);
-      document.addEventListener('touchend', hideProfit);
+      if (stickyProfitEyeIcon && !stickyProfitEyeIcon._hasHandlers && !(isMobile && isAdmin)) {
+        stickyProfitEyeIcon._hasHandlers = true;
+        stickyProfitEyeIcon.addEventListener('mousedown', showProfit);
+        document.addEventListener('mouseup', hideProfit);
+        if (isMobile) {
+          stickyProfitEyeIcon.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            showProfit();
+          });
+          document.addEventListener('touchend', hideProfit);
+        }
+      }
     } else {
       console.warn('⚠️ Sticky profit margin element not found');
-    }
-
-    // DIFFERENCE = MAX - MIN
-    if (differenceAmount) {
-      const diff = Math.max(0, maxAfterDiscount - minTotal);
-      differenceAmount.textContent = '+ ' + formatINR(diff);
     }
     
     // Removed percentage-display update as per request
@@ -2543,6 +2965,7 @@
     btnWP.disabled = contextFilteredItems.length === 0;
     
     // Update WhatsApp preview
+    updateMarketProductSummary();
     updateWhatsAppPreview();
   }
 
@@ -2558,10 +2981,13 @@
         (currentCategory === 'NVR' ? true : item.meta?.mp === currentMP)) // Adjust filter for NVR
       .reduce((sum, item) => sum + (item.qty || 0), 0);
     
-    const requiredEl = document.getElementById('camera-required-count');
-    const selectedEl = document.getElementById('camera-selected-count');
-    
-    if (requiredEl && selectedEl) {
+    const updateBar = (statusBarId, selectedId, requiredId) => {
+      const requiredEl = document.getElementById(requiredId);
+      const selectedEl = document.getElementById(selectedId);
+      const statusBar = document.getElementById(statusBarId);
+      const floatingBtn = document.getElementById('btn-generate-wp');
+      if (!requiredEl || !selectedEl) return;
+
       // Update with animation
       const oldSelected = parseInt(selectedEl.textContent || '0');
       if (oldSelected !== selectedCount) {
@@ -2573,9 +2999,6 @@
       selectedEl.textContent = selectedCount;
       
       // Update status bar font colors based on match
-      const statusBar = document.getElementById('camera-status-bar');
-      const floatingBtn = document.getElementById('btn-generate-wp');
-      
       if (statusBar) {
         const labels = statusBar.querySelectorAll('.status-label');
         const counts = statusBar.querySelectorAll('.status-count');
@@ -2650,8 +3073,12 @@
           }
         }
       }
-    }
+    };
+
+    updateBar('camera-status-bar', 'camera-selected-count', 'camera-required-count');
+    updateBar('market-camera-status-bar', 'market-camera-selected-count', 'market-camera-required-count');
   }
+ 
  
   /* ---------- WhatsApp ---------- */
   function buildWhatsAppMessage() {
@@ -2727,7 +3154,7 @@ msg.push('');
     const backBoxLabel = data.items?.['BACK BOX']?.label || 'Back Box - ₹20';
     additionalItems.push({ label: backBoxLabel, price: backBoxValue, qty: cameraCount });
     
-    const dlinkValue = parsePrice(data.items?.['Dlink']?.value) || 437.5;
+    const dlinkValue = parsePrice(data.items?.['Dlink']?.value) || 875;
     const dlinkLabel = data.items?.['Dlink']?.label || 'Dlink 3+1 Cable - ₹875';
     additionalItems.push({ label: dlinkLabel, price: dlinkValue, qty: Math.ceil(cameraCount / 4) });
     
@@ -2737,11 +3164,13 @@ msg.push('');
     const gst = finalSubtotal * GST_RATE;
     const installationCharge = 600 * cameraCount;
     const total = finalSubtotal + gst + installationCharge;
-    const minTotal = total + 3000; // Align with sticky MIN
-    
+
     // Use SAME profit calculation as summary
     const profitPercentage = parseFloat(data.additionalItems?.profitPercentage?.value) || 15; // Changed from 0.15 to 15 (15%)
-    const profitFlat = parseFloat(data.additionalItems?.profit?.value) || 0;
+    const profitFlatParsed = parseFloat(data.additionalItems?.profit?.value);
+    const profitFlat = Number.isFinite(profitFlatParsed) ? profitFlatParsed : 3000;
+    const minTotal = total + profitFlat; // Align with sticky MIN
+
     // First add flat profit, then apply percentage on the grand total
     const totalWithFlatProfit = total + profitFlat;
     const profitAmount = totalWithFlatProfit * (profitPercentage / 100); // Convert percentage to decimal
@@ -2774,9 +3203,15 @@ msg.push('');
       actualCost: actualCost
     });
     
-    // For marketing display: show inflated price, then "discount" to actual price
-    // We inflate it by dividing by 0.80 (which is same as multiplying by 1.25)
-    const totalBeforeDiscount = Math.round(stickyMaxWA * 1.20); // Total Cost = sticky MAX + 20%
+    const diffWA = Math.max(0, stickyMaxWA - minTotal);
+    const midTotalWA = Math.round(minTotal + (diffWA / 2));
+    const selectedAmountWA = whatsappPriceMode === 'min'
+      ? minTotal
+      : whatsappPriceMode === 'mid'
+        ? midTotalWA
+        : stickyMaxWA;
+    const selectedPriceText = formatINR(selectedAmountWA);
+    const totalBeforeDiscount = Math.round(selectedAmountWA / 0.8);
     
     // Get the MP of the selected NVR camera, or currentMP for DVR
     const displayMP = currentCategory === 'NVR' 
@@ -2785,11 +3220,7 @@ msg.push('');
 
     // Build main quote message
     let systemText = `*${currentBrand} ${currentCategory} Full HD ${getChannel(camCount)}-Channel System* | ${displayMP} × ${camCount} Cameras`;
-    
-        const stickyProfitEl = document.getElementById('sticky-profit-amount');
-    const stickyProfitText = (stickyProfitEl && stickyProfitEl.textContent) ? stickyProfitEl.textContent.trim() : stickyProfitText;
-// Show only MAX value in header
-    systemText += ` | 🎉 *Now at 20% OFF: ${stickyProfitText}*`;
+    systemText += ` | 🎉 *Now at 20% OFF: ${selectedPriceText}*`;
     
     msg.push(systemText);
     msg.push('');
@@ -2811,7 +3242,7 @@ msg.push(`- Please arrange a stool/ladder or bear rental if required.`);
 msg.push('');
     msg.push(`💰 Total Cost: ${formatINR(totalBeforeDiscount)}`);
     msg.push(`——————————————`);
-    msg.push(`🎉 *Now at 20% OFF: ${stickyProfitText}*`);
+    msg.push(`🎉 *Now at 20% OFF: ${selectedPriceText}*`);
 msg.push('');
 
 // Add conditional discount message if discount is selected
@@ -2824,7 +3255,7 @@ if (additionalDiscount > 0) {
 msg.push(`⭐ *Limited-Time Offer Includes:*`);
 msg.push('- 100% Genuine Products (No Duplicates)');
 msg.push(`- 2-Year *Brand Warranty* + 2-Year *Smartronic Service Warranty*`);
-msg.push(`(Smartronic covers free service & no hidden or extended charges for DVR, Cameras, and HDD — including onsite support for the same for 2 years.)`);
+msg.push(`- Smartronic covers free service & no hidden or extended charges for DVR, Cameras, and HDD — including onsite support for the same for 2 years.`);
 msg.push('- Free Installation & Materials');
 msg.push('- Optional 5-Year Replacement Warranty with AMC');
 msg.push('');
@@ -3022,18 +3453,20 @@ msg.push(`📞 Quick support: Call the same number or just reply *YES* to confir
   });
 
   /* ---------- Clear ---------- */
-  btnClear.addEventListener('click', (e) => {
-    e.preventDefault();
-    selectedItems = [];
-    document.querySelectorAll('.option-btn,.choice-btn').forEach(b => b.classList.remove('selected'));
-    if (num && range) { num.value = 6; range.value = 6; }
-    const popup = document.getElementById("componentPopup");
-    if (popup) popup.style.display = "none";
-    renderCategoryButtons();
-    renderAccessories();
-    updateSummary();
-    clearSessionData();
-  });
+  if (btnClear) {
+    btnClear.addEventListener('click', (e) => {
+      e.preventDefault();
+      selectedItems = [];
+      document.querySelectorAll('.option-btn,.choice-btn').forEach(b => b.classList.remove('selected'));
+      if (num && range) { num.value = 6; range.value = 6; }
+      const popup = document.getElementById("componentPopup");
+      if (popup) popup.style.display = "none";
+      renderCategoryButtons();
+      renderAccessories();
+      updateSummary();
+      clearSessionData();
+    });
+  }
 
   /* ---------- Init (wait for data.json) ---------- */
   function boot() {
@@ -3087,7 +3520,8 @@ msg.push(`📞 Quick support: Call the same number or just reply *YES* to confir
     const hasUrlParams = window.urlQuoteParams && Object.keys(window.urlQuoteParams).length > 0;
     
     const defaultCategory = hasUrlParams && window.urlQuoteParams.recorderType ? window.urlQuoteParams.recorderType : "DVR";
-    const defaultBrand = hasUrlParams && window.urlQuoteParams.brand ? window.urlQuoteParams.brand : "HIKVISION";
+    const typeRoot = safeGetTypeRoot();
+    const defaultBrand = getPreferredBrand(typeRoot?.[defaultCategory], hasUrlParams ? window.urlQuoteParams.brand : '');
     const defaultMP = hasUrlParams && window.urlQuoteParams.mp ? window.urlQuoteParams.mp : "2MP";
     const defaultCameras = hasUrlParams && window.urlQuoteParams.cameras ? window.urlQuoteParams.cameras : 6;
 
@@ -3429,6 +3863,11 @@ msg.push(`📞 Quick support: Call the same number or just reply *YES* to confir
               cameraItems[cameraItems.length - 1].qty -= (newAssigned - newTotal);
             }
           }
+        }
+        
+        if (currentlyAssigned < newTotal && contextCameraItems.length > 0) {
+          const missing = newTotal - currentlyAssigned;
+          contextCameraItems[0].qty = (contextCameraItems[0].qty || 0) + missing;
         }
 
         // Update button labels for current context

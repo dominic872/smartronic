@@ -145,6 +145,62 @@ background: #f7f7f7;
   text-align: center;
 }
 
+.half-diff-total {
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  background: #00a900b5;
+  padding: 4px;
+  border-radius: 4px;
+  margin-top: 4px;
+  text-align: center;
+  display: inline-block;
+}
+
+#sticky-total,
+#sticky-half-diff-total,
+#sticky-profit-amount {
+  cursor: pointer;
+}
+
+.wa-selected-price {
+  position: relative;
+}
+
+.wa-selected-price::before {
+  content: "✓";
+  color: #00a900;
+  font-size: 12px;
+  font-weight: 900;
+  margin-right: 6px;
+}
+
+#sticky-half-diff-total.wa-selected-price::before {
+  position: absolute;
+  left: -14px;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-right: 0;
+}
+
+.wp-selected-price-indicator {
+  position: fixed;
+  right: 20px;
+  bottom: 130px;
+  background: #00a900b5;
+  color: #fff;
+  padding: 8px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
+  z-index: 1000;
+}
+
+.wp-selected-price-indicator:empty {
+  display: none;
+}
+
 .sticky-totals #sticky-profit-row {
   font-size: 14px;
   font-weight: 600;
@@ -970,6 +1026,21 @@ body:not(.is-admin) .summary-totals {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.brand-btn-logo {
+  /* width: 18px; */
+  height: 13px;
+  object-fit: contain;
+  margin-right: 6px;
+  vertical-align: middle;
+  flex: 0 0 auto;
+}
+
+#brand-buttons .choice-btn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
 }
 
 .range-popup {

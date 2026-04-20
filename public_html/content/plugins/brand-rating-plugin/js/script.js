@@ -1,5 +1,6 @@
 jQuery(document).ready(function($) {
   let items = $('#brp-container .brp-item');
+  if (!items.length) return;
   let index = 0;
 
   // Initially hide all items except the first one
@@ -27,8 +28,10 @@ document.addEventListener('DOMContentLoaded', function () {
   const navLinks = document.querySelectorAll('.nav-link a'); // Simplified selector
   const sections = document.querySelectorAll('.inpage-section');
   const header = document.querySelector('header'); // Ensure header exists
+  if (!navLinks.length || !sections.length || !header) return;
   let lastScrollTop = 0;
   const scrollThreshold = 100; // Header hide/show threshold
+  let ticking = false;
 
   // Highlight active nav link based on scroll position
   function updateActiveLink() {
@@ -55,14 +58,19 @@ document.addEventListener('DOMContentLoaded', function () {
   navLinks.forEach(link => {
       link.addEventListener('click', function (e) {
           e.preventDefault();
-          const targetId = this.getAttribute('href').substring(1);
-          const targetSection = document.getElementById(targetId);
-          targetSection.scrollIntoView({ behavior: 'smooth' });
+          const href = this.getAttribute('href');
+          if (href) {
+            const targetId = href.substring(1);
+            const targetSection = document.getElementById(targetId);
+            if (targetSection) {
+              targetSection.scrollIntoView({ behavior: 'smooth' });
+            }
+          }
       });
   });
 
   // Show/hide header on scroll
-  window.addEventListener("scroll", function () {
+  const onScroll = function () {
       let currentScroll = window.pageYOffset || document.documentElement.scrollTop;
       if (currentScroll > lastScrollTop && currentScroll > scrollThreshold) {
           header.classList.add("hidden-header"); // Hide header
@@ -71,7 +79,14 @@ document.addEventListener('DOMContentLoaded', function () {
       }
       lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
       updateActiveLink(); // Update nav link highlighting on scroll
-  });
+      ticking = false;
+  };
+
+  window.addEventListener("scroll", function () {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(onScroll);
+  }, { passive: true });
 
   // Initial active link highlight
   updateActiveLink();

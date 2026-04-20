@@ -380,7 +380,16 @@
         }
 
         const dateBgColor = monthColors[monthIndex];
-        day.innerHTML = `<span class="date" style="background-color: ${dateBgColor}">${dayDate.getDate()} ${dayDate.toLocaleString('default', { month: 'short' }).toUpperCase()}</span>`;
+        day.innerHTML = `
+          <div class="day-header">
+            <span class="date" style="background-color: ${dateBgColor}">
+              ${dayDate.getDate()} ${dayDate.toLocaleString('default', { month: 'short' }).toUpperCase()}
+            </span>
+            <button class="day-map-toggle" onclick="console.log('Globe clicked'); window.toggleDayMaps(this)" title="Show Map">
+              <i class="fas fa-globe"></i>
+            </button>
+          </div>
+        `;
         fetchLeaves(dateStr).then(leaves => {
           if (leaves.length > 0) {
             const leaveDiv = document.createElement("div");

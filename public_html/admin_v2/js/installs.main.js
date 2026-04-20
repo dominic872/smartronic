@@ -156,16 +156,48 @@
   // Global state
   let editingId = null;
 
+  function updatePdfSentIndicator(status) {
+    const indicator = document.getElementById('popup-pdf-sent-indicator');
+    if (!indicator) return;
+    const normalized = String(status || '').trim().toLowerCase();
+    indicator.style.display = normalized === 'yes' ? 'inline-flex' : 'none';
+  }
+
+  function syncPdfSentIndicator(id) {
+    const orderId = String(id || '').trim();
+    if (!orderId) {
+      updatePdfSentIndicator('');
+      return Promise.resolve();
+    }
+
+    return fetch(`../smart/installs.php?id=${encodeURIComponent(orderId)}`, {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      cache: 'no-store'
+    })
+      .then(response => response.json())
+      .then(data => {
+        const pdfSent = data && typeof data.pdf_sent !== 'undefined' ? data.pdf_sent : '';
+        updatePdfSentIndicator(pdfSent);
+        if (window.currentInstallData) {
+          window.currentInstallData.pdf_sent = pdfSent;
+        }
+      })
+      .catch(error => {
+        console.warn('Unable to sync pdf_sent indicator:', error);
+      });
+  }
+
   // Core DOM elements
   const popup = document.getElementById('order-popup');
   const form = document.getElementById('installForm');
 
   // Save installs data
-  function saveInstalls(data) {
+  function saveInstalls(data, options = {}) {
     if (!data) {
       console.error('No data provided to saveInstalls');
       return;
     }
+    const silent = !!options.silent;
 
     console.log('Attempting to save data:', data);
 
@@ -208,7 +240,7 @@
           console.log('Parsed response:', result);
 
           if (result.status === 'ok') {
-            alert('Install saved successfully!');
+            if (!silent) alert('Install saved successfully!');
             if (typeof window.render === 'function') {
               window.render();
             }
@@ -261,7 +293,7 @@
     const validFormFields = [
       'id', 'name', 'cams', 'bullets', 'dome', 'hdd', 'monitor', 'type',
       'location', 'time', 'date', 'owner', 'technician', 'helper',
-      'resolution', 'map', 'rack', 'notes'
+      'resolution', 'brand', 'cam_type', 'map', 'rack', 'notes'
     ];
 
     // Small delay to ensure the form is visible before populating
@@ -297,10 +329,14 @@
         }
         // Skip fields that don't belong to this form (no warning needed)
       });
+      if (!data.brand && form.brand) {
+        form.brand.value = 'PRAMA';
+      }
     }, 50);
 
     editingId = data.id || null;
     window.editingId = editingId; // For backward compatibility
+    updatePdfSentIndicator(data.pdf_sent || '');
 
     if (typeof window.setCurrentOrderId === 'function') {
       window.setCurrentOrderId(editingId);
@@ -315,6 +351,10 @@
     if (typeof window.redirectToOrderItems === 'function') {
       window.redirectToOrderItems('');
     }
+
+    setTimeout(() => {
+      syncPdfSentIndicator(editingId);
+    }, 0);
   }
 
   // Close form
@@ -325,6 +365,7 @@
     }
     editingId = null;
     window.editingId = null;
+    updatePdfSentIndicator('');
   }
 
   // Form submission handler
@@ -349,6 +390,8 @@
         technician: form.technician.value,
         helper: form.helper.value,
         resolution: form.resolution.value,
+        brand: form.brand.value,
+        cam_type: form.cam_type.value,
         map: form.map.value,
         rack: form.rack.value,
         notes: form.notes.value
@@ -382,9 +425,12 @@
             technician: data.technician || '',
             helper: data.helper || '',
             resolution: data.resolution || '',
+            brand: data.brand || '',
+            cam_type: data.cam_type || '',
             map: data.Map || data.map || '',          // Handle case difference
             rack: data.rack || '',
-            notes: data.notes || data.note || ''      // Handle note vs notes
+            notes: data.notes || data.note || '',     // Handle note vs notes
+            pdf_sent: data.pdf_sent || ''
           };
 
           console.log('Original API data:', data);
@@ -393,6 +439,7 @@
           // Store the data globally for reference
           window.currentInstallData = formData;
           openForm(formData);
+          syncPdfSentIndicator(formData.id || id);
 
           // Load payment data when switching to invoice tab
           setTimeout(() => {
@@ -415,11 +462,14 @@
 
   // Delete install function
   function deleteInstall(id) {
-    // Check if user has admin role
     const authRole = getCookie('auth_role');
     if (authRole !== 'admin') {
-      alert('Only admin users can delete installs.');
-      return;
+      const ev = (window.allInstalls || []).find(x => String(x.id) === String(id));
+      const isUnscheduled = !ev || !ev.date || String(ev.date).trim() === '' || String(ev.date).trim() === '0000-00-00';
+      if (!isUnscheduled) {
+        alert('Only admin users can delete scheduled installs.');
+        return;
+      }
     }
 
     if (!confirm('Are you sure you want to delete this install?')) return;
@@ -510,18 +560,21 @@
     if (day.dataset.loading === 'true') return;
     day.dataset.loading = 'true';
 
-    // Show loading state on date
-    const dateEl = day.querySelector('.date');
-    const originalDateText = dateEl ? dateEl.dataset.originalText || dateEl.textContent : '';
-    if (dateEl) {
-      if (!dateEl.dataset.originalText) dateEl.dataset.originalText = dateEl.textContent;
-      dateEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+    // Show loading state on globe button
+    const globeBtn = day.querySelector('.day-map-toggle');
+    const globeIcon = globeBtn ? globeBtn.querySelector('i') : null;
+    if (globeIcon) {
+      globeIcon.classList.remove('fa-globe');
+      globeIcon.classList.add('fa-spinner', 'fa-spin');
     }
 
     // Reset loading state helper
     const resetLoading = () => {
       day.dataset.loading = 'false';
-      if (dateEl) dateEl.innerHTML = originalDateText; // Restore original text (usually the date number)
+      if (globeIcon) {
+        globeIcon.classList.remove('fa-spinner', 'fa-spin');
+        globeIcon.classList.add('fa-globe');
+      }
     };
 
     // Toggle logic: if master map exists, remove it and associated markers
@@ -931,9 +984,8 @@
       console.log(`[Map Debug] ${unmappedCount} location(s) have short URLs and will only show in full map view`);
     }
 
-    // Determine placement: Insert after the Date header (closest to top)
-    // The structure is day -> span.date -> ...
-    const dateSpan = day.querySelector('.date');
+    // Determine placement: Insert after the day header (date + globe)
+    const headerEl = day.querySelector('.day-header') || day.querySelector('.date');
     const img = document.createElement('img');
     img.className = 'master-map-preview';
     img.src = url;
@@ -957,8 +1009,8 @@
       openFullMapPopup(this._locationsData, this._dayElement);
     };
 
-    if (dateSpan && dateSpan.nextSibling) {
-      day.insertBefore(img, dateSpan.nextSibling);
+    if (headerEl && headerEl.parentNode === day) {
+      headerEl.after(img);
     } else {
       day.appendChild(img);
     }
@@ -1113,12 +1165,14 @@
     const card = document.createElement('div');
     card.style.cssText = `
       flex: 0 0 280px;
-      background: #fff;
-      border-radius: 10px;
-      padding: 15px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      background: #1e1e1e;
+      color: #ffffff;
+      border-radius: 6px;
+      padding: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
       scroll-snap-align: start;
       position: relative;
+      border: 1px solid #333;
     `;
 
     // Index badge with fancy styling
@@ -1126,40 +1180,149 @@
     badge.textContent = label;
     badge.style.cssText = `
       position: absolute;
-      top: -10px;
-      left: -10px;
-      background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
-      color: #fff;
-      min-width: 28px;
-      height: 28px;
-      border-radius: 14px;
-      padding: 0 8px;
+      top: 4px;
+      left: 9px;
+      background: linear-gradient(135deg, rgb(229, 57, 53) 0%, rgb(198, 40, 40) 100%);
+      color: rgb(255, 255, 255);
+      min-width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      padding: 0px 6px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: bold;
-      font-size: 12px;
-      box-shadow: 0 3px 8px rgba(229, 57, 53, 0.5);
-      border: 2px solid white;
+      font-size: 11px;
+      box-shadow: rgba(229, 57, 53, 0.5) 0px 3px 8px;
+      border: 2px solid rgb(30, 30, 30);
+      z-index: 2;
     `;
     card.appendChild(badge);
 
     // Location display helper
-    const locHtml = locationStr ? `<div style="font-size: 11px; color: #999; margin-top: 8px; border-top: 1px solid #eee; padding-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><i class="fas fa-map-pin" style="margin-right: 4px;"></i> ${locationStr}</div>` : '';
+    const locHtml = locationStr ? `<div style="font-size: 11px; color: #aaa; margin-top: 8px; border-top: 1px solid #444; padding-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><i class="fas fa-map-pin" style="margin-right: 4px;"></i> ${locationStr}</div>` : '';
 
     if (type === 'event') {
+      // Replicate .event styling logic
+      // Check classes for border color
+      if (element.classList.contains('DVR')) card.style.borderLeft = '6px solid #1976d2';
+      else if (element.classList.contains('NVR')) card.style.borderLeft = '6px solid #388e3c';
+      else if (element.classList.contains('WIFI')) card.style.borderLeft = '6px solid #f57c00';
+      
+      if (element.classList.contains('missing')) card.style.border = '2px dashed red';
+
       // Extract event details
       const h3 = element.querySelector('h3');
-      const name = h3 ? h3.textContent.trim() : 'Event';
+      // Clone content or extract text. Let's try to clone structure but style for dark mode
+      let nameText = h3 ? h3.textContent.trim() : 'Event';
+      
+      // Parse name: C49Paul jagadish 23 -> C-49 | Paul jagadish
+      // Regex to split ID, Name and remove trailing number
+      // Assuming ID starts with C or S followed by digits
+      // Expanded regex to be more permissive with whitespace and ID formats
+      // Original: /^([CS]\d+)(.+?)(?:\s+\d+)?$/i
+      // New: Capture ID (start), Name (middle), and optional trailing number (end)
+      const nameMatch = nameText.match(/^([A-Z-]*\d+)\s*(.+?)(?:\s+\d+)?$/i);
+      
+      if (nameMatch) {
+          let id = nameMatch[1];
+          // Insert hyphen if missing (C49 -> C-49) and not already hyphenated
+          if (!id.includes('-') && /^[A-Z]+\d+$/i.test(id)) {
+             id = id.replace(/^([A-Z]+)(\d+)$/i, '$1-$2');
+          }
+          
+          const name = nameMatch[2].trim();
+          nameText = `${id} | ${name}`;
+      } else {
+          // Fallback if regex fails but we want to ensure pipe format if possible
+          // e.g. if h3 text is just "C-49 Name"
+          // Check if it starts with ID pattern
+          const splitMatch = nameText.match(/^([A-Z]+-?\d+)\s+(.+)$/i);
+          if (splitMatch) {
+               nameText = `${splitMatch[1]} | ${splitMatch[2]}`;
+          }
+      }
+
+      // Get details
       const details = element.querySelector('.details');
-      const area = element.querySelector('.area a');
+      let detailsHtml = '';
+      if (details) {
+          // Clone and modify styles for dark mode
+          const dClone = details.cloneNode(true);
+          
+          // Apply shared styles for .cams, .hdd, .cams.type: inline-block, white bg, black text, padding, border
+          const detailSpans = dClone.querySelectorAll('.cams, .hdd');
+          detailSpans.forEach(el => {
+             // Reset existing classes impact if needed, or just override
+             el.style.display = 'inline-block';
+             el.style.background = 'white';
+             el.style.color = '#000000';
+             el.style.border = '1px solid #ccc'; // defaulting border
+             el.style.fontSize = '12.8px';
+             el.style.padding = '0 4px';
+             el.style.borderRadius = '3px'; // Optional: slight rounding usually looks better
+             el.style.marginRight = '4px';
+             el.style.marginBottom = '4px';
+             
+             // Specific overrides if class is .cams.type
+             if (el.classList.contains('type')) {
+                 el.style.border = '1px solid #000';
+             }
+          });
+
+          // Remove .area from details clone to avoid duplicate display
+          const areaInDetails = dClone.querySelector('.area');
+          if (areaInDetails) {
+              areaInDetails.remove();
+          }
+          
+          detailsHtml = dClone.innerHTML;
+      }
+      
+      const area = element.querySelector('.area');
+       let areaText = '';
+       
+       if (area) {
+           // Safer extraction: split distance from address
+           const aClone = area.cloneNode(true);
+           const distSpan = aClone.querySelector('span[id^="dist-"]');
+           const distText = distSpan ? distSpan.textContent.trim() : '';
+           
+           // Remove distance span from clone to get the rest of the text
+           if (distSpan) distSpan.remove();
+           
+           let restText = aClone.textContent.trim();
+           
+           // Clean up: remove dist-F-xxxx patterns if present
+           restText = restText.replace(/dist-[\w-]+/gi, '').trim();
+           
+           if (distText && !isNaN(parseFloat(distText))) {
+               areaText = `${distText} KM | ${restText}`;
+           } else {
+               areaText = restText;
+           }
+       }
+
       const names = element.querySelector('.names');
+      let namesHtml = '';
+      if (names) {
+         // We can just extract text or clone structure. Structure is better.
+         const nClone = names.cloneNode(true);
+         // Styles for .name-item .number need to be lighter
+         nClone.querySelectorAll('.number').forEach(el => el.style.color = '#aaa');
+         // Styles for links (a tags) to be white
+         nClone.querySelectorAll('a').forEach(el => {
+             el.style.color = '#ffffff';
+             el.style.textDecoration = 'none'; // Optional: remove underline if desired, but color is the request
+         });
+         nClone.style.borderTop = '1px dashed #444';
+         namesHtml = nClone.outerHTML;
+      }
 
       card.innerHTML += `
-        <div style="font-weight: 600; font-size: 14px; margin-bottom: 8px; color: #333; padding-left: 20px;">${name}</div>
-        ${details ? `<div style="font-size: 12px; color: #666; margin-bottom: 5px;">${details.textContent.trim()}</div>` : ''}
-        ${area ? `<div style="font-size: 12px; color: #1976d2; margin-bottom: 5px;"><i class="fas fa-map-marker-alt"></i> ${area.textContent.trim()}</div>` : ''}
-        ${names ? `<div style="font-size: 11px; color: #888;">${names.textContent.trim()}</div>` : ''}
+        <div style="font-weight: 600; font-size: 18px; margin-bottom: 6px; color: #fff; padding-left: 45px;">${nameText}</div>
+        <div style="font-size: 12px; color: #ccc; margin-bottom: 5px;">${detailsHtml}</div>
+        <div style="font-size: 11px; color: #ccc;">${namesHtml}</div>
         ${locHtml}
       `;
     } else {
@@ -1175,11 +1338,14 @@
         'general': '#28a745'
       }[(noteType?.textContent || '').toLowerCase()] || '#28a745';
 
+      card.style.borderLeft = `4px solid ${typeColor}`;
+
+      // Update styling as requested: 12px uppercase for type, 18px for title, padding-left 45px
       card.innerHTML += `
-        <div style="font-weight: 600; font-size: 12px; color: ${typeColor}; text-transform: uppercase; margin-bottom: 5px; padding-left: 20px;">${noteType?.textContent || 'Note'}</div>
-        <div style="font-weight: 600; font-size: 14px; color: #333; margin-bottom: 8px;">${title?.textContent || ''}</div>
-        ${desc ? `<div style="font-size: 12px; color: #666; margin-bottom: 5px; max-height: 60px; overflow: hidden;">${desc.textContent.substring(0, 100)}${desc.textContent.length > 100 ? '...' : ''}</div>` : ''}
-        ${phone ? `<div style="font-size: 12px; color: #1976d2;"><i class="fas fa-phone"></i> ${phone.textContent.trim()}</div>` : ''}
+        <div style="font-weight: 600; font-size: 12px; color: ${typeColor}; text-transform: uppercase; margin-bottom: 5px; padding-left: 45px;">${noteType?.textContent || 'Note'}</div>
+        <div style="font-weight: 600; font-size: 18px; color: #fff; margin-bottom: 20px; padding-left: 45px;">${title?.textContent || ''}</div>
+        ${desc ? `<div style="font-size: 12px; color: #ccc; margin-bottom: 5px; max-height: 60px; overflow: hidden;">${desc.textContent.substring(0, 100)}${desc.textContent.length > 100 ? '...' : ''}</div>` : ''}
+        ${phone ? `<div style="font-size: 12px; color: #64b5f6;"><i class="fas fa-phone"></i> ${phone.textContent.trim()}</div>` : ''}
         ${locHtml}
       `;
     }
@@ -1605,5 +1771,7 @@
   window.editInstall = editInstall;
   window.deleteInstall = deleteInstall;
   window.sendToWhatsapp = sendToWhatsapp;
+  window.updatePdfSentIndicator = updatePdfSentIndicator;
+  window.syncPdfSentIndicator = syncPdfSentIndicator;
 
 })(window);

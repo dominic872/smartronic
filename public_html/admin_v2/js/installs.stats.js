@@ -12,7 +12,7 @@ console.log("Stats module loaded");
   let lastMonthTotalCount = 0;
   let lastMonthTotalCams = 0;
 
-  let statsBtn = null;
+  let floatingMenuMounted = false;
   let weeksToggleBtn = null; // referenced by toolbar if present
   let toolbar = null;
   let toolbarRight = null;
@@ -48,71 +48,76 @@ console.log("Stats module loaded");
   }
 
   function ensureOwnerStatsButton() {
-    if (statsBtn && document.body.contains(statsBtn)) return; // already created and in DOM
+    if (floatingMenuMounted) return;
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('floating_menu') === '0') return;
+    if (!window.SmartFloatingMenu || typeof window.SmartFloatingMenu.mount !== 'function') return;
+    const authRole = ((document.cookie.match(/(?:^|; )auth_role=([^;]*)/) || [])[1] || '').trim().toLowerCase();
+    const links = [
+      {
+        label: 'Weeks',
+        icon: 'fas fa-calendar-week',
+        color: '#0f766e',
+        top: 208,
+        action: () => {
+          if (typeof window.toggleWeeksVisibility === 'function') window.toggleWeeksVisibility();
+        }
+      },
+      {
+        label: 'Next Week',
+        icon: 'fas fa-chevron-down',
+        color: '#111827',
+        action: () => {
+          if (typeof window.changeWeek === 'function') window.changeWeek(1);
+        }
+      },
+      {
+        label: 'Previous Week',
+        icon: 'fas fa-chevron-up',
+        color: '#111827',
+        action: () => {
+          if (typeof window.changeWeek === 'function') window.changeWeek(-1);
+        }
+      },
+      {
+        label: 'Stats',
+        icon: 'fas fa-chart-pie',
+        color: '#007bff',
+        action: () => {
+          if (typeof window.openOwnerStatsModal === 'function') window.openOwnerStatsModal(false);
+        }
+      },
+      {
+        label: 'Lead List',
+        icon: 'fas fa-users',
+        color: '#e11d48',
+        url: `${window.location.origin}/admin_v2/smart/lead_list_enhanced.php`
+      },
+      {
+        label: 'Quote Tool',
+        icon: 'fas fa-calculator',
+        color: '#6f42c1',
+        url: `${window.location.origin}/admin_v2/smart/quote.php`
+      }
+    ];
 
-    const controls = document.querySelector('.controls');
-    if (controls) {
-      controls.style.display = 'flex';
-      controls.style.alignItems = 'center';
-      controls.style.justifyContent = 'space-between';
+    if (authRole === 'admin') {
+      links.splice(1, 0, {
+        label: 'Profit',
+        icon: 'fas fa-indian-rupee-sign',
+        color: '#15803d',
+        action: () => {
+          if (typeof window.toggleProfitVisibility === 'function') window.toggleProfitVisibility();
+        }
+      });
     }
-    const navButtons = document.querySelector('.controls .nav-buttons');
-    const logoSection = document.querySelector('.controls .logo-section');
 
-    if (controls && navButtons) {
-      const ownerStatsContainer = document.createElement('div');
-      ownerStatsContainer.className = 'owner-stats-container';
-      ownerStatsContainer.style.cssText = 'display: flex; gap: 4px; align-items: center; justify-content: flex-end;';
-
-      // Stats button (Blue)
-      statsBtn = document.createElement('button');
-      statsBtn.type = 'button';
-      statsBtn.id = 'owner-stats-btn';
-      statsBtn.className = 'owner-stats-btn';
-      statsBtn.innerHTML = '<i class="fas fa-chart-pie"></i>';
-      statsBtn.title = 'Show Owner Stats';
-      statsBtn.style.background = '#007bff';
-      statsBtn.style.color = '#fff';
-      statsBtn.onclick = () => openOwnerStatsModal(false);
-
-      // Google Sheets button (Green)
-      const sheetsBtn = document.createElement('button');
-      sheetsBtn.type = 'button';
-      sheetsBtn.className = 'owner-stats-btn';
-      sheetsBtn.innerHTML = '<i class="fas fa-table"></i>';
-      sheetsBtn.title = 'Open Google Sheets';
-      sheetsBtn.style.background = '#28a745';
-      sheetsBtn.style.color = '#fff';
-      sheetsBtn.onclick = () => window.open('https://docs.google.com/spreadsheets/d/1OKNT1h9SLEOOGPeCiOIAP_QgQAlVnkzS84_EUypsX24/edit?gid=1114611638#gid=1114611638', '_blank');
-
-      // Quote button (Purple) - role-based URL
-      const quoteBtn = document.createElement('button');
-      quoteBtn.type = 'button';
-      quoteBtn.className = 'owner-stats-btn';
-      quoteBtn.innerHTML = '<i class="fas fa-calculator"></i>';
-      quoteBtn.title = 'Open Quote Tool';
-      quoteBtn.style.background = '#6f42c1';
-      quoteBtn.style.color = '#fff';
-      quoteBtn.onclick = () => {
-        // Get user role from cookie
-        const getCookie = (name) => {
-          const value = `; ${document.cookie}`;
-          const parts = value.split(`; ${name}=`);
-          if (parts.length === 2) return parts.pop().split(';').shift();
-          return null;
-        };
-        const authRole = getCookie('auth_role');
-        const quoteUrl = authRole === 'admin'
-          ? 'https://smartronic.online/admin_v2/quote.php'
-          : 'https://smartronic.online/admin_v2/smart_quote.php';
-        window.open(quoteUrl, '_blank');
-      };
-
-      ownerStatsContainer.appendChild(statsBtn);
-      ownerStatsContainer.appendChild(sheetsBtn);
-      ownerStatsContainer.appendChild(quoteBtn);
-      logoSection.insertAdjacentElement('afterend', ownerStatsContainer);
-    }
+    window.SmartFloatingMenu.mount({
+      links,
+      baseBottom: 140,
+      step: 60
+    });
+    floatingMenuMounted = true;
   }
 
   function openOwnerStatsModal(isAutomatic = false) {

@@ -2,7 +2,7 @@
 <html>
 <head>
   <title>Distance Finder</title>
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB7BKkBQEI0WpbFFjn8K4VWKRaYeIs3GhU&libraries=places"></script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB7BKkBQEI0WpbFFjn8K4VWKRaYeIs3GhU&libraries=places&loading=async"></script>
 </head>
 <body>
   <h2>Find Distance (KM)</h2>

@@ -56,12 +56,25 @@
       return;
     }
     
+    const brand = (installDetails.brand || 'PRAMA').trim();
+    const camType = (installDetails.cam_type || '').trim();
+    const brandLower = brand.toLowerCase();
+    const brandLogoPath = brandLower === 'cp plus'
+      ? 'https://smartronic.online/content/uploads/2025/01/cp-plus_logo.svg'
+      : brandLower === 'hikvision'
+      ? 'https://smartronic.online/content/uploads/2025/01/Hikvision_logo.svg'
+      : brandLower === 'prama'
+      ? 'https://smartronic.online/content/uploads/2025/01/Prama_logo.png'
+      : '';
+
     const requestData = {
       whatsapp_number: '88888888',
       num_cameras: installDetails.cams,
       dvr_type: installDetails.type,
       hdd_size: installDetails.hdd,
-      camera_resolution: installDetails.resolution
+      camera_resolution: installDetails.resolution,
+      brand,
+      cam_type: camType
     };
     fetch('/admin_v2/quote_api.php', {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestData)
@@ -78,9 +91,16 @@
         
         if (el) {
           // Create detailed quote breakdown
+          const brandLine = brand
+            ? `<div style="display:flex;align-items:center;gap:8px;margin:0 0 10px 0;padding:8px;background:#fff;border:1px solid #e5e7eb;border-radius:6px;">
+                ${brandLogoPath ? `<img src="${brandLogoPath}" alt="${brand}" style="height:18px;width:auto;object-fit:contain;">` : ''}
+                <strong>${brand}</strong>${camType ? `<span style="color:#666;">${camType}</span>` : ''}
+              </div>`
+            : '';
           const quoteHtml = `
             <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 14px; line-height: 1.4;">
               <h4 style="margin: 0 0 10px 0; color: #333;">📋 Quote Details</h4>
+              ${brandLine}
               <div style="border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-bottom: 8px;">
                 📞 WhatsApp: ${data.whatsapp}<br>
                 🎥 Camera: ${data.camera_key} x ${data.num_cams} @ ₹${data.camera_unit_price} = <strong>₹${data.camera_total}</strong><br>

@@ -55,15 +55,11 @@
         } else {
           console.warn('⚠️ loadExtrasFromDB not available');
         }
-        if (typeof window.ensureInvoicePdfSupport === 'function') {
-          await window.ensureInvoicePdfSupport();
-        }
-
         try {
           const host = document.getElementById('invoice-content');
           if (host) {
             initInvoiceControls(host);
-            await ensureHtml2PdfLoaded();
+            initPaymentLinkSection(host);
             setupDownloadPdf(host);
             try {
               const toolbarBtn = host.querySelector('#noteEditorToolbar button');
@@ -93,6 +89,7 @@
     const toolbar = scopeEl.querySelector('#noteEditorToolbar');
     const billingNameEl = scopeEl.querySelector('#billingNameDisplay');
     const invoiceNameEl = scopeEl.querySelector('#customerNameDisplay');
+    const invoiceControls = scopeEl.querySelector('#invoiceControls');
     const invHeader = scopeEl.querySelector('#invoiceControlsHeader');
     const invContent = scopeEl.querySelector('#invoiceControlsContent');
     const scanHeader = scopeEl.querySelector('#scannerCollapsibleHeader');
@@ -186,9 +183,96 @@
           }
         });
       });
+
+      try {
+        const allBtns = Array.from(toolbar.querySelectorAll('button'));
+        allBtns.forEach(b => {
+          const txt = String(b.textContent || '').trim();
+          const onclick = String(b.getAttribute('onclick') || '');
+          if (/download\s*pdf/i.test(txt) || /downloadPDF\s*\(/.test(onclick)) b.remove();
+        });
+      } catch (_) {}
     }
 
-    if (invHeader && invContent) {
+    let invoiceEditorHeader = null;
+    let invoiceEditorCaret = null;
+    try {
+      if (invoiceControls && invContent) {
+        if (invoiceControls.getAttribute('style')) invoiceControls.removeAttribute('style');
+        invoiceControls.classList.add('paylink-form-card');
+
+        if (invHeader) invHeader.style.display = 'none';
+
+        const existingHeader = invoiceControls.querySelector('#invoice-editor-header');
+        if (existingHeader) {
+          invoiceEditorHeader = existingHeader;
+          invoiceEditorCaret = invoiceEditorHeader.querySelector('#invoice-editor-caret');
+        } else {
+          invoiceEditorHeader = document.createElement('div');
+          invoiceEditorHeader.id = 'invoice-editor-header';
+          invoiceEditorHeader.className = 'paylink-collapsible-header';
+          invoiceEditorHeader.setAttribute('role', 'button');
+          invoiceEditorHeader.setAttribute('tabindex', '0');
+          invoiceEditorHeader.setAttribute('aria-expanded', 'false');
+          invoiceEditorHeader.innerHTML = `
+            <i class="fas fa-pen-to-square" aria-hidden="true"></i>
+            Edit Invoice / Proforma
+            <i id="invoice-editor-caret" class="fas fa-caret-down paylink-caret" aria-hidden="true"></i>
+          `;
+          invoiceEditorCaret = invoiceEditorHeader.querySelector('#invoice-editor-caret');
+          invoiceControls.insertBefore(invoiceEditorHeader, invContent);
+        }
+
+        const proformaToggle = scopeEl.querySelector('#proformaToggle');
+        if (proformaToggle) {
+          const existingRow = invoiceControls.querySelector('#invoice-proforma-row');
+          if (!existingRow) {
+            const row = document.createElement('div');
+            row.id = 'invoice-proforma-row';
+            row.className = 'invoice-proforma-row';
+
+            const label = document.createElement('label');
+            label.className = 'invoice-proforma-label';
+            label.appendChild(proformaToggle);
+            label.appendChild(document.createTextNode(' Porforma Invoice'));
+
+            row.appendChild(label);
+            invoiceControls.insertBefore(row, invContent);
+          } else if (!existingRow.contains(proformaToggle)) {
+            existingRow.textContent = '';
+            const label = document.createElement('label');
+            label.className = 'invoice-proforma-label';
+            label.appendChild(proformaToggle);
+            label.appendChild(document.createTextNode(' Porforma Invoice'));
+            existingRow.appendChild(label);
+          }
+        }
+
+        const proformaRow = invoiceControls.querySelector('#invoice-proforma-row');
+        if (proformaRow && invoiceEditorHeader) {
+          invoiceEditorHeader.insertAdjacentElement('afterend', proformaRow);
+        }
+      }
+    } catch (_) {}
+
+    function toggleInvoiceEditor() {
+      if (!invContent || !invoiceEditorHeader) return;
+      const isOpen = invContent.style.display !== 'none' && !!invContent.style.display;
+      const nextOpen = !isOpen;
+      invContent.style.display = nextOpen ? 'block' : 'none';
+      if (invoiceEditorCaret) invoiceEditorCaret.style.transform = nextOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+      invoiceEditorHeader.setAttribute('aria-expanded', nextOpen ? 'true' : 'false');
+    }
+
+    if (invoiceEditorHeader && invContent) {
+      invoiceEditorHeader.addEventListener('click', toggleInvoiceEditor);
+      invoiceEditorHeader.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggleInvoiceEditor();
+        }
+      });
+    } else if (invHeader && invContent) {
       invHeader.addEventListener('click', () => {
         invContent.style.display = (invContent.style.display === 'none' || !invContent.style.display) ? 'block' : 'none';
       });
@@ -201,25 +285,340 @@
     }
   }
 
-  async function ensureHtml2PdfLoaded() {
-    if (window.html2pdf) return;
-    await new Promise((resolve, reject) => {
-      const s = document.createElement('script');
-      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-      s.onload = resolve;
-      s.onerror = () => reject(new Error('Failed to load html2pdf'));
-      document.head.appendChild(s);
-    });
+  function initPaymentLinkSection(scopeEl) {
+    if (!scopeEl || scopeEl.querySelector('#paylink-panel')) return;
+
+    const scannerPanel = scopeEl.querySelector('#scanner-panel');
+    const invoiceEl = scopeEl.querySelector('#invoice');
+    if (!scannerPanel && !invoiceEl) return;
+
+    const wrapper = document.createElement('div');
+    wrapper.id = 'paylink-wrapper';
+
+    wrapper.innerHTML = `
+      <div id="paylink-collapsible-header" class="paylink-collapsible-header" role="button" tabindex="0" aria-expanded="false">
+        <i class="fas fa-link" aria-hidden="true"></i>
+        Create Payment Link
+        <i id="paylink-caret" class="fas fa-caret-down paylink-caret" aria-hidden="true"></i>
+      </div>
+      <div id="paylink-panel" class="paylink-panel">
+        <div class="paylink-form-card">
+          <div class="paylink-form-title">Create Razorpay Payment Link</div>
+          <form id="paylink-form" autocomplete="off">
+            <div class="paylink-grid">
+              <div class="paylink-field">
+                <label for="paylink-name">Customer Name</label>
+                <input id="paylink-name" name="name" type="text" required>
+              </div>
+              <div class="paylink-field">
+                <label for="paylink-phone">Customer Phone (10 digit)</label>
+                <input id="paylink-phone" name="phone" type="tel" inputmode="numeric" required>
+              </div>
+              <div class="paylink-field">
+                <label for="paylink-amount">Amount (INR)</label>
+                <input id="paylink-amount" name="amount" type="number" min="1" step="1" required>
+              </div>
+              <div class="paylink-field">
+                <label for="paylink-description">Description</label>
+                <input id="paylink-description" name="description" type="text" required>
+              </div>
+            </div>
+
+            <div class="paylink-actions">
+              <button class="paylink-btn paylink-btn-primary" type="submit" id="paylink-submit">
+                Create Link <i class="fas fa-arrow-right" aria-hidden="true"></i>
+              </button>
+              <span id="paylink-status" class="paylink-status"></span>
+            </div>
+
+            <div id="paylink-result" class="paylink-result-box" style="display:none;">
+              <div><span style="color:#6b7280; font-weight:800;">Reference:</span> <span id="paylink-ref" class="paylink-result-link"></span></div>
+              <div style="margin-top: 6px;">
+                <span style="color:#6b7280; font-weight:800;">Link:</span>
+                <div><a id="paylink-link" class="paylink-result-link" href="#" target="_blank" rel="noopener"></a></div>
+              </div>
+              <div class="paylink-result-actions">
+                <button type="button" class="paylink-btn paylink-btn-flat" id="paylink-copy">Copy Link</button>
+                <a class="paylink-btn paylink-btn-wa" id="paylink-wa" href="#" target="_blank" rel="noopener">WhatsApp</a>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
+
+    const scannerHeader = scopeEl.querySelector('#scannerCollapsibleHeader');
+    const invoiceControls = scopeEl.querySelector('#invoiceControls');
+
+    if (scannerPanel && scannerPanel.parentNode) {
+      scannerPanel.insertAdjacentElement('afterend', wrapper);
+    } else if (scannerHeader && scannerHeader.parentNode) {
+      scannerHeader.insertAdjacentElement('afterend', wrapper);
+    } else if (invoiceControls && invoiceControls.parentNode) {
+      invoiceControls.parentNode.insertBefore(wrapper, invoiceControls);
+    } else if (invoiceEl && invoiceEl.parentNode) {
+      invoiceEl.parentNode.insertBefore(wrapper, invoiceEl);
+    } else {
+      scopeEl.appendChild(wrapper);
+    }
+
+    if (invoiceControls && wrapper.parentNode) {
+      wrapper.insertAdjacentElement('afterend', invoiceControls);
+    }
+
+    const header = wrapper.querySelector('#paylink-collapsible-header');
+    const panel = wrapper.querySelector('#paylink-panel');
+    const caret = wrapper.querySelector('#paylink-caret');
+
+    function setExpanded(expanded) {
+      if (!panel) return;
+      panel.style.display = expanded ? 'block' : 'none';
+      if (caret) caret.style.transform = expanded ? 'rotate(180deg)' : 'rotate(0deg)';
+      if (header) header.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    }
+
+    setExpanded(false);
+
+    if (header) {
+      header.addEventListener('click', () => setExpanded(panel.style.display === 'none' || !panel.style.display));
+      header.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          setExpanded(panel.style.display === 'none' || !panel.style.display);
+        }
+      });
+    }
+
+    const nameInput = wrapper.querySelector('#paylink-name');
+    const phoneInput = wrapper.querySelector('#paylink-phone');
+    const amountInput = wrapper.querySelector('#paylink-amount');
+    const descInput = wrapper.querySelector('#paylink-description');
+
+    try {
+      const invName = scopeEl.querySelector('#customerNameDisplay');
+      if (nameInput && invName && invName.textContent) nameInput.value = invName.textContent.trim();
+    } catch (_) {}
+
+    try {
+      const billing = scopeEl.querySelector('.billing');
+      const ps = billing ? billing.querySelectorAll('p') : [];
+      const phoneText = ps && ps[1] ? (ps[1].textContent || '') : (ps && ps[0] ? (ps[0].textContent || '') : '');
+      const digits = String(phoneText).replace(/\D+/g, '');
+      const normalized = digits.length > 10 ? digits.slice(-10) : digits;
+      if (phoneInput && normalized.length === 10) phoneInput.value = normalized;
+    } catch (_) {}
+
+    try {
+      if (descInput && !String(descInput.value || '').trim()) {
+        descInput.value = 'Smartronic | CCTV Surveillance System';
+      }
+    } catch (_) {}
+
+    function parseInr(text) {
+      const clean = String(text || '').replace(/[^0-9.]/g, '');
+      const num = Number(clean);
+      return Number.isFinite(num) ? num : null;
+    }
+
+    try {
+      const payableEl = scopeEl.querySelector('#payable');
+      const payable = parseInr(payableEl ? payableEl.textContent : '');
+      if (amountInput && (!String(amountInput.value || '').trim()) && payable && payable > 0) {
+        amountInput.value = String(Math.round(payable));
+      }
+    } catch (_) {}
+
+    try {
+      const existing = String(amountInput ? (amountInput.value || '') : '').trim();
+      if (amountInput && !existing) {
+        let orderId = '';
+        try {
+          if (typeof window.getCurrentOrderId === 'function') orderId = String(window.getCurrentOrderId() || '');
+        } catch (_) {}
+        if (orderId) {
+          fetch(`/admin_v2/smart/installs.php?get_payment=1&id=${encodeURIComponent(orderId)}`, { cache: 'no-store' })
+            .then(r => r.json())
+            .then(d => {
+              if (!amountInput) return;
+              const now = String(amountInput.value || '').trim();
+              if (now) return;
+              const amt = d && d.success ? Number(d.amount_paid) : NaN;
+              if (Number.isFinite(amt) && amt > 0) {
+                amountInput.value = String(Math.round(amt));
+              }
+            })
+            .catch(() => {});
+        }
+      }
+    } catch (_) {}
+
+    const form = wrapper.querySelector('#paylink-form');
+    const submitBtn = wrapper.querySelector('#paylink-submit');
+    const statusText = wrapper.querySelector('#paylink-status');
+    const resultBox = wrapper.querySelector('#paylink-result');
+    const refOut = wrapper.querySelector('#paylink-ref');
+    const linkOut = wrapper.querySelector('#paylink-link');
+    const waBtn = wrapper.querySelector('#paylink-wa');
+    const copyBtn = wrapper.querySelector('#paylink-copy');
+
+    function setBusy(busy) {
+      if (submitBtn) submitBtn.disabled = busy;
+      if (statusText) {
+        if (busy) statusText.textContent = 'Creating…';
+        else if (statusText.textContent === 'Creating…') statusText.textContent = '';
+      }
+    }
+
+    function normalizePhone(raw) {
+      const digits = String(raw || '').replace(/\D+/g, '');
+      if (digits.length > 10) return digits.slice(-10);
+      return digits;
+    }
+
+    function showStatus(msg) {
+      if (!statusText) return;
+      statusText.textContent = msg || '';
+    }
+
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (resultBox) resultBox.style.display = 'none';
+        setExpanded(true);
+        setBusy(true);
+        try {
+          const name = String((wrapper.querySelector('#paylink-name') || {}).value || '').trim();
+          const phone = normalizePhone(String((wrapper.querySelector('#paylink-phone') || {}).value || ''));
+          const amount = Number((wrapper.querySelector('#paylink-amount') || {}).value || 0);
+          const description = String((wrapper.querySelector('#paylink-description') || {}).value || '').trim();
+
+          if (!name || phone.length !== 10 || !Number.isFinite(amount) || amount <= 0 || !description) {
+            showStatus('Fill all fields correctly');
+            return;
+          }
+
+          const res = await fetch('/payments/create_payment_link.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, phone, amount, description })
+          });
+
+          const data = await res.json().catch(() => null);
+          if (!res.ok || !data || !data.success) {
+            const msg = data && (data.error || data.details) ? String(data.error || data.details) : 'Failed to create link';
+            showStatus(msg);
+            return;
+          }
+
+          if (refOut) refOut.textContent = data.reference_id || '';
+          if (linkOut) {
+            linkOut.textContent = data.link || '';
+            linkOut.href = data.link || '#';
+          }
+
+          if (waBtn) {
+            const waMsg = encodeURIComponent(`Hi ${name}, please complete your payment using this link: ${data.link}`);
+            waBtn.href = `https://wa.me/91${phone}?text=${waMsg}`;
+          }
+
+          if (resultBox) resultBox.style.display = '';
+          showStatus('');
+        } finally {
+          setBusy(false);
+        }
+      });
+    }
+
+    if (copyBtn) {
+      copyBtn.addEventListener('click', async () => {
+        const link = linkOut && linkOut.href ? linkOut.href : '';
+        if (!link || link === '#') return;
+        try {
+          await navigator.clipboard.writeText(link);
+          showStatus('Copied');
+          setTimeout(() => showStatus(''), 1200);
+        } catch (_) {
+          try {
+            const ta = document.createElement('textarea');
+            ta.value = link;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            ta.remove();
+            showStatus('Copied');
+            setTimeout(() => showStatus(''), 1200);
+          } catch (_) {}
+        }
+      });
+    }
   }
 
   function setupDownloadPdf(scopeEl) {
-    window.downloadPDF = function() {
-      const el = scopeEl.querySelector('#invoice');
-      if (!el || !window.html2pdf) return;
-      let id = null;
-      try { if (typeof window.getCurrentOrderId === 'function') id = window.getCurrentOrderId(); } catch (_) {}
-      const fname = 'Smartronic_Invoice_' + (id || 'current') + '.pdf';
-      window.html2pdf().from(el).save(fname);
+    window.downloadPDF = async function() {
+      const invoiceHost = scopeEl.querySelector('#invoice-content') || scopeEl;
+      const invoiceEl = invoiceHost.querySelector('#invoice');
+      if (!invoiceEl) {
+        alert('Invoice content not loaded');
+        return;
+      }
+
+      let id = 'current';
+      try {
+        if (typeof window.getCurrentOrderId === 'function') id = window.getCurrentOrderId() || id;
+      } catch (_) {}
+
+      const clone = invoiceHost.cloneNode(true);
+      clone.querySelectorAll('script, #scannerCollapsibleHeader, #invoiceControls, #scanner-panel, #paylink-wrapper, #paylink-panel, #paylink-collapsible-header').forEach((node) => node.remove());
+
+      const pdfButton = document.getElementById('download-pdf-fab');
+      const originalHtml = pdfButton ? pdfButton.innerHTML : '';
+      if (pdfButton) {
+        pdfButton.disabled = true;
+        pdfButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+      }
+
+      try {
+        const res = await fetch('../smart/installs.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: JSON.stringify({
+            invoicePdf: true,
+            id,
+            html: clone.innerHTML
+          })
+        });
+
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Smartronic_Invoice_${id}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+        if (typeof window.updatePdfSentIndicator === 'function') {
+          window.updatePdfSentIndicator('yes');
+        }
+        if (window.currentInstallData) {
+          window.currentInstallData.pdf_sent = 'yes';
+        }
+      } catch (err) {
+        console.error('Failed to generate invoice PDF', err);
+        alert('Failed to generate invoice PDF');
+      } finally {
+        if (pdfButton) {
+          pdfButton.disabled = false;
+          pdfButton.innerHTML = originalHtml;
+        }
+      }
     };
   }
 
@@ -433,46 +832,6 @@
     if (shareBtn) shareBtn.style.display = isMaterial ? 'flex' : 'none';
   }
 
-  // PDF support for invoices
-  async function ensureInvoicePdfSupport() {
-    function installDownloadPDF() {
-      window.downloadPDF = function() {
-        const host = document.getElementById('invoice-content');
-        const el = (host && host.querySelector('#invoice')) || document.getElementById('invoice');
-        if (!el) {
-          alert('Invoice content not loaded');
-          return;
-        }
-        const id = (document.getElementById('id') || {}).value || 'invoice';
-        try {
-          html2pdf().from(el).save(`Smartronic_Invoice_${id}.pdf`);
-        } catch (err) {
-          console.error('html2pdf failed', err);
-          alert('Failed to generate PDF');
-        }
-      };
-    }
-    
-    if (window.html2pdf) {
-      installDownloadPDF();
-      return;
-    }
-    
-    await new Promise((resolve) => {
-      const s = document.createElement('script');
-      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-      s.onload = () => {
-        installDownloadPDF();
-        resolve();
-      };
-      s.onerror = () => {
-        console.warn('Failed to load html2pdf');
-        resolve();
-      };
-      document.head.appendChild(s);
-    });
-  }
-
   // Function to populate material form fields with data from the requirement form
   function fillMaterialFromForm() {
     console.log('Filling material from form...');
@@ -487,6 +846,8 @@
     const idno = getVal('id');
     const location = getVal('location');
     const resolution = getVal('resolution'); // "2 MP" or "5 MP"
+    const brand = getVal('brand');
+    const camType = getVal('cam_type');
     const bullets = parseInt(getVal('bullets') || '0', 10) || 0;
     const dome = parseInt(getVal('dome') || '0', 10) || 0;
     const monitor = getVal('monitor');
@@ -495,8 +856,12 @@
     const type = getVal('type'); // DVR/NVR type
     
     console.log('Values from requirement form:', {
-      name, idno, location, resolution, bullets, dome, monitor, rack, hdd, type
+      name, idno, location, resolution, brand, camType, bullets, dome, monitor, rack, hdd, type
     });
+
+    if (typeof window.setMaterialBrand === 'function') {
+      window.setMaterialBrand(brand);
+    }
     
     // Populate basic material form fields
     const nameField = document.getElementById('user-name');
@@ -521,17 +886,23 @@
         console.log('Set bullet camera quantity to:', bullets);
       }
       
-      // Set bullet camera resolution
+      // Set bullet camera resolution (skip if select doesn't exist)
       const bulletSelect = document.getElementById('resolution-bullet');
-      if (bulletSelect && resolution) {
-        const options = bulletSelect.options;
-        for (let i = 0; i < options.length; i++) {
-          if (options[i].value.includes(resolution)) {
-            bulletSelect.selectedIndex = i;
-            console.log('Set bullet camera resolution to:', options[i].value);
-            break;
-          }
+      if (bulletSelect && bulletSelect.options && resolution) {
+        bulletSelect.value = resolution;
+        console.log('Set bullet camera resolution to:', resolution);
+      }
+      const bulletCamTypeSelect = document.getElementById('resolution-bullet-cam-type');
+      if (bulletCamTypeSelect && camType) {
+        const normalizedCamType = String(camType).trim().toLowerCase();
+        if (normalizedCamType.includes('hybrid')) {
+          bulletCamTypeSelect.value = 'Hybrid';
+        } else if (normalizedCamType.includes('full')) {
+          bulletCamTypeSelect.value = 'Full colour';
+        } else {
+          bulletCamTypeSelect.value = 'Normal with mic';
         }
+        console.log('Set bullet camera type to:', bulletCamTypeSelect.value);
       }
     }
     
@@ -543,23 +914,29 @@
         console.log('Set dome camera quantity to:', dome);
       }
       
-      // Set dome camera resolution
+      // Set dome camera resolution (skip if select doesn't exist)
       const domeSelect = document.getElementById('resolution-dome');
-      if (domeSelect && resolution) {
-        const options = domeSelect.options;
-        for (let i = 0; i < options.length; i++) {
-          if (options[i].value.includes(resolution)) {
-            domeSelect.selectedIndex = i;
-            console.log('Set dome camera resolution to:', options[i].value);
-            break;
-          }
+      if (domeSelect && domeSelect.options && resolution) {
+        domeSelect.value = resolution;
+        console.log('Set dome camera resolution to:', domeSelect.value);
+      }
+      const domeCamTypeSelect = document.getElementById('resolution-dome-cam-type');
+      if (domeCamTypeSelect && camType) {
+        const normalizedCamType = String(camType).trim().toLowerCase();
+        if (normalizedCamType.includes('hybrid')) {
+          domeCamTypeSelect.value = 'Hybrid';
+        } else if (normalizedCamType.includes('full')) {
+          domeCamTypeSelect.value = 'Full colour';
+        } else {
+          domeCamTypeSelect.value = 'Normal with mic';
         }
+        console.log('Set dome camera type to:', domeCamTypeSelect.value);
       }
     }
     
-    // Set DVR type
+    // Set DVR type (skip if select doesn't exist)
     const dvrSelect = document.getElementById('type');
-    if (dvrSelect && type && resolution) {
+    if (dvrSelect && dvrSelect.options && type) {
       const totalCams = bullets + dome;
       const options = dvrSelect.options;
       
@@ -656,7 +1033,6 @@
   // Export functions to global scope
   window.loadInvoiceIntoContainer = loadInvoiceIntoContainer;
   window.loadMaterialIntoContainer = loadMaterialIntoContainer;
-  window.ensureInvoicePdfSupport = ensureInvoicePdfSupport;
   window.fillMaterialFromForm = fillMaterialFromForm;
   window.ensureMaterialFABs = ensureMaterialFABs;
   window.updateMaterialFabVisibility = updateMaterialFabVisibility;

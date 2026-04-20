@@ -32,10 +32,12 @@ $whatsappNumberLabels = [
 // Keys: Mon, Tue, Wed, Thu, Fri, Sat, Sun
 $whatsappSchedule = [
     "Mon" => "919886735991", // Amreen
-    "Tue" => "919886735991", // Amreen
-    "Wed" => "916360274445", // Varsha
+    "Tue" => "917829080536", // Amreen
+
+    "Wed" => "917829080536", // Varsha
     "Thu" => "916360274445", // Varsha
     "Fri" => "916360274445", // Varsha
+    
     "Sat" => "919886735991", // Amreen
     "Sun" => "919886735991"  // Amreen
 ];

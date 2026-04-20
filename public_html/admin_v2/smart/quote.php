@@ -1,9 +1,12 @@
 <?php
 ob_start();
 require_once '../auth.php'; // Assuming we create auth.php in admin folder
+requireSmartPageAccess('quote', $role, $authPages);
 
 // Check if user is admin
 $isAdmin = isset($_COOKIE['auth_role']) && $_COOKIE['auth_role'] === 'admin';
+$isMarket = isset($_COOKIE['auth_role']) && $_COOKIE['auth_role'] === 'market';
+$allowedSmartPages = getAllowedSmartPages($role, $authPages);
 ?>
 <!doctype html>
 <html lang="en">
@@ -19,9 +22,9 @@ $isAdmin = isset($_COOKIE['auth_role']) && $_COOKIE['auth_role'] === 'admin';
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <!-- Local stylesheet -->
-  <link href="styles.css?v=146" rel="stylesheet">
+  <link href="styles.css?v=147" rel="stylesheet">
 </head>
-<body class="grey lighten-4<?php echo (!isset($_COOKIE['auth_role']) || $_COOKIE['auth_role'] !== 'admin') ? ' not-admin' : ' is-admin'; ?>">
+<body class="grey lighten-4<?php echo (!isset($_COOKIE['auth_role']) || $_COOKIE['auth_role'] !== 'admin') ? ' not-admin' : ' is-admin'; ?><?php echo ($isMarket && !$isAdmin) ? ' is-market' : ''; ?>">
 
   <section class="crf-form-wrapper">
     <div class="container">
@@ -93,6 +96,7 @@ $isAdmin = isset($_COOKIE['auth_role']) && $_COOKIE['auth_role'] === 'admin';
               <div class="row no-margin total-row">
                 <span class="amount-label">MIN</span>
                 <span class="amount-large" id="sticky-total">₹0</span>
+                <span class="half-diff-total" id="sticky-half-diff-total">₹0</span>
                 <span class="original-max-display" id="original-max-row" style="display:none;"></span>
               </div>
               <div class="row no-margin" id="sticky-profit-row">
@@ -158,8 +162,12 @@ $isAdmin = isset($_COOKIE['auth_role']) && $_COOKIE['auth_role'] === 'admin';
             <div class="crf-form-col">
               <div class="textarea-header">
                 <label for="whatsapp-preview">WhatsApp Message Preview</label>
-                <i class="fas fa-copy textarea-copy-icon" id="textarea-copy-icon" title="Copy to clipboard" style="margin-left: auto; cursor: pointer; color: #667eea;"></i>
-                <i class="fas fa-edit textarea-edit-icon" id="textarea-toggle-icon" title="Click to edit message"></i>
+                <span style="margin-left: auto; display: flex; align-items: center; gap: 10px;">
+                  <i class="fas fa-file-pdf textarea-pdf-icon" id="textarea-pdf-icon" title="Generate PDF" style="cursor: pointer; color: #dc2626; font-size: 16px; font-weight: bold; padding: 5px; border: 1px solid #dc2626; border-radius: 4px; background: #fef2f2;"></i>
+                  <button id="textarea-pdf-button" title="Generate PDF" style="cursor: pointer; color: white; font-size: 12px; font-weight: bold; padding: 5px 10px; border: 1px solid #dc2626; border-radius: 4px; background: #dc2626; display: none;">PDF</button>
+                  <i class="fas fa-copy textarea-copy-icon" id="textarea-copy-icon" title="Copy to clipboard" style="cursor: pointer; color: #667eea;"></i>
+                  <i class="fas fa-edit textarea-edit-icon" id="textarea-toggle-icon" title="Click to edit message"></i>
+                </span>
               </div>
               <div class="textarea-wrapper">
                 <textarea id="whatsapp-preview" class="input" rows="15" placeholder="Message will appear here..." style="background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 14px; border: 2px solid #e9ecef; border-radius: 8px; padding: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: border-color 0.3s ease;"></textarea>
@@ -167,7 +175,7 @@ $isAdmin = isset($_COOKIE['auth_role']) && $_COOKIE['auth_role'] === 'admin';
             </div>
           </div>
 
-          <!-- Live Summary Panel -->
+          <?php if ($isAdmin): ?>
           <aside id="summary-panel" class="summary-panel">
             <h6>Live Price Summary</h6>
             <div id="camera-status-bar" class="camera-status-bar">
@@ -198,6 +206,24 @@ $isAdmin = isset($_COOKIE['auth_role']) && $_COOKIE['auth_role'] === 'admin';
               <button id="btn-clear" class="btn-flat">Clear selection</button>
             </div>
           </aside>
+          <?php endif; ?>
+
+          <?php if (!$isAdmin && $isMarket): ?>
+          <aside id="market-summary-panel" class="summary-panel">
+            <h6>Product Summary</h6>
+            <div id="market-camera-status-bar" class="camera-status-bar">
+              <span class="status-label">Cameras:</span>
+              <span id="market-camera-selected-count" class="status-count">0</span>
+              <span class="status-separator">/</span>
+              <span id="market-camera-required-count" class="status-count">6</span>
+              <span class="status-label">selected</span>
+            </div>
+            <div id="market-summary-items" class="summary-items"></div>
+            <div class="summary-actions">
+              <button id="market-btn-clear" class="btn-flat">Clear selection</button>
+            </div>
+          </aside>
+          <?php endif; ?>
 
         </div>
 
@@ -206,14 +232,79 @@ $isAdmin = isset($_COOKIE['auth_role']) && $_COOKIE['auth_role'] === 'admin';
   </section>
 
   <!-- Floating WhatsApp Button -->
+  <div id="wp-selected-price-indicator" class="wp-selected-price-indicator" aria-live="polite"></div>
   <button type="button" id="btn-generate-wp" class="btn-cta btn-floating" disabled>
     <i class="fas fa-paper-plane"></i>
   </button>
 
   <!-- External data + script -->
   <script>
+    function mountQuoteFloatingMenu() {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('floating_menu') === '0') return true;
+      if (!window.SmartFloatingMenu || typeof window.SmartFloatingMenu.mount !== 'function') return false;
+      const allowedPages = <?php echo json_encode($allowedSmartPages); ?>;
+      const links = [];
+      if (allowedPages.includes('lead')) {
+        links.push({
+          label: 'Lead List',
+          icon: 'fas fa-users',
+          color: '#e11d48',
+          url: `${window.location.origin}/admin_v2/smart/lead_list_enhanced.php`
+        });
+      }
+      if (allowedPages.includes('install')) {
+        links.push({
+          label: 'Installs',
+          icon: 'fa-solid fa-screwdriver-wrench',
+          color: '#2563eb',
+          url: `${window.location.origin}/admin_v2/smart/installs.php`
+        });
+      }
+      if (allowedPages.includes('quote')) {
+        links.push({
+          label: 'Quote Tool',
+          icon: 'fas fa-calculator',
+          color: '#6f42c1',
+          url: `${window.location.origin}/admin_v2/smart/quote.php`
+        });
+      }
+      window.SmartFloatingMenu.mount({
+        links,
+        baseBottom: 140,
+        step: 60
+      });
+      return true;
+    }
+
+    function initQuoteFloatingMenu() {
+      if (mountQuoteFloatingMenu()) return;
+      const s = document.createElement('script');
+      s.src = '/admin_v2/js/floating_icon_menu.js';
+      s.onload = () => { mountQuoteFloatingMenu(); };
+      s.onerror = () => {
+        const fallback = document.createElement('script');
+        fallback.src = '../js/floating_icon_menu.js';
+        fallback.onload = () => { mountQuoteFloatingMenu(); };
+        document.head.appendChild(fallback);
+      };
+      document.head.appendChild(s);
+      let tries = 0;
+      const timer = setInterval(() => {
+        tries += 1;
+        if (mountQuoteFloatingMenu() || tries >= 20) clearInterval(timer);
+      }, 150);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initQuoteFloatingMenu);
+    } else {
+      initQuoteFloatingMenu();
+    }
+  </script>
+  <script>
     // Load data from JSON 
-    fetch('/admin_v2/smart/data.json')
+    fetch('/admin_v2/smart/data.json?v=157', { cache: 'no-store' })
       .then(response => {
         console.log('Response status:', response.status);
         if (!response.ok) {
@@ -252,7 +343,7 @@ $isAdmin = isset($_COOKIE['auth_role']) && $_COOKIE['auth_role'] === 'admin';
           s.onerror = function() {
             if (!isFallback) {
               console.warn('Primary load failed, trying relative scripts.js');
-              loadScript('scripts.js?v=153', true);
+              loadScript('scripts.js?v=158', true);
             } else {
               console.error('Failed to load scripts.js after fallback');
             }
@@ -261,7 +352,7 @@ $isAdmin = isset($_COOKIE['auth_role']) && $_COOKIE['auth_role'] === 'admin';
         };
 
         // Try absolute first, then fallback relative
-        loadScript('/admin_v2/smart/scripts.js?v=153');
+        loadScript('/admin_v2/smart/scripts.js?v=158');
       })
       .catch(error => {
         console.error('Failed to load data.json:', error);
