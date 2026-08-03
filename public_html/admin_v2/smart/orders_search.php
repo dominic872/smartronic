@@ -97,12 +97,12 @@ $optional = [
   'id'          => ['id','order_id','install_id','ticket_id','job_id'],
   'name'        => ['name','customer_name','client_name','fullname','contact_name'],
   'date'        => ['date','order_date','install_date','scheduled_date','created_at','createdon','created_on'],
-  'location'    => ['location','address','address1','site','place','area'],
-  'cams'        => ['cams','cameras','num_cameras','camera_count','total'],
+  'location'    => ['location','Location','area','address','address1','site','place','map','Map','map_url','google_map','maplink','map_link'],
+  'cams'        => ['cams','quantity','cameras','num_cameras','camera_count','total'],
   'type'        => ['type','dvr_type','job_type','order_type'],
   'resolution'  => ['resolution','camera_resolution','res'],
   'hdd'         => ['hdd','hdd_size','storage'],
-  'map'         => ['map','map_url','google_map','maplink','map_link'],
+  'map'         => ['map','Map','location','Location','map_url','google_map','maplink','map_link','area','address','address1','site','place'],
   'owner'       => ['owner','team','assigned_owner','division'],
   'technician'  => ['technician','tech','assigned_to','assigned_tech','engineer'],
 ];
@@ -183,6 +183,14 @@ $res = $stmt->get_result();
 $out = [];
 while ($row = $res->fetch_assoc()) {
   if (isset($row['cams'])) $row['cams'] = is_null($row['cams']) ? null : (int)$row['cams'];
+  $location = isset($row['location']) ? trim((string)$row['location']) : '';
+  $map = isset($row['map']) ? trim((string)$row['map']) : '';
+  if ($location === '' && $map !== '') {
+    $row['location'] = $map;
+  }
+  if ($map === '' && $location !== '') {
+    $row['map'] = $location;
+  }
   $out[] = $row;
 }
 

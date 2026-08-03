@@ -5,7 +5,9 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 
-  <title>Lead List</title>
+  <title>SM Leads | List</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/content/uploads/2025/01/cropped-Site-Icon-32x32.png">
+  <link rel="apple-touch-icon" href="/content/uploads/2025/01/cropped-Site-Icon-180x180.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -545,7 +547,7 @@
             <div class="lead-info-content">
               <div class="lead-header">
                 <h3 class="${nameClass}">${displayName}</h3>
-                ${assign && assign !== '-' ? `<span class="assign-badge">${assign}</span>` : ''}
+                ${assign && assign !== '-' ? `<span class="assign-badge${String(assign).trim().toUpperCase() === 'SUR' ? ' is-sur' : ''}">${assign}</span>` : ''}
               </div>
 
               <div class="lead-meta-row">
@@ -1538,6 +1540,7 @@ quoteModal.addEventListener('click', (e) => {
           headerSection.appendChild(assignTag);
         }
         assignTag.textContent = assignVal;
+        assignTag.classList.toggle('is-sur', assignVal.toUpperCase() === 'SUR');
       } else if (assignTag) {
         assignTag.remove();
       }

@@ -37,7 +37,7 @@ if (file_exists($configPhp)) {
     }
 
     $whatsappPickedByAssignee = null;
-    $whatsappAssigneeCookie = isset($_COOKIE['assignee']) ? (string)$_COOKIE['assignee'] : '';
+    $whatsappAssigneeCookie = isset($_POST['assignee']) ? (string)$_POST['assignee'] : (isset($_COOKIE['assignee']) ? (string)$_COOKIE['assignee'] : '');
     $whatsappAssigneeMatch = null;
     if ($whatsappAssigneeCookie !== '' && isset($whatsappNumberLabels) && is_array($whatsappNumberLabels)) {
         $cookieRaw = trim($whatsappAssigneeCookie);

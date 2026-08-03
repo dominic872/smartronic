@@ -25,6 +25,28 @@ if (
 // Set timezone to India
 date_default_timezone_set('Asia/Kolkata');
 
+function ensureOrdersMapCoordColumns(mysqli $conn): void {
+    static $done = false;
+    if ($done || $conn->connect_error) return;
+    $done = true;
+
+    $needed = [
+        'map_lat' => "ALTER TABLE orders ADD COLUMN map_lat DECIMAL(10,7) NULL DEFAULT NULL",
+        'map_lng' => "ALTER TABLE orders ADD COLUMN map_lng DECIMAL(10,7) NULL DEFAULT NULL",
+    ];
+
+    foreach ($needed as $column => $sql) {
+        $safeColumn = $conn->real_escape_string($column);
+        $res = $conn->query("SELECT COUNT(*) AS c FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'orders' AND COLUMN_NAME = '{$safeColumn}'");
+        $row = $res ? $res->fetch_assoc() : null;
+        if (!$row || (int)$row['c'] === 0) {
+            $conn->query($sql);
+        }
+    }
+}
+
+ensureOrdersMapCoordColumns($conn);
+
 // Handle query string parameters
 $queryParams = $_GET;
 $existingRecord = null;
@@ -118,6 +140,8 @@ if (isset($_GET['id']) && !isset($_GET['get_extras']) && !isset($_GET['get_payme
             'order' => $row['order'],
             'resolution' => $row['resolution'],
             'map' => $row['Map'],
+            'map_lat' => isset($row['map_lat']) ? $row['map_lat'] : null,
+            'map_lng' => isset($row['map_lng']) ? $row['map_lng'] : null,
             'rack' => $row['rack'],
             'notes' => isset($row['notes']) ? $row['notes'] : ''
         ];
@@ -202,16 +226,19 @@ if ($isApiCall && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $order = (int)($data['order'] ?? 0);
     $resolution = $data['resolution'] ?? '';
     $map = $data['map'] ?? '';
+    $mapLat = isset($data['map_lat']) && $data['map_lat'] !== '' ? (string)$data['map_lat'] : '';
+    $mapLng = isset($data['map_lng']) && $data['map_lng'] !== '' ? (string)$data['map_lng'] : '';
     $rack = $data['rack'] ?? '';
     $notes = isset($data['notes']) ? $data['notes'] : '';
-    $stmt = $conn->prepare("INSERT INTO orders (idno, name, quantity, bullets, dome, storage, monitor, product, area, time, date, owner, technician, helper, `order`, resolution, map, rack, notes)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    $stmt = $conn->prepare("INSERT INTO orders (idno, name, quantity, bullets, dome, storage, monitor, product, area, time, date, owner, technician, helper, `order`, resolution, map, map_lat, map_lng, rack, notes)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULLIF(?, ''), NULLIF(?, ''), ?, ?)
 ON DUPLICATE KEY UPDATE name=?, quantity=?, bullets=?, dome=?, storage=?, monitor=?, product=?, area=?, time=?, date=?, owner=?, technician=?, helper=?, `order`=?, resolution=?, map=?, rack=?, notes=?");
+$types = str_repeat('s', 39);
 $stmt->bind_param(
-  "ssiiissssssssssisssssiiissssssssssissss",
+  $types,
   $id, $name, $cams, $bullets, $dome,
   $hdd, $monitor, $type, $location, $time,
-  $date, $owner, $technician, $helper, $order, $resolution, $map, $rack, $notes,
+  $date, $owner, $technician, $helper, $order, $resolution, $map, $mapLat, $mapLng, $rack, $notes,
   $name, $cams, $bullets, $dome,
   $hdd, $monitor, $type, $location, $time,
   $date, $owner, $technician, $helper, $order, $resolution, $map, $rack, $notes
@@ -300,7 +327,9 @@ if (isset($_GET['render_material'])) {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CCTV Install Calendar</title>
+  <title>SM Installs | Calendar</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/content/uploads/2025/01/cropped-Site-Icon-32x32.png">
+  <link rel="apple-touch-icon" href="/content/uploads/2025/01/cropped-Site-Icon-180x180.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" href="../css/installs.css">
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB7BKkBQEI0WpbFFjn8K4VWKRaYeIs3GhU&libraries=places"></script>
@@ -737,6 +766,8 @@ echo "<h2>Hello, $nameAssign!</h2>";
       <input type="text" id="location" placeholder="Location">
       
       <input type="text" id="map" placeholder="Map Link">
+      <input type="hidden" id="map_lat" value="">
+      <input type="hidden" id="map_lng" value="">
       <input type="time" id="time">
       <input type="date" id="date" required>
       <select id="owner">
@@ -750,15 +781,18 @@ echo "<h2>Hello, $nameAssign!</h2>";
         <option value="SYED">SYED</option>
         <option value="AFREED">AFREED</option>
         <option value="KARTHICK">KARTHICK</option>
-        <option value="ABDUL">ABDUL</option>
         <option value="SYED 2">SYED 2</option>
-        <option value="DAVID">DAVID</option>
+        <option value="Chandan">Chandan</option>
+        <option value="Uday (Chennai)">Uday (Chennai)</option>
+        <option value="Zain">Zain</option>
       </select>
       <select id="helper">
         <option value="">Select Helper</option>
         <option value="KARTHIK">KARTHIK</option>
-        <option value="ABDUL">ABDUL</option>
         <option value="SYED 2">SYED 2</option>
+        <option value="Chandan">Chandan</option>
+        <option value="Uday (Chennai)">Uday (Chennai)</option>
+        <option value="Zain">Zain</option>
       </select>
       <input type="text" id="notes" placeholder="Notes" />
       <button type="submit">Save</button>

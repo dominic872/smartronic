@@ -7,8 +7,8 @@
     const params = new URLSearchParams();
     const fields = [
       'id', 'name', 'cams', 'bullets', 'dome', 'hdd', 'monitor', 'type', 
-      'location', 'time', 'date', 'owner', 'technician', 'helper', 
-      'resolution', 'map', 'rack', 'notes'
+      'city', 'location', 'time', 'date', 'owner', 'technician', 'helper',
+      'resolution', 'brand', 'cam_type', 'map', 'rack', 'notes'
     ];
     
     fields.forEach(field => {
@@ -19,8 +19,13 @@
     });
     params.append('render_invoice', '1');
 
+    const orderIdInput = document.getElementById('id');
+    const loadingOrderId = orderIdInput ? String(orderIdInput.value || '').trim() : '';
     const container = document.getElementById('invoice-content');
-    if (container) container.innerHTML = 'Loading invoice...';
+    if (container) {
+      container.dataset.orderId = loadingOrderId;
+      container.innerHTML = 'Loading invoice...';
+    }
     
     try {
       const res = await fetch(`../smart/installs.php?${params.toString()}`, { cache: 'no-store' });
@@ -31,6 +36,7 @@
       
       const html = await res.text();
       if (container) {
+        container.dataset.orderId = loadingOrderId;
         container.innerHTML = html || 'No invoice content available.';
       }
     } catch (e) {
@@ -94,6 +100,15 @@
     const invContent = scopeEl.querySelector('#invoiceControlsContent');
     const scanHeader = scopeEl.querySelector('#scannerCollapsibleHeader');
     const scannerPanel = scopeEl.querySelector('#scanner-panel');
+    const invoiceHost = scopeEl.id === 'invoice-content' ? scopeEl : scopeEl.closest('#invoice-content');
+
+    const isInvoiceForCurrentOrder = () => {
+      const currentOrderId = typeof window.getCurrentOrderId === 'function'
+        ? String(window.getCurrentOrderId() || '').trim()
+        : String((document.getElementById('id') || {}).value || '').trim();
+      const invoiceOrderId = invoiceHost ? String(invoiceHost.dataset.orderId || '').trim() : '';
+      return currentOrderId !== '' && invoiceOrderId !== '' && currentOrderId === invoiceOrderId;
+    };
 
     if (noteInput) {
       if (!noteInput.value || !noteInput.value.trim()) noteInput.value = addressText;
@@ -105,8 +120,42 @@
       const initial = noteOutput ? noteOutput.innerHTML : addressText;
       noteEditor.innerHTML = initial;
     }
+    const syncInvoiceNameFields = () => {
+      if (!isInvoiceForCurrentOrder()) {
+        const mainNameInput = document.getElementById('name');
+        return mainNameInput ? mainNameInput.value : '';
+      }
+      const newName = nameInput ? nameInput.value.trim() : '';
+      if (newName) {
+        if (billingNameEl) billingNameEl.textContent = newName;
+        if (invoiceNameEl) invoiceNameEl.textContent = newName;
+      }
+      const mainNameInput = document.getElementById('name');
+      if (mainNameInput && typeof newName === 'string') {
+        mainNameInput.value = newName;
+      }
+      return newName;
+    };
+    const syncInvoiceNoteFields = () => {
+      if (!isInvoiceForCurrentOrder()) {
+        const mainNotesInput = document.getElementById('notes');
+        return mainNotesInput ? mainNotesInput.value : '';
+      }
+      const newNoteHtml = noteEditor ? noteEditor.innerHTML : (noteInput ? noteInput.value : '');
+      if (typeof newNoteHtml === 'string' && noteOutput) noteOutput.innerHTML = newNoteHtml;
+      if (noteInput && noteEditor) noteInput.value = noteEditor.textContent;
+      return noteInput ? noteInput.value : (noteEditor ? noteEditor.textContent : '');
+    };
+    window.syncInstallInvoiceName = syncInvoiceNameFields;
+    window.syncInstallInvoiceNote = syncInvoiceNoteFields;
     if (nameInput && !nameInput.value && billingNameEl) {
       nameInput.value = (billingNameEl.textContent||'').trim();
+    }
+    if (nameInput) {
+      const updateName = () => { syncInvoiceNameFields(); };
+      nameInput.addEventListener('input', updateName);
+      nameInput.addEventListener('change', updateName);
+      nameInput.addEventListener('blur', updateName);
     }
     Array.from(billingPs).forEach(p => { p.style.display = 'none'; });
     if (noteInput && noteOutput && !noteEditor) {
@@ -115,7 +164,7 @@
       noteInput.addEventListener('mousedown', updateNote);
     }
     if (noteEditor && noteOutput) {
-      const updateNoteHtml = () => { noteOutput.innerHTML = noteEditor.innerHTML; };
+      const updateNoteHtml = () => { syncInvoiceNoteFields(); };
       noteEditor.addEventListener('input', updateNoteHtml);
       noteEditor.addEventListener('mousedown', updateNoteHtml);
     }
@@ -159,14 +208,8 @@
     if (applyBtn) {
       applyBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        const newName = nameInput ? nameInput.value.trim() : '';
-        const newNoteHtml = noteEditor ? noteEditor.innerHTML : (noteInput ? noteInput.value : '');
-        if (newNoteHtml && noteOutput) noteOutput.innerHTML = newNoteHtml;
-        if (noteInput && noteEditor) noteInput.value = noteEditor.textContent;
-        if (newName) {
-          if (billingNameEl) billingNameEl.textContent = newName;
-          if (invoiceNameEl) invoiceNameEl.textContent = newName;
-        }
+        syncInvoiceNameFields();
+        syncInvoiceNoteFields();
       });
     }
 
@@ -553,23 +596,34 @@
     }
   }
 
-  function setupDownloadPdf(scopeEl) {
-    window.downloadPDF = async function() {
+  function buildCleanInvoiceExportHtml(scopeEl) {
       const invoiceHost = scopeEl.querySelector('#invoice-content') || scopeEl;
       const invoiceEl = invoiceHost.querySelector('#invoice');
       if (!invoiceEl) {
-        alert('Invoice content not loaded');
-        return;
+        return '';
       }
 
+      const clone = invoiceHost.cloneNode(true);
+      clone.querySelectorAll('script, #scannerCollapsibleHeader, #invoiceControls, #scanner-panel, #paylink-wrapper, #paylink-panel, #paylink-collapsible-header').forEach((node) => node.remove());
+      return clone.innerHTML;
+  }
+
+  function getInvoiceExportId() {
       let id = 'current';
       try {
         if (typeof window.getCurrentOrderId === 'function') id = window.getCurrentOrderId() || id;
       } catch (_) {}
+      return id;
+  }
 
-      const clone = invoiceHost.cloneNode(true);
-      clone.querySelectorAll('script, #scannerCollapsibleHeader, #invoiceControls, #scanner-panel, #paylink-wrapper, #paylink-panel, #paylink-collapsible-header').forEach((node) => node.remove());
-
+  function setupDownloadPdf(scopeEl) {
+    window.downloadPDF = async function() {
+      const html = buildCleanInvoiceExportHtml(scopeEl);
+      if (!html) {
+        alert('Invoice content not loaded');
+        return;
+      }
+      const id = getInvoiceExportId();
       const pdfButton = document.getElementById('download-pdf-fab');
       const originalHtml = pdfButton ? pdfButton.innerHTML : '';
       if (pdfButton) {
@@ -587,7 +641,7 @@
           body: JSON.stringify({
             invoicePdf: true,
             id,
-            html: clone.innerHTML
+            html
           })
         });
 
@@ -610,6 +664,9 @@
         if (window.currentInstallData) {
           window.currentInstallData.pdf_sent = 'yes';
         }
+        if (typeof window.refreshInstallHistoryPanel === 'function') {
+          window.refreshInstallHistoryPanel();
+        }
       } catch (err) {
         console.error('Failed to generate invoice PDF', err);
         alert('Failed to generate invoice PDF');
@@ -617,6 +674,65 @@
         if (pdfButton) {
           pdfButton.disabled = false;
           pdfButton.innerHTML = originalHtml;
+        }
+      }
+    };
+
+    window.downloadWordInvoice = async function() {
+      const role = String(window.INSTALLS_CURRENT_ROLE || '').toLowerCase();
+      if (role !== 'admin') {
+        alert('Only admin users can download Word invoices');
+        return;
+      }
+
+      const html = buildCleanInvoiceExportHtml(scopeEl);
+      if (!html) {
+        alert('Invoice content not loaded');
+        return;
+      }
+
+      const id = getInvoiceExportId();
+      const wordButton = document.getElementById('download-word-fab');
+      const originalHtml = wordButton ? wordButton.innerHTML : '';
+      if (wordButton) {
+        wordButton.disabled = true;
+        wordButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+      }
+
+      try {
+        const res = await fetch('../smart/installs.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: JSON.stringify({
+            invoiceWord: true,
+            id,
+            html
+          })
+        });
+
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Smartronic_Invoice_${id}.doc`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+      } catch (err) {
+        console.error('Failed to generate invoice Word document', err);
+        alert('Failed to generate invoice Word document');
+      } finally {
+        if (wordButton) {
+          wordButton.disabled = false;
+          wordButton.innerHTML = originalHtml;
         }
       }
     };
@@ -641,7 +757,7 @@
     const params = new URLSearchParams();
     const fields = [
       'id', 'name', 'cams', 'bullets', 'dome', 'hdd', 'monitor', 'type',
-      'location', 'time', 'date', 'owner', 'technician', 'helper',
+      'city', 'location', 'time', 'date', 'owner', 'technician', 'helper',
       'resolution', 'map', 'rack', 'notes'
     ];
     
@@ -934,39 +1050,47 @@
       }
     }
     
-    // Set DVR type (skip if select doesn't exist)
+    // Set recorder type (DVR/NVR) based on camera count
     const dvrSelect = document.getElementById('type');
     if (dvrSelect && dvrSelect.options && type) {
       const totalCams = bullets + dome;
       const options = dvrSelect.options;
+      const isNvr = String(type || '').toUpperCase().includes('NVR');
+      const getChannels = (value) => {
+        const match = String(value || '').match(/(\d+)\s*CH/i);
+        return match ? parseInt(match[1], 10) || 0 : 0;
+      };
       
-      // Find appropriate DVR based on resolution and camera count
+      // Find appropriate recorder based on resolution and camera count
       for (let i = 0; i < options.length; i++) {
         const option = options[i].value;
-        if (option.includes(resolution)) {
-          const channels = parseInt(option.split(' ')[2]) || 0;
+        if (isNvr || option.includes(resolution)) {
+          const channels = getChannels(option);
           if (channels >= totalCams) {
             dvrSelect.selectedIndex = i;
-            console.log('Set DVR type to:', option);
+            console.log('Set recorder type to:', option);
             break;
           }
         }
       }
       
-      // Set DVR quantity
+      // Set recorder quantity
       const dvrQty = document.querySelector('[name="qty-2"]') || document.getElementById('type-qty');
       if (dvrQty) {
         dvrQty.value = 1;
-        console.log('Set DVR quantity to: 1');
+        console.log('Set recorder quantity to: 1');
       }
     }
     
     // Set HDD (scope to material content to avoid matching requirement form field)
     const hddSelect = document.querySelector('#material-content #hdd') || document.getElementById('hdd');
     if (hddSelect && hdd) {
+      const target = hdd.replace(/\s+/g, '').toLowerCase();
       const options = hddSelect.options;
       for (let i = 0; i < options.length; i++) {
-        if (options[i].value.replace(/\s+/g, '') === hdd) {
+        const optionValue = (options[i].value || '').replace(/\s+/g, '').toLowerCase();
+        const optionText = (options[i].text || '').replace(/\s+/g, '').toLowerCase();
+        if (optionValue === target || optionText === target || optionValue.startsWith(target) || optionText.startsWith(target)) {
           hddSelect.selectedIndex = i;
           console.log('Set HDD to:', options[i].value);
           break;

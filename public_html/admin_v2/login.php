@@ -4,7 +4,7 @@ ini_set('display_errors', 1);
 require 'config.php'; // contains $mysqli = new mysqli(...);
 $error = '';
 
-// $password = 'Smart@0000'; // your desired password
+// $password = 'surya@1994'; // your desired password
 // $hash = password_hash($password, PASSWORD_DEFAULT);
 
 //echo $hash;

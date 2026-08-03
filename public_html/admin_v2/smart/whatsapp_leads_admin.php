@@ -2,8 +2,8 @@
 ob_start();
 require_once '../auth.php'; // Assuming we create auth.php in admin folder
 
-// Check if user is admin
-$isAdmin = isset($_COOKIE['auth_role']) && $_COOKIE['auth_role'] === 'admin';
+// Check if user has admin-like access
+$isAdmin = isElevatedRole((string)($_COOKIE['auth_role'] ?? ''));
 ?>
 <?php
 // Admin UI to select active WhatsApp number for whatsapp_leads.php
@@ -104,7 +104,9 @@ if (isset($whatsappSchedule) && is_array($whatsappSchedule)) {
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>WhatsApp Leads Admin</title>
+    <title>SM WhatsApp | Leads Admin</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/content/uploads/2025/01/cropped-Site-Icon-32x32.png">
+  <link rel="apple-touch-icon" href="/content/uploads/2025/01/cropped-Site-Icon-180x180.png">
     <style>
         body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 2rem; color: #222; }
         h1 { font-size: 1.5rem; margin-bottom: 1rem; }

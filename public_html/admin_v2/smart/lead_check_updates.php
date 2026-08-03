@@ -27,7 +27,7 @@ if ($origAssignColRes && $origAssignColRes->num_rows === 0) {
 
 date_default_timezone_set('Asia/Kolkata');
 $role = $_COOKIE['auth_role'] ?? '';
-$isAdmin = ($role === 'admin');
+$isAdmin = in_array(strtolower(trim((string)$role)), ['admin', 'manager'], true);
 $isMarket = ($role === 'market');
 $authName = $_COOKIE['auth_name'] ?? '';
 $authUser = $_COOKIE['auth_user'] ?? '';
@@ -37,10 +37,22 @@ if (!$isAdmin && !$isMarket) {
     $conn->close();
     exit;
 }
+$canonicalPresenceCode = static function(string $codeSource, string $displayName = ''): string {
+    $candidates = [$codeSource, $displayName];
+    foreach ($candidates as $candidate) {
+        $letters = strtolower(preg_replace('/[^a-zA-Z]/', '', (string)$candidate));
+        if ($letters === '') continue;
+        if (strpos($letters, 'amreen') === 0 || strpos($letters, 'amr') === 0) return 'amr';
+        if (strpos($letters, 'varsha') === 0 || strpos($letters, 'var') === 0) return 'var';
+        if (strpos($letters, 'zoya') === 0 || strpos($letters, 'zoy') === 0) return 'zoy';
+        if (strpos($letters, 'surya') === 0 || strpos($letters, 'sur') === 0) return 'sur';
+        return substr($letters, 0, 3);
+    }
+    return '';
+};
+
 $codeSource = $authName !== '' ? $authName : $authUser;
-$letters = preg_replace('/[^a-zA-Z]/', '', $codeSource);
-$letters = strtoupper($letters);
-$userCode = $letters !== '' ? substr($letters, 0, 3) : '';
+$userCode = $canonicalPresenceCode($codeSource, $authName);
 $userCodeLower = strtolower($userCode);
 $userAssignCond = '';
 if (!$isAdmin) {
@@ -81,18 +93,19 @@ if ($lastId <= 0 && $presenceState === '' && $presenceLastActive <= 0) {
 }
 if ($lastId <= 0) $lastId = 0;
 
-$getUsersOut = function() use ($conn) {
+$getUsersOut = function() use ($conn, $canonicalPresenceCode) {
     $usersOut = [];
     $uRes = $conn->query("SELECT user_code, display_name, last_seen, TIMESTAMPDIFF(SECOND, last_seen, NOW()) as age_seconds FROM user_presence ORDER BY user_code ASC");
     if ($uRes) {
         while ($u = $uRes->fetch_assoc()) {
             $codeRaw = isset($u['user_code']) ? (string)$u['user_code'] : '';
-            $codeNorm = strtolower(trim($codeRaw));
-            if (!in_array($codeNorm, ['amr', 'var', 'zoy'], true)) continue;
+            $displayNameRaw = isset($u['display_name']) ? (string)$u['display_name'] : '';
+            $codeNorm = $canonicalPresenceCode($codeRaw, $displayNameRaw);
+            if (!in_array($codeNorm, ['amr', 'var', 'zoy', 'sur'], true)) continue;
             $age = isset($u['age_seconds']) ? (int)$u['age_seconds'] : 999999;
             $usersOut[] = [
                 'code' => $codeNorm,
-                'name' => isset($u['display_name']) ? (string)$u['display_name'] : '',
+                'name' => $displayNameRaw,
                 'active' => ($age <= 180)
             ];
         }
@@ -109,6 +122,9 @@ if ($lastId === 0) {
 $hasUpdatedAt = false;
 $colRes = $conn->query("SHOW COLUMNS FROM leads LIKE 'updated_at'");
 if ($colRes && $colRes->num_rows > 0) $hasUpdatedAt = true;
+$hasQuoteLinks = false;
+$quoteLinksColRes = $conn->query("SHOW COLUMNS FROM leads LIKE 'quote_links'");
+if ($quoteLinksColRes && $quoteLinksColRes->num_rows > 0) $hasQuoteLinks = true;
 $tsExpr = $hasUpdatedAt ? "COALESCE(updated_at, created_at)" : "created_at";
 $openCond = "(COALESCE(TRIM(Assign), '') = '' OR LOWER(TRIM(Assign)) = 'open')";
 $statusCol = null;
@@ -120,13 +136,15 @@ if ($statusCol === null) {
 }
 $statusColSql = $statusCol !== null ? "`$statusCol`" : null;
 $assignNotOpenCond = "COALESCE(TRIM(Assign), '') <> '' AND TRIM(Assign) <> '-' AND LOWER(TRIM(Assign)) <> 'open' AND LOWER(TRIM(Assign)) <> 'na'";
+$quoteNotSentCond = $hasQuoteLinks ? "(quote_links IS NULL OR TRIM(quote_links) = '')" : "1=1";
+$staleBaseCond = "$assignNotOpenCond AND $quoteNotSentCond AND $tsExpr IS NOT NULL AND TIMESTAMPDIFF(MINUTE, $tsExpr, NOW()) >= 90";
 
 $reopenedLeads = [];
 if ($statusColSql !== null) {
     $statusEmptyCond = "(COALESCE(TRIM($statusColSql), '') = '' OR TRIM($statusColSql) = '-' OR LOWER(TRIM($statusColSql)) = 'na')";
-    $staleRes = $conn->query("SELECT id FROM leads WHERE $assignNotOpenCond AND $statusEmptyCond AND created_at IS NOT NULL AND TIMESTAMPDIFF(MINUTE, created_at, NOW()) >= 90 LIMIT 25");
+    $staleRes = $conn->query("SELECT id FROM leads WHERE $staleBaseCond AND $statusEmptyCond LIMIT 25");
 } else {
-    $staleRes = $conn->query("SELECT id FROM leads WHERE $assignNotOpenCond AND $tsExpr IS NOT NULL AND TIMESTAMPDIFF(MINUTE, $tsExpr, NOW()) >= 90 LIMIT 25");
+    $staleRes = $conn->query("SELECT id FROM leads WHERE $staleBaseCond LIMIT 25");
 }
 $staleIds = [];
 if ($staleRes) {

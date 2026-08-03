@@ -10,7 +10,8 @@ $whatsappNumberList = [
   //  "917204849198",
     "918884407222",
     "916360274445",
-    "917829080536"
+    "919176350978"
+  //  "917829080536"
 ];
 
 // Currently active WhatsApp number (one from the list above)
@@ -25,16 +26,17 @@ $whatsappNumberLabels = [
    //"917204849198" => "Bharath",
     "918884407222" => "Sophy",
     "916360274445" => "Varsha",
-    "917829080536" => "Zoya"
+    "919176350978" => "Surya"
+    //"917829080536" => "Zoya"
 ];
 
 // Schedule Configuration (Day => Number)
 // Keys: Mon, Tue, Wed, Thu, Fri, Sat, Sun
 $whatsappSchedule = [
     "Mon" => "919886735991", // Amreen
-    "Tue" => "917829080536", // Amreen
+    "Tue" => "919886735991", // Amreen
 
-    "Wed" => "917829080536", // Varsha
+    "Wed" => "916360274445", // Varsha
     "Thu" => "916360274445", // Varsha
     "Fri" => "916360274445", // Varsha
     

@@ -32,6 +32,27 @@
     submitPaymentUpdate(currentId, fullyPaid, amountPaid);
   }
 
+  function normalizeAmountForInput(value) {
+    const raw = String(value ?? '').trim();
+    if (!raw) return '';
+    const cleaned = raw.replace(/[^0-9.]/g, '');
+    if (!cleaned) return '';
+    const amount = parseFloat(cleaned);
+    return Number.isFinite(amount) ? String(amount) : '';
+  }
+
+  function handleActualAmountUpdate(form) {
+    const currentId = window.editingId || getCurrentOrderId();
+    if (!currentId) {
+      alert('No order selected. Please select an order first.');
+      return;
+    }
+
+    const actualAmountInput = form.querySelector('#overlay-actual-amount');
+    const actualAmount = actualAmountInput ? actualAmountInput.value.trim() : '';
+    submitActualAmountUpdate(currentId, actualAmount);
+  }
+
   // Submit payment update to server
   function submitPaymentUpdate(currentId, fullyPaid, amountPaid) {
     // Validate amount if provided
@@ -61,10 +82,24 @@
     .then(data => {
       if (data.success) {
         alert('Payment updated successfully!');
+        if (fullyPaid && Array.isArray(window.allInstalls)) {
+          window.allInstalls.forEach(ev => {
+            if (String(ev.id || ev.idno || '') === String(currentId)) {
+              ev.fully_paid = true;
+              ev.pending_amount = 0;
+            }
+          });
+        }
         // Sync both forms
         loadPaymentData(currentId);
         if (typeof window.render === 'function') {
           window.render(); // Refresh the calendar view
+        }
+        if (typeof window.renderPendingPaymentsModal === 'function') {
+          window.renderPendingPaymentsModal();
+        }
+        if (typeof window.refreshInstallHistoryPanel === 'function') {
+          window.refreshInstallHistoryPanel();
         }
       } else {
         alert('Error: ' + (data.message || 'Failed to update payment'));
@@ -73,6 +108,58 @@
     .catch(error => {
       console.error('Error:', error);
       alert('An error occurred while updating payment.');
+    });
+  }
+
+  function submitActualAmountUpdate(currentId, actualAmount) {
+    if (!actualAmount || isNaN(parseFloat(actualAmount)) || parseFloat(actualAmount) < 0) {
+      alert('Please enter a valid actual amount.');
+      return;
+    }
+
+    const data = {
+      updateActualAmount: true,
+      id: currentId,
+      actual_amount: parseFloat(actualAmount)
+    };
+
+    fetch('/admin_v2/smart/installs.php', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (!data.success) {
+        alert('Error: ' + (data.message || 'Failed to update actual amount'));
+        return;
+      }
+
+      alert('Actual amount updated successfully!');
+      loadPaymentData(currentId);
+
+      const reloadInvoice = typeof window.loadInvoiceIntoContainer === 'function'
+        ? window.loadInvoiceIntoContainer()
+        : Promise.resolve();
+
+      Promise.resolve(reloadInvoice).finally(() => {
+        if (typeof window.updateProfitDetailsOverlay === 'function') {
+          window.updateProfitDetailsOverlay();
+        }
+        if (typeof window.render === 'function') {
+          window.render();
+        }
+        if (typeof window.refreshInstallHistoryPanel === 'function') {
+          window.refreshInstallHistoryPanel();
+        }
+      });
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('An error occurred while updating actual amount.');
     });
   }
 
@@ -90,11 +177,13 @@
           const amountPaidInput = document.getElementById('amount-paid');
           const overlayFullyPaid = document.getElementById('overlay-fully-paid');
           const overlayAmountPaid = document.getElementById('overlay-amount-paid');
+          const overlayActualAmount = document.getElementById('overlay-actual-amount');
           
           if (fullyPaidCheckbox) fullyPaidCheckbox.checked = data.fully_paid;
           if (amountPaidInput) amountPaidInput.value = (data.amount_paid ?? '');
           if (overlayFullyPaid) overlayFullyPaid.checked = data.fully_paid;
           if (overlayAmountPaid) overlayAmountPaid.value = (data.amount_paid ?? '');
+          if (overlayActualAmount) overlayActualAmount.value = normalizeAmountForInput(data.actual_amount);
         }
       })
       .catch(error => {
@@ -126,6 +215,14 @@
         handleOverlayPaymentUpdate(e.target);
       }
     });
+
+    document.addEventListener('click', function(e) {
+      if (e.target.closest('#overlay-actual-amount-save')) {
+        e.preventDefault();
+        const form = document.getElementById('overlay-payment-form');
+        if (form) handleActualAmountUpdate(form);
+      }
+    });
   }
 
   // Initialize when DOM is ready
@@ -138,7 +235,9 @@
   // Export functions to global scope
   window.loadPaymentData = loadPaymentData;
   window.submitPaymentUpdate = submitPaymentUpdate;
+  window.submitActualAmountUpdate = submitActualAmountUpdate;
   window.handlePaymentUpdate = handlePaymentUpdate;
   window.handleOverlayPaymentUpdate = handleOverlayPaymentUpdate;
+  window.handleActualAmountUpdate = handleActualAmountUpdate;
 
 })(window);

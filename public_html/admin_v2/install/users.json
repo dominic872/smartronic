@@ -2,5 +2,7 @@
   { "username": "ashok", "password": "mani@123", "role": "tech", "name": "Ashok Mani" },
   { "username": "dominic", "password": "smart@70", "role": "admin", "name": "Dominic Sagayaraj" },
   { "username": "dharshan", "password": "smart@24th", "role": "market", "name": "Dharshan M" },
-  { "username": "david", "password": "smart@cctv", "role": "tech", "name": "David Joseph"}
+  { "username": "chandan", "password": "smart@cctv", "role": "tech", "name": "Chandan", "phone": "+917970707053" },
+  { "username": "uday", "password": "smart@cctv", "role": "tech", "name": "Uday (Chennai)", "phone": "+917358364562" },
+  { "username": "zain", "password": "smart@cctv", "role": "tech", "name": "Zain", "phone": "+917204505731" }
 ]

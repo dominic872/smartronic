@@ -253,7 +253,7 @@ class JsonDataAdminTest {
         
         // Test HTML structure
         $this->assertContains('<!doctype html>', $response, 'Should be valid HTML5');
-        $this->assertContains('<title>Product & Pricing — Table Editor</title>', $response, 'Should have correct title');
+        $this->assertContains('<title>SM Pricing | Table Editor</title>', $response, 'Should have correct title');
         $this->assertContains('tailwindcss', $response, 'Should load Tailwind CSS');
         $this->assertContains('Inter', $response, 'Should use Inter font');
         

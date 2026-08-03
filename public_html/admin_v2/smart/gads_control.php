@@ -1,25 +1,14 @@
 <?php
 
-/*********************************************************************
- * CONFIG — Paste your credentials below
- *********************************************************************/
+require_once __DIR__ . '/lib/GoogleAdsEnv.php';
 
-// From API Center in your MCC (463-065-6250)
-$developerToken  = "bFRBQas0OuZQqMbaY9n49g";
-
-// Your NORMAL Ads account (the one with campaigns)
-$customerId      = "3669769058";    // NO dashes
-
-// Your MANAGER (MCC) account ID
-$loginCustomerId = "4630656250";    // NO dashes
-
-// From Google Cloud Console (same project used in OAuth Playground)
-$clientId       = "587618814920-n59ojbksctekeqgjth31edudepq88333.apps.googleusercontent.com";
-$clientSecret   = "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";
-
-// From OAuth Playground (scope: https://www.googleapis.com/auth/adwords,
-// using "Use your own OAuth credentials" with the above client)
-$refreshToken   = "1//04uhaPid-lRCOCgYIARAAGAQSNwF-L9IrKa-48E1C4crFuzTc49fiaq6Y-YOjJsMgy_BA1yxaNPy9kCI9R7Uit4kkDPj8v6KPM_k";
+$googleAdsEnv = new GoogleAdsEnv();
+$developerToken  = $googleAdsEnv->get('GOOGLE_ADS_DEVELOPER_TOKEN');
+$customerId      = preg_replace('/\D+/', '', $googleAdsEnv->get('GOOGLE_ADS_CUSTOMER_ID'));
+$loginCustomerId = preg_replace('/\D+/', '', $googleAdsEnv->get('GOOGLE_ADS_LOGIN_CUSTOMER_ID'));
+$clientId        = $googleAdsEnv->get('GOOGLE_ADS_CLIENT_ID');
+$clientSecret    = $googleAdsEnv->get('GOOGLE_ADS_CLIENT_SECRET');
+$refreshToken    = $googleAdsEnv->get('GOOGLE_ADS_REFRESH_TOKEN');
 
 
 /*********************************************************************
@@ -194,7 +183,9 @@ if (isset($_GET["action"])) {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Google Ads Controller</title>
+    <title>SM Ads | Controller</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/content/uploads/2025/01/cropped-Site-Icon-32x32.png">
+  <link rel="apple-touch-icon" href="/content/uploads/2025/01/cropped-Site-Icon-180x180.png">
     <style>
         body { font-family: Arial, sans-serif; margin:40px; }
         button {

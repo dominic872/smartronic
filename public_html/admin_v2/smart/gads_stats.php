@@ -153,7 +153,9 @@ $conn->close();
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CCTV Enquiry Dashboard 1</title>
+<title>SM Ads | Dashboard</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/content/uploads/2025/01/cropped-Site-Icon-32x32.png">
+  <link rel="apple-touch-icon" href="/content/uploads/2025/01/cropped-Site-Icon-180x180.png">
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="../css/gads_stats.css">
 </head>

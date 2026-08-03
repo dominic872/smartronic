@@ -20,7 +20,7 @@ $conn = @new mysqli($host, $username, $password, $database);
 if ($conn->connect_error) $safe_error('DB connection failed');
 
 $role = $_COOKIE['auth_role'] ?? '';
-$isAdmin = ($role === 'admin');
+$isAdmin = in_array(strtolower(trim((string)$role)), ['admin', 'manager'], true);
 $isMarket = ($role === 'market');
 if (!$isAdmin && !$isMarket) {
     http_response_code(403);

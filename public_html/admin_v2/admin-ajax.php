@@ -1,6 +1,8 @@
 <?php
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+require_once __DIR__ . '/smart/lib/CampaignIdMap.php';
 // Database connection parameters
 $host = '127.0.0.1:3306';
 $username = 'u398852039_smartronic';
@@ -19,6 +21,120 @@ if (!$dryRun) {
     if ($conn->connect_error) {
         die(json_encode(['success' => false, 'data' => 'Database connection failed: ' . $conn->connect_error]));
     }
+}
+
+function reconnectDbIfNeeded(&$conn): bool {
+    global $host, $username, $password, $database;
+
+    if ($conn instanceof mysqli) {
+        try {
+            if (@$conn->ping()) {
+                return true;
+            }
+        } catch (Throwable $e) {
+            error_log('MySQL ping failed, reconnecting: ' . $e->getMessage());
+        }
+
+        try {
+            @$conn->close();
+        } catch (Throwable $e) {
+            error_log('MySQL close after ping failure failed: ' . $e->getMessage());
+        }
+    }
+
+    try {
+        $conn = new mysqli($host, $username, $password, $database);
+        if ($conn->connect_error) {
+            error_log('MySQL reconnect failed: ' . $conn->connect_error);
+            return false;
+        }
+        return true;
+    } catch (Throwable $e) {
+        error_log('MySQL reconnect exception: ' . $e->getMessage());
+        return false;
+    }
+}
+
+function requireDbConnection(&$conn): void {
+    if (reconnectDbIfNeeded($conn)) {
+        return;
+    }
+
+    http_response_code(500);
+    echo json_encode(['success' => false, 'data' => 'Database connection failed. Please try again.']);
+    exit;
+}
+
+function fetchIpInfo($ipAddress): array {
+    $context = stream_context_create([
+        'http' => [
+            'timeout' => 2,
+        ],
+    ]);
+    $raw = @file_get_contents("http://ip-api.com/json/$ipAddress", false, $context);
+    $data = $raw ? @json_decode($raw, true) : [];
+    return is_array($data) ? $data : [];
+}
+
+function sendLeadWhatsAppBestEffort($phone, $name = 'Customer'): void {
+    try {
+        gupshupOptIn($phone);
+        usleep(100000);
+        sendWhatsAppTemplate($phone, $name ?: 'Customer');
+    } catch (Throwable $e) {
+        error_log('Lead WhatsApp notification skipped: ' . $e->getMessage());
+    }
+}
+
+function sendTelegramBestEffort(string $botToken, string $chatID, string $message): bool {
+    $url = "https://api.telegram.org/bot{$botToken}/sendMessage";
+    $payload = http_build_query([
+        'chat_id' => $chatID,
+        'text' => $message,
+    ]);
+
+    try {
+        $ch = curl_init($url);
+        if (!$ch) {
+            error_log('Telegram API request failed: cURL init failed.');
+            return false;
+        }
+        curl_setopt_array($ch, [
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => $payload,
+            CURLOPT_HTTPHEADER => ['Content-Type: application/x-www-form-urlencoded'],
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CONNECTTIMEOUT => 2,
+            CURLOPT_TIMEOUT => 3,
+        ]);
+        $response = curl_exec($ch);
+        $errno = curl_errno($ch);
+        $error = curl_error($ch);
+        $status = (int)curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+        curl_close($ch);
+
+        if ($response === false || $errno || $status < 200 || $status >= 300) {
+            error_log('Telegram API request failed. HTTP ' . $status . ' cURL ' . $errno . ' ' . $error);
+            return false;
+        }
+        return true;
+    } catch (Throwable $e) {
+        error_log('Telegram API request exception: ' . $e->getMessage());
+        return false;
+    }
+}
+
+function ensureLeadCityColumn(mysqli $conn): void {
+    static $checked = false;
+    if ($checked) {
+        return;
+    }
+    $checked = true;
+    $res = $conn->query("SHOW COLUMNS FROM leads LIKE 'city'");
+    if ($res && $res->num_rows > 0) {
+        return;
+    }
+    $conn->query("ALTER TABLE leads ADD COLUMN city VARCHAR(50) NULL DEFAULT NULL");
 }
     define('GUPSHUP_API_KEY', 'shxu5xiveqtbo20as5brlfsh9ijdnnir'); // your Gupshup API key
     define('GUPSHUP_APP_NAME', 'smartwaapp');
@@ -48,7 +164,9 @@ function gupshupOptIn($phone) {
         CURLOPT_POST => true,
         CURLOPT_POSTFIELDS => $postData,
         CURLOPT_HTTPHEADER => $headers,
-        CURLOPT_RETURNTRANSFER => true
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CONNECTTIMEOUT => 2,
+        CURLOPT_TIMEOUT => 4
     ]);
 
     $response = curl_exec($ch);
@@ -92,7 +210,8 @@ function sendWhatsAppTemplate($phone, $name = 'Customer') {
         CURLOPT_POSTFIELDS     => $postData,
         CURLOPT_HTTPHEADER     => $headers,
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT        => 30
+        CURLOPT_CONNECTTIMEOUT => 2,
+        CURLOPT_TIMEOUT        => 4
     ]);
 
     $response = curl_exec($ch);
@@ -180,6 +299,36 @@ function pickLeadValue($existingValue, $incomingValue, $alwaysUpdate = false) {
     return trim((string)$existingValue);
 }
 
+function normalizeLeadCity($city) {
+    $city = trim((string)$city);
+    if ($city === '') return '';
+    $cityLower = strtolower($city);
+    if ($cityLower === 'bangalore' || $cityLower === 'bengaluru') return 'Bangalore';
+    if ($cityLower === 'chennai') return 'Chennai';
+    return ucfirst($cityLower);
+}
+
+function resolveLeadAssignByCity($city, $fallbackAssign = '') {
+    $normalizedCity = normalizeLeadCity($city);
+    if ($normalizedCity === 'Chennai') {
+        return 'SUR';
+    }
+    return trim((string)$fallbackAssign);
+}
+
+function resolveLeadCity($postedCity, $campaignLabel = '', $campaignId = '') {
+    $normalizedCity = normalizeLeadCity($postedCity);
+    $label = strtolower(trim((string)$campaignLabel));
+    $campaignId = trim((string)$campaignId);
+    if (
+        in_array($campaignId, ['23862610003', '23922125031'], true)
+        || in_array($label, ['gl-chennai', '26may-2-chennai'], true)
+    ) {
+        return 'Chennai';
+    }
+    return $normalizedCity;
+}
+
 function findTodayLeadByPhone(mysqli $conn, $whatsappNumber) {
     $tz = new DateTimeZone('Asia/Kolkata');
     $start = new DateTime('today', $tz);
@@ -212,16 +361,18 @@ function updateExistingLeadWithIncoming(mysqli $conn, array $existingLead, array
     $cameraResolution = pickLeadValue($existingLead['camera_resolution'] ?? '', $incomingLead['camera_resolution'] ?? '');
     $column1 = pickLeadValue($existingLead['Column_1'] ?? '', $incomingLead['column_1'] ?? '', true);
     $column2 = pickLeadValue($existingLead['Column_2'] ?? '', $incomingLead['column_2'] ?? '', true);
+    $city = pickLeadValue($existingLead['city'] ?? '', normalizeLeadCity($incomingLead['city'] ?? ''), true);
+    $assign = resolveLeadAssignByCity($city, $existingLead['Assign'] ?? $existingLead['assign'] ?? '');
     $leadId = (int)($existingLead['id'] ?? 0);
 
     $stmt = $conn->prepare(
         "UPDATE leads
-         SET name = ?, num_cameras = ?, dvr_type = ?, hdd_size = ?, camera_resolution = ?, Column_1 = ?, Column_2 = ?
+         SET name = ?, num_cameras = ?, dvr_type = ?, hdd_size = ?, camera_resolution = ?, Column_1 = ?, Column_2 = ?, city = ?, assign = ?
          WHERE id = ?
          LIMIT 1"
     );
     $stmt->bind_param(
-        'sssssssi',
+        'sssssssssi',
         $name,
         $numCameras,
         $dvrType,
@@ -229,6 +380,8 @@ function updateExistingLeadWithIncoming(mysqli $conn, array $existingLead, array
         $cameraResolution,
         $column1,
         $column2,
+        $city,
+        $assign,
         $leadId
     );
     $ok = $stmt->execute();
@@ -238,41 +391,100 @@ function updateExistingLeadWithIncoming(mysqli $conn, array $existingLead, array
 
 // Google Ads campaign tracking
 
-// 1️⃣ Get parameters
-$gadCampaignId = isset($_POST['gad_campaignid']) ? trim((string)$_POST['gad_campaignid']) : null;
-$gadsParam = isset($_GET['gads']) ? trim((string)$_GET['gads']) : null;
+function extractPostedCampaignFallbackQuery(): string {
+    $candidateKeys = ['page_query', 'page_params', 'url_query', 'full_query'];
+    foreach ($candidateKeys as $key) {
+        if (!isset($_POST[$key])) {
+            continue;
+        }
+        $value = trim((string)$_POST[$key]);
+        if ($value !== '') {
+            return ltrim($value, '?');
+        }
+    }
 
-// 2️⃣ Campaign ID to Label map
-$campaignIdMap = [
-    '22154028165' => 'GL',   // Get Leads
-    '23084756848' => 'PM',   // Pmax
-    '22848100317' => 'DG',   // Demand Gen
-    '23085059220' => 'SO25', // Search Oct 25
-    '23220779450' => '13K',   // 13,390 CP Plus Offer
-    '23546405439' => 'QK',  // Quick conversion | CCTV Installation – Ready to Install Leads
-    '23564758451' => 'HSR 10KM',  // 10KM HSR Run_Get_Leads_G_SERP_WPF 70 1.9k
-    '23643892728' => 'GA_GMaps' // Google Ads - Google Maps
-  ];
+    $candidateUrlKeys = ['page_url', 'referrer_url', 'source_url'];
+    foreach ($candidateUrlKeys as $key) {
+        if (!isset($_POST[$key])) {
+            continue;
+        }
+        $value = trim((string)$_POST[$key]);
+        if ($value === '') {
+            continue;
+        }
+        $query = trim((string)parse_url($value, PHP_URL_QUERY));
+        if ($query !== '') {
+            return $query;
+        }
+    }
 
-// 3️⃣ Default label
-$label = 'Q';
-
-// 4️⃣ Priority: URL ?gads=... → then campaign ID map
-if ($gadsParam) {
-    // Use the direct ?gads= value
-    $label = $gadsParam;
-} elseif ($gadCampaignId && isset($campaignIdMap[$gadCampaignId])) {
-    // Fallback to mapped campaign ID
-    $label = $campaignIdMap[$gadCampaignId];
+    return '';
 }
 
+function findCampaignIdInQueryString(string $query): string {
+    $query = ltrim(trim($query), '?');
+    if ($query === '') {
+        return '';
+    }
+
+    $parsed = [];
+    parse_str($query, $parsed);
+    $candidate = $parsed['gad_campaignid'] ?? $parsed['campaignid'] ?? $parsed['campaign_id'] ?? '';
+    return trim((string)$candidate);
+}
+
+function resolveCampaignLabel(?string $campaignId, array $campaignIdMap, string $fallbackQuery = ''): string {
+    $campaignId = trim((string)$campaignId);
+    if ($campaignId !== '') {
+        return $campaignIdMap[$campaignId] ?? $campaignId;
+    }
+
+    $fallbackQuery = ltrim(trim($fallbackQuery), '?');
+    $fallbackCampaignId = findCampaignIdInQueryString($fallbackQuery);
+    if ($fallbackCampaignId !== '') {
+        return $campaignIdMap[$fallbackCampaignId] ?? $fallbackCampaignId;
+    }
+    if ($fallbackQuery !== '') {
+        return $fallbackQuery;
+    }
+
+    $queryString = ltrim(trim((string)($_SERVER['QUERY_STRING'] ?? '')), '?');
+    $queryCampaignId = findCampaignIdInQueryString($queryString);
+    if ($queryCampaignId !== '') {
+        return $campaignIdMap[$queryCampaignId] ?? $queryCampaignId;
+    }
+    if ($queryString !== '') {
+        return $queryString;
+    }
+
+    $refererQuery = trim((string)parse_url((string)($_SERVER['HTTP_REFERER'] ?? ''), PHP_URL_QUERY));
+    $refererCampaignId = findCampaignIdInQueryString($refererQuery);
+    if ($refererCampaignId !== '') {
+        return $campaignIdMap[$refererCampaignId] ?? $refererCampaignId;
+    }
+    return $refererQuery !== '' ? $refererQuery : 'Q';
+}
+
+// 1️⃣ Get parameters
+$gadCampaignId = isset($_POST['gad_campaignid'])
+    ? trim((string)$_POST['gad_campaignid'])
+    : (isset($_GET['gad_campaignid']) ? trim((string)$_GET['gad_campaignid']) : '');
+
+// 2️⃣ Campaign ID to Label map
+$campaignIdMap = smartronicCampaignIdMap();
+
+// 3️⃣ Default label resolution
+$postedCampaignQuery = extractPostedCampaignFallbackQuery();
+$label = resolveCampaignLabel($gadCampaignId, $campaignIdMap, $postedCampaignQuery);
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'popup_lead_capture') {
+    if (!$dryRun) ensureLeadCityColumn($conn);
 
     $customer_name = isset($_POST['customer_name']) ? trim((string)$_POST['customer_name']) : '';
     $whatsapp_number = isset($_POST['whatsapp_number']) ? normalizeLeadPhone($_POST['whatsapp_number']) : '';
-    $popupGads = isset($_POST['gads']) ? trim((string)$_POST['gads']) : '';
     $popupDevice = isset($_POST['popup_device']) ? trim((string)$_POST['popup_device']) : '';
     $popupDevice = in_array($popupDevice, ['pop-mobile', 'pop-desk'], true) ? $popupDevice : 'pop-desk';
+    $leadCity = resolveLeadCity($_POST['city'] ?? '', $label, $gadCampaignId);
 
     if ($customer_name === '' || strlen($whatsapp_number) !== 10) {
         echo json_encode(['success' => false, 'data' => 'Name and valid WhatsApp number are required.']);
@@ -283,8 +495,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $dvr_type = 'Popup Offer';
     $hdd_size = 'Popup Offer';
     $camera_resolution = 'Popup Offer';
-    $label = $popupGads !== '' ? $popupGads : ($gadsParam ?: $label);
-
     $existingLead = null;
     if (!$dryRun) {
         $existingLead = findTodayLeadByPhone($conn, $whatsapp_number);
@@ -297,7 +507,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 'camera_resolution' => $camera_resolution,
                 'column_1' => $label,
                 'column_2' => $popupDevice,
+                'city' => $leadCity,
             ]);
+            $existingLead['Assign'] = resolveLeadAssignByCity($leadCity ?: ($existingLead['city'] ?? ''), $existingLead['Assign'] ?? '');
 
             $ajaxResponse = [
                 'success' => true,
@@ -314,12 +526,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         }
     }
 
-    gupshupOptIn($whatsapp_number);
-    usleep(300000);
-    sendWhatsAppTemplate($whatsapp_number, $customer_name ?: 'Customer');
+    sendLeadWhatsAppBestEffort($whatsapp_number, $customer_name ?: 'Customer');
 
     $ip_address = $_SERVER['REMOTE_ADDR'];
-    $ip_info = @json_decode(file_get_contents("http://ip-api.com/json/$ip_address"), true) ?: [];
+    $ip_info = fetchIpInfo($ip_address);
     $region = $ip_info['regionName'] ?? 'Unknown';
     $country = $ip_info['country'] ?? 'Unknown';
     $city = $ip_info['city'] ?? 'Unknown';
@@ -340,8 +550,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $botToken = "7729323805:AAFBIBS2M1FJM5pozzcb7AZNiyOXLyO8Xig";
     $chatID = "7994221275";
     $message = "$label | $popupDevice | Popup Lead: \n $customer_name | $whatsapp_number \n $user_vals";
-    $url = "https://api.telegram.org/bot$botToken/sendMessage?chat_id=$chatID&text=" . urlencode($message);
-    $telegramResponse = @file_get_contents($url);
+    $telegramResponse = sendTelegramBestEffort($botToken, $chatID, $message);
     if (!$telegramResponse) {
         error_log("Telegram API request failed for popup lead.");
     }
@@ -354,8 +563,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         exit;
     }
 
+    requireDbConnection($conn);
+    ensureLeadCityColumn($conn);
     $conn->query("SET time_zone = '+05:30'");
-    $assignees = ['AMR', 'VAR', 'ZOY'];
+    $assignees = ['AMR', 'VAR'];
     $maxRetries = 5;
     $attempt = 0;
     $mid = '';
@@ -367,7 +578,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
             $now = new DateTime('now', new DateTimeZone('Asia/Kolkata'));
             $countStmt = $conn->prepare(
-                "SELECT COUNT(*) AS cnt
+                "SELECT COUNT(*) AS cnt,
+                        SUM(
+                            CASE
+                                WHEN LOWER(COALESCE(city, '')) IN ('bangalore', 'bengaluru') THEN 1
+                                ELSE 0
+                            END
+                        ) AS bangalore_cnt
                  FROM leads
                  WHERE YEAR(created_at) = ?
                    AND MONTH(created_at) = ?"
@@ -382,18 +599,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $countStmt->close();
 
             $totalRows = ((int)$row['cnt']) + 1;
+            $bangaloreRows = (int)($row['bangalore_cnt'] ?? 0);
             $mid = getMonthCode() . '-' . $totalRows;
-            $assign = $assignees[((int)$row['cnt']) % count($assignees)];
+            $assign = resolveLeadAssignByCity($leadCity, $assignees[$bangaloreRows % count($assignees)]);
 
             $leadStmt = $conn->prepare(
                 "INSERT INTO leads
                  (name, num_cameras, dvr_type, hdd_size, camera_resolution,
-                  whatsapp_number, created_at, MID, assign, Column_1, Column_2)
-                 VALUES (?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?)"
+                  whatsapp_number, created_at, MID, assign, Column_1, Column_2, city)
+                 VALUES (?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?)"
             );
 
             $leadStmt->bind_param(
-                'ssssssssss',
+                'sssssssssss',
                 $customer_name,
                 $num_cameras,
                 $dvr_type,
@@ -403,7 +621,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $mid,
                 $assign,
                 $label,
-                $popupDevice
+                $popupDevice,
+                $leadCity
             );
 
             if (!$leadStmt->execute()) {
@@ -420,7 +639,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         } catch (Throwable $e) {
             if ($attempt >= $maxRetries) {
                 error_log("FINAL POPUP MID FAILURE: " . $e->getMessage());
-                throw $e;
+                http_response_code(500);
+                echo json_encode(['success' => false, 'data' => 'Failed to save lead. Please try again.']);
+                exit;
             }
         }
     }
@@ -436,7 +657,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         'created_at' => (new DateTime('now', new DateTimeZone('Asia/Kolkata')))->format('d-m-Y H:i:s'),
         'message' => 'Popup Lead | ' . $customer_name . ' | ' . $whatsapp_number,
         'noVal' => '',
-        'assign' => '=CHOOSE(MOD(ROW()-1,4)+1,"VAR","AMR","BHA","ZOY")',
+        'assign' => $assign !== '' ? $assign : '=CHOOSE(MOD(ROW()-1,2)+1,"VAR","AMR")',
         'quote' => $label,
         'smart_quote' => 'Popup',
         'order' => 'Popup'
@@ -465,6 +686,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 // Check if the AJAX request contains the expected action
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'crf_save_form_data') {
+    if (!$dryRun) ensureLeadCityColumn($conn);
 
     // Sanitize input values
     $num_cameras = $_POST['num_cameras'] ?? '';
@@ -473,12 +695,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $camera_resolution = $_POST['camera_resolution'] ?? '';
     $whatsapp_number = isset($_POST['whatsapp_number']) ? normalizeLeadPhone($_POST['whatsapp_number']) : '';
     $customer_name = isset($_POST['customer_name']) ? trim((string)$_POST['customer_name']) : '';
-    $postedGads = isset($_POST['gads']) ? trim((string)$_POST['gads']) : '';
+    $leadCity = resolveLeadCity($_POST['city'] ?? '', $label, $gadCampaignId);
     $mainDevice = isset($_POST['form_device']) ? trim((string)$_POST['form_device']) : '';
     $mainDevice = in_array($mainDevice, ['main-mobile', 'main-desk'], true) ? $mainDevice : 'main-desk';
-    if ($postedGads !== '') {
-        $label = $postedGads;
-    }
 
     // Validate required fields
     if (empty($num_cameras) || empty($dvr_type) || empty($hdd_size) || empty($camera_resolution) || empty($whatsapp_number)) {
@@ -497,7 +716,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 'camera_resolution' => $camera_resolution,
                 'column_1' => $label,
                 'column_2' => $mainDevice,
+                'city' => $leadCity,
             ]);
+            $existingLead['Assign'] = resolveLeadAssignByCity($leadCity ?: ($existingLead['city'] ?? ''), $existingLead['Assign'] ?? '');
 
             $ajaxResponse = [
                 'success' => true,
@@ -522,15 +743,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $customerName = $customer_name;
         $repName = "from the sales team";
         
-        $optinResponse = gupshupOptIn($whatsapp_number);
-
-        // OPTIONAL: small delay helps in some cases
-        usleep(300000); // 300ms
-
-        sendWhatsAppTemplate(
-            $whatsapp_number,
-            $customerName ?: 'Customer'
-        );
+        sendLeadWhatsAppBestEffort($whatsapp_number, $customerName ?: 'Customer');
 
 
         
@@ -540,7 +753,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $ip_address = $_SERVER['REMOTE_ADDR'];
 
         // Fetch location details using IP
-        $ip_info = @json_decode(file_get_contents("http://ip-api.com/json/$ip_address"), true) ?: [];
+        $ip_info = fetchIpInfo($ip_address);
         $region = $ip_info['regionName'] ?? 'Unknown';
         $country = $ip_info['country'] ?? 'Unknown';
         $city = $ip_info['city'] ?? 'Unknown';
@@ -582,8 +795,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         }
 
         // Send message to Telegram
-        $url = "https://api.telegram.org/bot$botToken/sendMessage?chat_id=$chatID&text=" . urlencode($message);
-        $telegramResponse = @file_get_contents($url);
+        $telegramResponse = sendTelegramBestEffort($botToken, $chatID, $message);
         $urlSheets = "https://smartronic.online/admin_v2/quote.php?quote=" . urlencode($vals);
 
         if (!$telegramResponse) {
@@ -598,90 +810,101 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         }
 
 
+        requireDbConnection($conn);
+        ensureLeadCityColumn($conn);
         $insert_id = $conn->insert_id;
 
         // ========================= 
-        // INSERT INTO LEADS (MID = MONTH COUNT) 
-        // ========================= 
-        
-        $conn->query("SET time_zone = '+05:30'"); 
- 
-        //$assignees = ['VAR', 'AMR', 'ZOY']; 
-        $assignees = ['AMR', 'VAR', 'ZOY']; 
-        $maxRetries = 5; 
-        $attempt = 0;       
-        
-        while ($attempt < $maxRetries) { 
-            try { 
-                $attempt++; 
-        
-                // Current month range (IST) 
-                $now = new DateTime('now', new DateTimeZone('Asia/Kolkata')); 
-                
-                // Recount leads for this month 
-                $countStmt = $conn->prepare( 
-                    "SELECT COUNT(*) AS cnt 
-                     FROM leads 
-                     WHERE YEAR(created_at) = ? 
-                       AND MONTH(created_at) = ?" 
-                ); 
-                
-                $year  = (int)$now->format('Y'); 
-                $month = (int)$now->format('n'); 
-                
-                $countStmt->bind_param('ii', $year, $month); 
-                $countStmt->execute(); 
-                $row = $countStmt->get_result()->fetch_assoc(); 
-                $countStmt->close(); 
-        
-                // Total rows including this new one 
-                $totalRows = ((int)$row['cnt']) + 1; 
-                $mid       = getMonthCode() . '-' . $totalRows; 
-        
-                // Assign (round robin) 
-                $assign = $assignees[((int)$row['cnt']) % count($assignees)]; 
-        
-                // Insert 
-                if ($customer_name !== '') {
-                    $leadStmt = $conn->prepare( 
-                        "INSERT INTO leads 
-                         (name, num_cameras, dvr_type, hdd_size, camera_resolution, 
-                          whatsapp_number, created_at, MID, assign, Column_1, Column_2)
-                         VALUES (?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?)" 
-                    ); 
+        // INSERT INTO LEADS (MID = MONTH COUNT)
+        // =========================
 
-                    $leadStmt->bind_param( 
-                        'ssssssssss', 
+        $conn->query("SET time_zone = '+05:30'");
+
+        //$assignees = ['VAR', 'AMR'];
+        $assignees = ['AMR', 'VAR'];
+        $maxRetries = 5;
+        $attempt = 0;
+
+        while ($attempt < $maxRetries) {
+            try {
+                $attempt++;
+
+                // Current month range (IST)
+                $now = new DateTime('now', new DateTimeZone('Asia/Kolkata'));
+
+                // Recount leads for this month
+                $countStmt = $conn->prepare(
+                    "SELECT COUNT(*) AS cnt,
+                            SUM(
+                                CASE
+                                    WHEN LOWER(COALESCE(city, '')) IN ('bangalore', 'bengaluru') THEN 1
+                                    ELSE 0
+                                END
+                            ) AS bangalore_cnt
+                     FROM leads
+                     WHERE YEAR(created_at) = ?
+                       AND MONTH(created_at) = ?"
+                );
+
+                $year  = (int)$now->format('Y');
+                $month = (int)$now->format('n');
+
+                $countStmt->bind_param('ii', $year, $month);
+                $countStmt->execute();
+                $row = $countStmt->get_result()->fetch_assoc();
+                $countStmt->close();
+
+                // Total rows including this new one
+                $totalRows = ((int)$row['cnt']) + 1;
+                $bangaloreRows = (int)($row['bangalore_cnt'] ?? 0);
+                $mid       = getMonthCode() . '-' . $totalRows;
+
+                // Assign (round robin)
+                $assign = resolveLeadAssignByCity($leadCity, $assignees[$bangaloreRows % count($assignees)]);
+
+                // Insert
+                if ($customer_name !== '') {
+                    $leadStmt = $conn->prepare(
+                        "INSERT INTO leads
+                         (name, num_cameras, dvr_type, hdd_size, camera_resolution,
+                          whatsapp_number, created_at, MID, assign, Column_1, Column_2, city)
+                         VALUES (?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?)"
+                    );
+
+                    $leadStmt->bind_param(
+                        'sssssssssss',
                         $customer_name,
-                        $num_cameras, 
-                        $dvr_type, 
-                        $hdd_size, 
-                        $camera_resolution, 
-                        $whatsapp_number, 
-                        $mid, 
-                        $assign, 
+                        $num_cameras,
+                        $dvr_type,
+                        $hdd_size,
+                        $camera_resolution,
+                        $whatsapp_number,
+                        $mid,
+                        $assign,
                         $label,
-                        $mainDevice
+                        $mainDevice,
+                        $leadCity
                     );
                 } else {
-                    $leadStmt = $conn->prepare( 
-                        "INSERT INTO leads 
-                         (num_cameras, dvr_type, hdd_size, camera_resolution, 
-                          whatsapp_number, created_at, MID, assign, Column_1, Column_2)
-                         VALUES (?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?)" 
-                    ); 
-        
-                    $leadStmt->bind_param( 
-                        'sssssssss', 
-                        $num_cameras, 
-                        $dvr_type, 
-                        $hdd_size, 
-                        $camera_resolution, 
-                        $whatsapp_number, 
-                        $mid, 
-                        $assign, 
+                    $leadStmt = $conn->prepare(
+                        "INSERT INTO leads
+                         (num_cameras, dvr_type, hdd_size, camera_resolution,
+                          whatsapp_number, created_at, MID, assign, Column_1, Column_2, city)
+                         VALUES (?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?)"
+                    );
+
+                    $leadStmt->bind_param(
+                        'ssssssssss',
+                        $num_cameras,
+                        $dvr_type,
+                        $hdd_size,
+                        $camera_resolution,
+                        $whatsapp_number,
+                        $mid,
+                        $assign,
                         $label,
-                        $mainDevice
+                        $mainDevice,
+                        $leadCity
                     );
                 }
         
@@ -701,7 +924,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             } catch (Throwable $e) { 
                 if ($attempt >= $maxRetries) { 
                     error_log("FINAL MID FAILURE: " . $e->getMessage()); 
-                    throw $e; 
+                    http_response_code(500);
+                    echo json_encode(['success' => false, 'data' => 'Failed to save lead. Please try again.']);
+                    exit;
                 } 
             } 
         }
@@ -718,7 +943,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             'created_at' => (new DateTime('now', new DateTimeZone('Asia/Kolkata')))->format('d-m-Y H:i:s'),
             'message' => $urlSheets,
             'noVal' => '',
-           'assign' => '=CHOOSE(MOD(ROW()-1,4)+1,"VAR","AMR","BHA","ZOY")', // If you ever add more people, Just increase the number: MOD(ROW()-1,5)+1
+           'assign' => $assign !== '' ? $assign : '=CHOOSE(MOD(ROW()-1,2)+1,"VAR","AMR")', // If you ever add more people, increase both the MOD count and CHOOSE list together.
            'quote' => '=HYPERLINK(
                 "https://smartronic.online/admin_v2/quote.php?quote=" & 
                 ENCODEURL(

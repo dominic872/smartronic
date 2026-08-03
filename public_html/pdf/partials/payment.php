@@ -32,7 +32,7 @@ $qrSrc = $asHtml
  <strong>Please share the payment screenshot or reference number after payment</strong></p>
  <ul>
  <li>Validity of this quotation: 30 days.</li>
- <li>Payment terms: Please pay 30% before the beginning of the work or as per the agreed terms.</li>
+ <li>Payment terms: Please pay Rs 500/- before the beginning of the work or as per the agreed terms.</li>
  <li>Delivery Timeline: 1 week</li>
  <li>Warranty: Warranty applicable as per the brand 2 years for Hikvision and 2 years for
 HDD</li>

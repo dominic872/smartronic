@@ -65,7 +65,7 @@ class LeadListTest {
         
         // Test HTML structure
         $this->assertContains('<!DOCTYPE html>', $response, 'Should be valid HTML5');
-        $this->assertContains('<title>Lead List</title>', $response, 'Should have correct title');
+        $this->assertContains('<title>SM Leads | List</title>', $response, 'Should have correct title');
         $this->assertContains('materialize.min.css', $response, 'Should load Materialize CSS');
         $this->assertContains('font-awesome', $response, 'Should load Font Awesome');
         $this->assertContains('lead_list_styles.css', $response, 'Should load custom styles');

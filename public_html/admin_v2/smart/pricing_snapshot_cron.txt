@@ -1,0 +1,17 @@
+Recommended cron for monthly pricing snapshots:
+
+10 0 * * * /opt/alt/php82/usr/bin/php /home/u398852039/domains/smartronic.online/public_html/admin_v2/smart/snapshot_pricing_data.php
+
+What it does:
+- Runs daily at 12:10 AM.
+- Creates data_snapshots/data_YYYY-MM.json for the current month if it does not already exist.
+- Does not overwrite an existing month snapshot, so older profit calculations remain stable.
+
+Manual browser test:
+https://smartronic.online/admin_v2/smart/snapshot_pricing_data.php?run=1
+
+Manual browser test for a specific month:
+https://smartronic.online/admin_v2/smart/snapshot_pricing_data.php?run=1&month=2026-07
+
+Only use force if you intentionally want to replace an existing snapshot:
+https://smartronic.online/admin_v2/smart/snapshot_pricing_data.php?run=1&month=2026-07&force=1

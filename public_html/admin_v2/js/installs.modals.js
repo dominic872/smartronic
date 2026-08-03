@@ -63,8 +63,8 @@
           // Define the fields that exist in the requirements form
           const validFormFields = [
             'id', 'name', 'cams', 'bullets', 'dome', 'hdd', 'monitor', 'type',
-            'location', 'time', 'date', 'owner', 'technician', 'helper', 
-            'resolution', 'map', 'rack', 'notes'
+            'city', 'location', 'time', 'date', 'owner', 'technician', 'helper', 
+            'resolution', 'map', 'rack', 'admin_event_comment', 'notes'
           ];
           
           Object.entries(window.currentInstallData).forEach(([key, value]) => {

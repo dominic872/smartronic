@@ -120,20 +120,8 @@
     }
 
     function sendData(data) {
-      const body = JSON.stringify(data);
-
-      if (navigator.sendBeacon) {
-        const blob = new Blob([body], { type: 'application/json' });
-        navigator.sendBeacon('https://smartronic.online/admin/track.php', blob);
-        return;
-      }
-
-      fetch('https://smartronic.online/admin/track.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: body,
-        keepalive: true
-      }).catch(function () {});
+      // Visitor tracking disabled temporarily; it must not interfere with lead submission.
+      return;
     }
 
     window.addEventListener('pagehide', function () {
@@ -145,9 +133,7 @@
     });
 
     const loadTrackingPixel = function () {
-      const img = document.getElementById('tracking-image');
-      if (!img) return;
-      img.src = 'https://smartronic.online/admin/capture.php?timestamp=' + Date.now();
+      return;
     };
 
     if (window.requestIdleCallback) {
@@ -198,11 +184,13 @@
     const popupTermsLink = document.getElementById('promoPopupTermsLink');
     const popupSubmit = document.getElementById('promoPopupSubmit');
     const popupMessage = document.getElementById('promoPopupMessage');
+    const popupCity = popupForm ? popupForm.querySelector('input[name="city"]') : null;
     const mainPhone = document.getElementById('num-whatsapp');
     const mainForm = document.getElementById('cctv-requirement-form');
     const formHolder = document.querySelector('.form-holder');
     const successMessage = document.querySelector('.form-success-message');
     const popupStateKey = 'smartronicPromoPopupState';
+    const popupClosedAtKey = 'smartronicPromoPopupClosedAt';
     const popupGads = document.body ? (document.body.dataset.popupGads || '') : '';
 
     if (!popup || !popupForm || !popupPhone || !popupName) return;
@@ -233,14 +221,22 @@
 
     let popupOpen = false;
     let popupLocked = false;
+    let popupDismissed = false;
     let popupScrollY = 0;
     let mainFormEngaged = false;
     let mainFormSubmitted = false;
-    const popupDelay = window.innerWidth <= 767 ? 3000 : 10000;
+    const popupDelay = 10000;
+    const popupReopenCooldown = 60000;
+    let popupClosedAt = 0;
 
     try {
-      if (window.sessionStorage.getItem(popupStateKey) === 'closed') {
+      const savedPopupState = window.sessionStorage.getItem(popupStateKey);
+      if (savedPopupState === 'submitted') {
         popupLocked = true;
+        mainFormSubmitted = true;
+      } else if (savedPopupState === 'closed') {
+        popupDismissed = true;
+        popupClosedAt = parseInt(window.sessionStorage.getItem(popupClosedAtKey) || '0', 10) || Date.now();
       }
     } catch (error) {}
 
@@ -267,9 +263,20 @@
     };
 
     const setPopupState = function (value) {
-      popupLocked = value === 'closed';
+      popupLocked = value === 'submitted';
+      popupDismissed = value === 'closed';
+      if (value === 'closed') {
+        popupClosedAt = Date.now();
+      } else {
+        popupClosedAt = 0;
+      }
       try {
         window.sessionStorage.setItem(popupStateKey, value);
+        if (value === 'closed') {
+          window.sessionStorage.setItem(popupClosedAtKey, String(popupClosedAt));
+        } else {
+          window.sessionStorage.removeItem(popupClosedAtKey);
+        }
       } catch (error) {}
     };
 
@@ -290,6 +297,10 @@
     const openPopup = function (options) {
       const opts = options || {};
       if (popupLocked || popupOpen || mainFormSubmitted) return;
+      if (popupDismissed) {
+        if (!opts.ignoreDismissed) return;
+        if (Date.now() - popupClosedAt < popupReopenCooldown) return;
+      }
       if (!opts.ignoreEngaged && mainFormEngaged) return;
       popup.classList.add('is-open');
       popup.setAttribute('aria-hidden', 'false');
@@ -318,7 +329,7 @@
     document.addEventListener('mousemove', function (event) {
       if (popupLocked || popupOpen) return;
       if (window.innerWidth > 767 && event.clientY <= 90) {
-        openPopup({ ignoreEngaged: true });
+        openPopup({ ignoreEngaged: true, ignoreDismissed: true });
       }
     });
 
@@ -331,14 +342,14 @@
       mainForm.addEventListener('change', markMainFormEngaged);
       mainForm.addEventListener('submit', function () {
         mainFormSubmitted = true;
-        setPopupState('closed');
+        setPopupState('submitted');
         closePopup(false);
       });
     }
 
     window.addEventListener('smartronic:leadSubmitted', function () {
       mainFormSubmitted = true;
-      setPopupState('closed');
+      setPopupState('submitted');
       closePopup(false);
     });
 
@@ -409,13 +420,21 @@
       }
 
       const payload = new URLSearchParams();
+      const popupPageParams = new URLSearchParams(window.location.search);
       payload.set('action', 'popup_lead_capture');
       payload.set('customer_name', name);
       payload.set('whatsapp_number', phone);
       payload.set('gads', popupGads);
       payload.set('popup_device', window.innerWidth <= 767 ? 'pop-mobile' : 'pop-desk');
+      if (popupPageParams.has('gad_campaignid')) {
+        payload.set('gad_campaignid', popupPageParams.get('gad_campaignid') || '');
+      }
+      if (popupCity && popupCity.value.trim()) {
+        payload.set('city', popupCity.value.trim());
+      }
 
-      fetch('admin_v2/admin-ajax.php', {
+      const popupAjaxUrl = '/admin_v2/admin-ajax.php' + (window.location.search || '');
+      fetch(popupAjaxUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
         body: payload.toString()
@@ -440,7 +459,7 @@
           }
           syncMainFormName(name);
           mainFormSubmitted = true;
-          setPopupState('closed');
+          setPopupState('submitted');
           closePopup(false);
           if (typeof window.showLeadSuccessState === 'function') {
             window.showLeadSuccessState();
@@ -463,7 +482,7 @@
         .finally(function () {
           if (popupSubmit) {
             popupSubmit.dataset.loading = '0';
-            popupSubmit.textContent = 'Get now';
+            popupSubmit.textContent = 'Call Me Now';
           }
           syncPopupSubmitState();
         });

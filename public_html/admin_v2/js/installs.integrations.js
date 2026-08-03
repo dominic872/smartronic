@@ -40,7 +40,7 @@
   }
   window.sendToWhatsapp = sendToWhatsapp;
 
-  function getQuoteDetails(installDetails){
+  async function getQuoteDetails(installDetails){
     // Check if user has admin role
     const authRole = getCookie('auth_role');
     if (authRole !== 'admin') {
@@ -65,80 +65,71 @@
       ? 'https://smartronic.online/content/uploads/2025/01/Hikvision_logo.svg'
       : brandLower === 'prama'
       ? 'https://smartronic.online/content/uploads/2025/01/Prama_logo.png'
+      : brandLower === 'secureye'
+      ? 'https://smartronic.online/content/uploads/2025/01/Secureye_logo.png'
       : '';
 
-    const requestData = {
-      whatsapp_number: '88888888',
-      num_cameras: installDetails.cams,
-      dvr_type: installDetails.type,
-      hdd_size: installDetails.hdd,
-      camera_resolution: installDetails.resolution,
-      brand,
-      cam_type: camType
-    };
-    fetch('/admin_v2/quote_api.php', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestData)
-    })
-      .then(response => response.json())
-      .then(data => {
-        console.log('📦 Quote Response:', data);
-        
-        // Try to find #results first, then fallback to #result
-        let el = document.getElementById('results');
-        if (!el) {
-          el = document.getElementById('result');
-        }
-        
-        if (el) {
-          // Create detailed quote breakdown
-          const brandLine = brand
-            ? `<div style="display:flex;align-items:center;gap:8px;margin:0 0 10px 0;padding:8px;background:#fff;border:1px solid #e5e7eb;border-radius:6px;">
-                ${brandLogoPath ? `<img src="${brandLogoPath}" alt="${brand}" style="height:18px;width:auto;object-fit:contain;">` : ''}
-                <strong>${brand}</strong>${camType ? `<span style="color:#666;">${camType}</span>` : ''}
-              </div>`
-            : '';
-          const quoteHtml = `
-            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 14px; line-height: 1.4;">
-              <h4 style="margin: 0 0 10px 0; color: #333;">📋 Quote Details</h4>
-              ${brandLine}
-              <div style="border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-bottom: 8px;">
-                📞 WhatsApp: ${data.whatsapp}<br>
-                🎥 Camera: ${data.camera_key} x ${data.num_cams} @ ₹${data.camera_unit_price} = <strong>₹${data.camera_total}</strong><br>
-                📦 Recorder: ${data.recorder_key} = <strong>₹${data.recorder_price}</strong><br>
-                💽 HDD: ${data.hdd_size} = <strong>₹${data.hdd_price}</strong><br>
-                ${data.poe_price > 0 ? `🔌 POE: <strong>₹${data.poe_price}</strong><br>` : ''}
-                ${data.smps_price > 0 ? `🔌 SMPS: <strong>₹${data.smps_price}</strong><br>` : ''}
-                🧰 Accessories: <strong>₹${data.accessories}</strong>
-              </div>
-              <div style="border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-bottom: 8px;">
-                💰 Subtotal: ₹${data.subtotal}<br>
-                🧾 GST (18%): ₹${data.gst}<br>
-                💵 <strong>Total Cost(With Tax): ₹${data.with_gst}</strong><br>
-                🧩 Installation: ₹${data.install_charge}<br>
-                💼 Profit (60%): ₹${data.profit}
-              </div>
-              <div style="background: #e8f5e8; padding: 8px; border-radius: 4px; margin-bottom: 8px;">
-                💵 Total Before Discount: <strong>₹${data.before_discount}</strong><br>
-                🎁 Final (20% Off): <strong style="color: #28a745;">₹${data.final_total}</strong>
-              </div>
-              <div style="background: #e6f3ff; padding: 8px; border-radius: 4px;">
-                ✅ Final Limited Profit Total: <strong style="color: #0066cc;">₹${data.final_limited_profit}</strong><br>
-                <small style="color: #666;">🧮 Per-Cam Cost: ₹${data.install_per_cam} x ${data.num_cams} = ₹${data.install_cam_cost}</small>
-                <small style="color: #666;">Profit:₹${data.final_total-data.subtotal-data.gst}</small>
-              </div>
+    try {
+      if (typeof window.calculateInstallPricing !== 'function') {
+        throw new Error('Pricing calculator is not loaded.');
+      }
+      const data = await window.calculateInstallPricing(installDetails);
+      console.log('📦 data.json pricing response:', data);
+
+      let el = document.getElementById('results');
+      if (!el) {
+        el = document.getElementById('result');
+      }
+
+      if (el) {
+        const inr = n => Number.isFinite(Number(n)) ? `₹${Math.round(Number(n)).toLocaleString('en-IN')}` : 'n/a';
+        const brandLine = brand
+          ? `<div style="display:flex;align-items:center;gap:8px;margin:0 0 10px 0;padding:8px;background:#fff;border:1px solid #e5e7eb;border-radius:6px;">
+              ${brandLogoPath ? `<img src="${brandLogoPath}" alt="${brand}" style="height:18px;width:auto;object-fit:contain;">` : ''}
+              <strong>${brand}</strong>${camType ? `<span style="color:#666;">${camType}</span>` : ''}
+            </div>`
+          : '';
+        const missingHtml = data.missing && data.missing.length
+          ? `<div style="color:#b91c1c;margin-top:8px;">Missing price: ${data.missing.join(', ')}</div>`
+          : '';
+        const quoteHtml = `
+          <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 14px; line-height: 1.4;">
+            <h4 style="margin: 0 0 10px 0; color: #333;">📋 Quote Details</h4>
+            ${brandLine}
+            <div style="border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-bottom: 8px;">
+              Source: <strong>data.json</strong><br>
+              🎥 Camera: ${data.resolution} ${data.camType || ''} x ${data.cams} @ ${inr(data.cameraUnitPrice)} = <strong>${inr(data.cameraTotal)}</strong><br>
+              📦 Recorder: ${data.channel}CH = <strong>${inr(data.recorderPrice)}</strong><br>
+              💽 HDD: <strong>${inr(data.hddPrice)}</strong><br>
+              🧰 Accessories: <strong>${inr(data.accessories)}</strong>
             </div>
-          `;
-          el.innerHTML = quoteHtml;
-        }
-      })
-      .catch(err => {
-        console.error('Error calling quote API:', err);
-        let el = document.getElementById('results');
-        if (!el) {
-          el = document.getElementById('result');
-        }
-        if (el) el.innerHTML = '<div style="color: red; padding: 10px;">❌ Error fetching quote details</div>';
-      });
+            <div style="border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-bottom: 8px;">
+              💰 Subtotal: ${inr(data.subtotal)}<br>
+              🧾 GST (18%): ${inr(data.gst)}<br>
+              💵 <strong>Material Cost: ${inr(data.materialCost)}</strong><br>
+              🧩 Installation: ${inr(data.installCharge)}
+            </div>
+            <div style="background: #e6f3ff; padding: 8px; border-radius: 4px;">
+              ✅ Limited Total: <strong style="color: #0066cc;">${inr(data.limitedTotal)}</strong><br>
+              ✅ Final Total (${data.profitPercentage}%): <strong style="color: #0066cc;">${inr(data.finalTotal)}</strong><br>
+              <small style="color: #666;">Actual Profit: ${inr(data.actualProfit)}</small>
+              ${missingHtml}
+            </div>
+          </div>
+        `;
+        el.innerHTML = quoteHtml;
+      }
+      if (typeof window.updateProfitDetailsOverlay === 'function') {
+        window.updateProfitDetailsOverlay(installDetails);
+      }
+    } catch (err) {
+      console.error('Error calculating quote details from data.json:', err);
+      let el = document.getElementById('results');
+      if (!el) {
+        el = document.getElementById('result');
+      }
+      if (el) el.innerHTML = '<div style="color: red; padding: 10px;">❌ Error calculating quote details from data.json</div>';
+    }
   }
   window.getQuoteDetails = getQuoteDetails;
 
@@ -168,7 +159,7 @@
         if (exists) { alert(`Record already exists for date: ${exists.date}`); }
         else {
           const formData = {
-            id: params.get('id') || '', name: params.get('name') || '', cams: params.get('cams') || '', bullets: '', dome: '', hdd: (params.get('hdd') || '').replace(/\s+/g, ''), monitor: '', type: params.get('type') || '', location: params.get('location') || '', time: '', date: params.get('date') || '', owner: params.get('owner') || '', technician: '', helper: '', resolution: params.get('resolution') || '', map: params.get('map') || ''
+            id: params.get('id') || '', name: params.get('name') || '', cams: params.get('cams') || '', bullets: '', dome: '', hdd: (params.get('hdd') || '').replace(/\s+/g, ''), monitor: '', type: params.get('type') || '', city: params.get('city') || 'Bangalore', location: params.get('location') || '', time: '', date: params.get('date') || '', owner: params.get('owner') || params.get('Assign') || params.get('assign') || '', technician: '', helper: '', resolution: params.get('resolution') || '', map: params.get('map') || ''
           };
           if (typeof window.openForm === 'function') window.openForm(formData);
         }

@@ -167,7 +167,7 @@
     const numCameras = document.getElementById('num-cameras-input')?.value?.trim() || '';
     
     // Extract selected brand, category, mp from form
-    const selectedBrand = document.getElementById('selected-brand')?.value?.trim() || 'PRAMA';
+    const selectedBrand = document.getElementById('selected-brand')?.value?.trim() || 'SECUREYE';
     const selectedCategory = document.getElementById('selected-category')?.value?.trim() || 'NVR';
     const selectedMP = document.getElementById('selected-mp')?.value?.trim() || '4MP';
     
@@ -251,7 +251,9 @@
   let additionalDiscount = 0;
   let additionalPercentage = 0;
   let whatsappPriceMode = 'max';
+  let isProfitShortcutVisible = false;
   const wpSelectedPriceIndicator = document.getElementById('wp-selected-price-indicator');
+  const isAdminUser = !!(document.body && document.body.classList && document.body.classList.contains('is-admin'));
   const isMarketUser = !!(document.body && document.body.classList && document.body.classList.contains('is-market'));
   const marketSummaryItemsEl = document.getElementById('market-summary-items');
 
@@ -259,6 +261,35 @@
     const digits = String(txt || '').replace(/[^\d]/g, '');
     return digits ? parseInt(digits, 10) : 0;
   };
+
+  const setProfitVisibility = (shouldShow) => {
+    if (!isAdminUser) return false;
+    let changed = false;
+    [
+      { amountId: 'profit-display-amount', iconId: 'profit-eye-icon' },
+      { amountId: 'sticky-profit-margin-amount', iconId: 'sticky-profit-eye-icon' }
+    ].forEach(({ amountId, iconId }) => {
+      const amountEl = document.getElementById(amountId);
+      if (!amountEl || !amountEl.dataset.profitValue) return;
+      amountEl.textContent = shouldShow ? formatINR(parseFloat(amountEl.dataset.profitValue) || 0) : '•••';
+      const iconEl = document.getElementById(iconId);
+      if (iconEl) {
+        iconEl.classList.toggle('fa-eye', !shouldShow);
+        iconEl.classList.toggle('fa-eye-slash', shouldShow);
+      }
+      changed = true;
+    });
+    isProfitShortcutVisible = shouldShow;
+    return changed;
+  };
+
+  document.addEventListener('keydown', (event) => {
+    if ((event.ctrlKey || event.metaKey) && String(event.key).toLowerCase() === 'p') {
+      if (!isAdminUser) return;
+      event.preventDefault();
+      setProfitVisibility(!isProfitShortcutVisible);
+    }
+  });
 
   const getPriceModeLabel = (mode) => {
     if (mode === 'min') return 'MIN';
@@ -367,6 +398,78 @@
   const stickyTotalEl = document.getElementById('sticky-total');
   const stickyHalfDiffEl = document.getElementById('sticky-half-diff-total');
   const stickyProfitEl = document.getElementById('sticky-profit-amount');
+
+  function setStickySelectionWarning(missingSelections) {
+    const sticky = document.getElementById('sticky-totals');
+    if (!sticky) return;
+    const missing = Array.isArray(missingSelections)
+      ? missingSelections.filter(Boolean)
+      : [];
+    sticky.classList.toggle('selection-incomplete', missing.length > 0);
+    if (missing.length > 0) {
+      sticky.title = `Missing selection: ${missing.join(', ')}`;
+      sticky.dataset.missingSelections = missing.join(', ');
+    } else {
+      sticky.removeAttribute('title');
+      delete sticky.dataset.missingSelections;
+    }
+  }
+
+  function getRequiredSelectionGaps(contextFilteredItems = []) {
+    const gaps = [];
+    const hasSelectedButton = (container) =>
+      !!(container && container.querySelector('.choice-btn.selected, .option-btn.selected'));
+    const typeRoot = safeGetTypeRoot();
+    const contextData = currentCategory === 'NVR'
+      ? typeRoot?.[currentCategory]?.[currentBrand]
+      : typeRoot?.[currentCategory]?.[currentBrand]?.[currentMP];
+    const hasRecorderData = !!(contextData?.Recorder && Object.keys(contextData.Recorder).length > 0);
+    const hasCameraData = !!(
+      contextData?.Camera &&
+      (
+        (Array.isArray(contextData.Camera) && contextData.Camera.length > 0) ||
+        (!Array.isArray(contextData.Camera) && Object.keys(contextData.Camera).length > 0)
+      )
+    );
+    const hasHddData = !!(
+      data?.HDD &&
+      Object.values(data.HDD).some(arr => Array.isArray(arr) && arr.length > 0)
+    );
+
+    if (!currentCategory || !hasSelectedButton(categoryContainer)) gaps.push('Type');
+    if (!currentBrand || !hasSelectedButton(brandContainer)) gaps.push('Brand');
+    if (
+      currentCategory === 'DVR' &&
+      (!currentMP || !hasSelectedButton(mpContainer))
+    ) {
+      gaps.push('Resolution');
+    }
+
+    const contextHasItems = (component) =>
+      contextFilteredItems.some(item => item.meta?.component === component);
+    const enabledRecorderButtons = document.querySelectorAll('#componentPopup .recorder-btn:not(.disabled)');
+    const cameraButtons = document.querySelectorAll('#componentPopup .camera-btn');
+    const hddButtons = document.querySelectorAll('#preferred-hdd .choice-btn, #brandwise-hdd .choice-btn');
+    const requiredCameraCount = parseInt(document.getElementById('num-cameras-input')?.value || 0, 10);
+    const selectedCameraCount = contextFilteredItems
+      .filter(item => item.meta?.component === 'Camera')
+      .reduce((sum, item) => sum + (item.qty || 0), 0);
+
+    if ((hasRecorderData || enabledRecorderButtons.length > 0) && !contextHasItems('Recorder')) {
+      gaps.push('Recorder');
+    }
+    if (
+      (hasCameraData || cameraButtons.length > 0) &&
+      (!contextHasItems('Camera') || selectedCameraCount !== requiredCameraCount)
+    ) {
+      gaps.push('Camera');
+    }
+    if ((hasHddData || hddButtons.length > 0) && !contextHasItems('HDD')) {
+      gaps.push('HDD');
+    }
+
+    return gaps;
+  }
 
   const setWhatsAppPriceMode = (mode) => {
     whatsappPriceMode = mode === 'min' || mode === 'mid' ? mode : 'max';
@@ -1129,9 +1232,10 @@
   let currentCategory = '';
   let currentBrand = '';
   let currentMP = '';
-  const PREFERRED_BRAND = 'PRAMA';
+  const PREFERRED_BRAND = 'SECUREYE';
   const BRAND_LOGOS = {
     'PRAMA': '/content/uploads/2025/01/Prama_logo.png',
+    'SECUREYE': '/content/uploads/2025/01/Secureye_logo.png',
     'HIKVISION': '/content/uploads/2025/01/Hikvision_logo.svg',
     'CP PLUS': '/content/uploads/2025/01/cp-plus_logo.svg'
   };
@@ -1863,7 +1967,14 @@
             nvrCamContainer.className = "button-row";
             camSection.appendChild(nvrCamContainer);
 
-            const entryCameras = Array.isArray(brandData.Camera) ? brandData.Camera : Object.values(brandData.Camera).flat();
+            const entryCameras = Array.isArray(brandData.Camera)
+              ? brandData.Camera
+              : Object.entries(brandData.Camera).flatMap(([cameraMP, cameras]) =>
+                  (Array.isArray(cameras) ? cameras : []).map(cam => ({
+                    ...cam,
+                    mp: cam.mp || cameraMP
+                  }))
+                );
             const sortedCameras = sortByPriceLowToHigh(entryCameras);
 
             sortedCameras.forEach(cam => {
@@ -2331,10 +2442,12 @@
   function updateSummary() {
     if (!currentCategory || !currentBrand) {
       console.warn('[SUMMARY] Skipping - context not set:', {currentCategory, currentBrand});
+      setStickySelectionWarning(getRequiredSelectionGaps([]));
       return;
     }
     if (currentCategory === 'DVR' && !currentMP) {
         console.warn('[SUMMARY] Skipping for DVR - MP not set');
+        setStickySelectionWarning(getRequiredSelectionGaps([]));
         return;
     }
 
@@ -2372,6 +2485,7 @@
     console.log('[DEBUG BRANDS]', selectedItems.map(i => ({label: i.label, brand: i.meta?.brand, category: i.meta?.category, mp: i.meta?.mp})));
     console.log('[FILTERED ITEMS TO DISPLAY]', contextFilteredItems.map(i => ({label: i.label, brand: i.meta?.brand, category: i.meta?.category, mp: i.meta?.mp, component: i.meta?.component})));
     console.log('[WILL RENDER]', contextFilteredItems.length, 'items for brand:', currentBrand);
+    setStickySelectionWarning(getRequiredSelectionGaps(contextFilteredItems));
     
     // Sort contextFilteredItems based on component type for display order
     const sortedContextFilteredItems = [...contextFilteredItems].sort((a, b) => {
@@ -2696,18 +2810,21 @@
     const materialCost = finalSubtotal + gst;
     const summaryTotalsEl = document.querySelector('.summary-totals');
     const totalRow = summaryTotalsEl ? summaryTotalsEl.querySelector('.total-row') : null;
+    const materialCostText = formatINR(materialCost);
     
     let materialCostRow = document.getElementById('material-cost-row');
     if (!materialCostRow && summaryTotalsEl) {
       materialCostRow = document.createElement('div');
       materialCostRow.id = 'material-cost-row';
       materialCostRow.className = 'row no-margin';
+      materialCostRow.dataset.materialCost = String(materialCost);
+      materialCostRow.setAttribute('data-material-cost', String(materialCost));
       materialCostRow.style.borderTop = '1px solid #ddd';
       materialCostRow.style.marginTop = '8px';
       materialCostRow.style.paddingTop = '8px';
       materialCostRow.innerHTML = `
         <div class="col s7" style="font-weight: 600;">Material Cost</div>
-        <div class="col s5 right-align" id="material-cost-amount" style="font-weight: 600;">${formatINR(materialCost)}</div>
+        <div class="col s5 right-align" id="material-cost-amount" style="font-weight: 600;">${materialCostText}</div>
       `;
       // Insert before the total row
       if (totalRow) {
@@ -2716,7 +2833,9 @@
         summaryTotalsEl.appendChild(materialCostRow);
       }
     } else if (materialCostRow) {
-      materialCostRow.querySelector('#material-cost-amount').textContent = formatINR(materialCost);
+      materialCostRow.dataset.materialCost = String(materialCost);
+      materialCostRow.setAttribute('data-material-cost', String(materialCost));
+      materialCostRow.querySelector('#material-cost-amount').textContent = materialCostText;
     }
     
     // Add installation charge row after material cost and before total
@@ -2778,6 +2897,7 @@
       // Add eye icon toggle handlers
       const eyeIcon = profitDisplayRow.querySelector('#profit-eye-icon');
       const profitAmount = profitDisplayRow.querySelector('#profit-display-amount');
+      if (profitAmount) profitAmount.dataset.profitValue = String(profitValue);
       
       if (profitAmount && isMobile && isAdmin) {
         profitAmount.textContent = formatINR(profitValue);
@@ -2810,6 +2930,7 @@
     } else if (profitDisplayRow) {
       const eyeIcon = profitDisplayRow.querySelector('#profit-eye-icon');
       const profitAmount = profitDisplayRow.querySelector('#profit-display-amount');
+      if (profitAmount) profitAmount.dataset.profitValue = String(profitValue);
       if (profitAmount && isMobile && isAdmin) {
         profitAmount.textContent = formatINR(profitValue);
         if (eyeIcon) eyeIcon.style.display = 'none';
@@ -2938,6 +3059,9 @@
           });
           document.addEventListener('touchend', hideProfit);
         }
+      }
+      if (isProfitShortcutVisible) {
+        setProfitVisibility(true);
       }
     } else {
       console.warn('⚠️ Sticky profit margin element not found');
@@ -3081,6 +3205,31 @@
  
  
   /* ---------- WhatsApp ---------- */
+  function getHddIncludedMessageLines(hddItem, fallbackHddSize = '') {
+    const raw = [
+      hddItem?.meta?.capacity,
+      hddItem?.label,
+      hddItem?.meta?.label,
+      hddItem?.meta?.raw?.label,
+      fallbackHddSize
+    ].filter(Boolean).join(' ');
+    const normalized = String(raw || '').replace(/\s+/g, '').toLowerCase();
+    const is500Gb = /500(?:gb|g\b)/i.test(normalized) || normalized.includes('500gb');
+    const capacityMatch = normalized.match(/(\d+(?:\.\d+)?)(tb|gb)/i);
+    const capacityLabel = capacityMatch
+      ? `${capacityMatch[1]} ${capacityMatch[2].toUpperCase()}`
+      : '500 GB';
+
+    if (is500Gb) {
+      return ['- Consistent or equalent 500 GB Const. 2Yr - Included'];
+    }
+
+    return [
+      `- Consistent ${capacityLabel} Const. 2Yr - Included`,
+      '(Add just 6000/- more to get TOSHIBA/ Seagate/ WD/ Consistent Hard Disk)'
+    ];
+  }
+
   function buildWhatsAppMessage() {
     console.log('Building WhatsApp message with percentage:', additionalPercentage);
     const camCount = parseInt(num.value || 0, 10);
@@ -3214,8 +3363,19 @@ msg.push('');
     const totalBeforeDiscount = Math.round(selectedAmountWA / 0.8);
     
     // Get the MP of the selected NVR camera, or currentMP for DVR
-    const displayMP = currentCategory === 'NVR' 
-      ? (contextFilteredItems.find(item => item.meta?.component === 'Camera')?.meta?.mp || '')
+    const selectedCameraItem = contextFilteredItems.find(item => item.meta?.component === 'Camera');
+    const cameraLabelMP = String(
+      selectedCameraItem?.meta?.cameraLabel
+      || selectedCameraItem?.meta?.raw?.label
+      || selectedCameraItem?.label
+      || ''
+    ).match(/\b(\d+(?:\.\d+)?)\s*MP\b/i)?.[1];
+    const displayMP = currentCategory === 'NVR'
+      ? (
+          String(selectedCameraItem?.meta?.mp || '').trim()
+          || (cameraLabelMP ? `${cameraLabelMP}MP` : '')
+          || String(currentMP || '').trim()
+        )
       : currentMP;
 
     // Build main quote message
@@ -3224,16 +3384,16 @@ msg.push('');
     
     msg.push(systemText);
     msg.push('');
-    msg.push(`- ${currentMP} Outdoor/Indoor Cameras (${camCount} units) – Smart Night Vision, Motion Detection & Packed with Advanced Features for Complete Security`);
+    msg.push(`- ${displayMP} Outdoor/Indoor Cameras (${camCount} units) – Smart Night Vision, Motion Detection & Packed with Advanced Features for Complete Security`);
 
     // Find HDD in selected items
-    const hddItem = contextFilteredItems.find(i => i.meta?.component === 'HDD');
-    if (hddItem) {
-      const hddName = hddItem.label.split(' - ')[0] || 'Hard Disk';
-      msg.push(`- ${hddName} or TOSHIBA/ Seagate/ WD/ Consistent Hard Disk - Included`);
-    } else {
-      msg.push(`- TOSHIBA/ Seagate/ WD/ Consistent Hard Disk - Included`);
-    }
+    const contextKey = currentCategory === 'NVR'
+      ? `${currentCategory}::${currentBrand}`
+      : `${currentCategory}::${currentBrand}::${currentMP}`;
+    const hddItem = contextFilteredItems.find(i => i.meta?.component === 'HDD')
+      || selectedItems.find(i => i.meta?.component === 'HDD' && i.meta?.contextKey === contextKey)
+      || selectedItems.find(i => i.meta?.component === 'HDD');
+    getHddIncludedMessageLines(hddItem, window.urlQuoteParams?.hddSize || '').forEach(line => msg.push(line));
     msg.push(`- Complete Cabling & Accessories (RJ45/BNC, DC, Camera Box, POE/SMPS) – *All Included!*`);
 msg.push(`- *Professional Installation – Absolutely Free!*`);
 msg.push(`- Includes up to 90m of premium cable. Extra cable if needed: ₹20/m + ₹20/m labour.`);
@@ -3263,7 +3423,7 @@ msg.push(`💡 *Why Choose Smartronic.online?*`);
 msg.push('- Smart Motion Detection Cameras with Clear Night Vision in Black & White or Colour');
 msg.push('- Transparent, Affordable Pricing – No Hidden Costs');
 msg.push('- Fast, Hassle-Free Installation & Service Support');
-msg.push('- Trusted by 500+ Happy Customers Across Bangalore!');
+msg.push('- Trusted by 2500+ Happy Customers Across Bangalore!');
 msg.push('');
 msg.push(`🛒 *Book Today & Lock Your 20% Discount!*`);
 msg.push(`📞 Quick support: Call the same number or just reply *YES* to confirm!`);

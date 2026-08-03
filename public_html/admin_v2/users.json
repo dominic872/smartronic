@@ -1,13 +1,14 @@
 [
   { "username": "dominic", "password": "smart@70", "role": "admin", "name": "Dominic Sagayaraj", "phone": "+918884831000" },
-  { "username": "david", "password": "smart@cctv", "role": "tech", "name": "David", "phone": "+916366656811" },
   { "username": "amreen", "password": "smart@1947", "role": "market", "name": "Amreen M", "phone": "+919886735991"  },
   
   { "username": "syed", "password": "smart@1980", "role": "tech", "name": "Syed", "phone": "+919900398459"  },
   { "username": "karthick", "password": "smart@2080", "role": "associate", "name": "Karthick", "phone": "+917358654091" },
-  { "username": "abdul", "password": "smart@1930", "role": "associate", "name": "Abdul", "phone": "+919380010130" },
   { "username": "siren", "password": "siren@1947", "role": "tech", "name": "Siren", "phone": "+918553914355" },
   { "username": "pawan", "password": "pawan@19710", "role": "tech", "name": "Pawan", "phone": "+916203001397"  },
-   { "username": "gowtham", "password": "smart@2007", "role": "tech", "name": "Gowtham H D", "phone": "+919019277197"  }
+  { "username": "gowtham", "password": "smart@2007", "role": "tech", "name": "Gowtham H D", "phone": "+919019277197"  },
+  { "username": "chandan", "password": "smart@cctv", "role": "tech", "name": "Chandan", "phone": "+917970707053" },
+  { "username": "uday", "password": "smart@cctv", "role": "tech", "name": "Uday (Chennai)", "phone": "+917358364562" },
+  { "username": "zain", "password": "smart@cctv", "role": "tech", "name": "Zain", "phone": "+917204505731" }
 ]
   

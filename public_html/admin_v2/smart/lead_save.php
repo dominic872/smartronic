@@ -42,7 +42,8 @@ $conn->query("SET time_zone = '+05:30'");
 date_default_timezone_set('Asia/Kolkata');
 
 $role = $_COOKIE['auth_role'] ?? '';
-$isAdmin = $role === 'admin';
+$isAdmin = in_array(strtolower(trim((string)$role)), ['admin', 'manager'], true);
+$canDeleteLead = strtolower(trim((string)$role)) === 'admin';
 $authName = $_COOKIE['auth_name'] ?? '';
 $authUser = $_COOKIE['auth_user'] ?? '';
 $codeSource = $authName !== '' ? $authName : $authUser;
@@ -55,9 +56,42 @@ $isUnassignedAssign = function ($assignRaw) {
     return ($v === '' || $v === 'open' || $v === '-' || $v === 'na');
 };
 
+$isAssignedAssign = function ($assignRaw) use ($isUnassignedAssign) {
+    return !$isUnassignedAssign($assignRaw);
+};
+
+$normalizeAssign = function ($assignRaw) {
+    $v = strtolower(trim((string)$assignRaw));
+    $allowed = [
+        '' => 'Open',
+        '-' => 'Open',
+        'na' => 'Open',
+        'open' => 'Open',
+        'amr' => 'AMR',
+        'var' => 'VAR',
+        'sur' => 'SUR',
+    ];
+    return array_key_exists($v, $allowed) ? $allowed[$v] : null;
+};
+
+$requestedAssign = null;
+if (array_key_exists('Assign', $data)) {
+    $requestedAssign = $normalizeAssign($data['Assign']);
+    if ($requestedAssign === null) {
+        echo json_encode(['success' => false, 'message' => 'Invalid assignee.']);
+        $conn->close();
+        exit;
+    }
+    $data['Assign'] = $requestedAssign;
+}
+
 $editTraceColCheck = $conn->query("SHOW COLUMNS FROM leads LIKE 'edit_trace'");
 if ($editTraceColCheck && $editTraceColCheck->num_rows === 0) {
     $conn->query("ALTER TABLE leads ADD COLUMN edit_trace LONGTEXT NULL");
+}
+$originalAssignColCheck = $conn->query("SHOW COLUMNS FROM leads LIKE 'originally_assigned'");
+if ($originalAssignColCheck && $originalAssignColCheck->num_rows === 0) {
+    $conn->query("ALTER TABLE leads ADD COLUMN originally_assigned VARCHAR(255) NULL");
 }
 $quoteColCheck = $conn->query("SHOW COLUMNS FROM leads LIKE 'quote'");
 if ($quoteColCheck && $quoteColCheck->num_rows === 0) {
@@ -82,6 +116,46 @@ $appendEditTrace = function($existing, $entry) {
 };
 
 $leadId = $data['leadId'] ?? null; 
+
+if (!empty($data['deleteLead'])) {
+    if (!$canDeleteLead) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'message' => 'Only admin can delete leads.']);
+        $conn->close();
+        exit;
+    }
+
+    $deleteLeadIdRaw = $leadId ?? ($data['id'] ?? '');
+    if (is_string($deleteLeadIdRaw) && stripos($deleteLeadIdRaw, 'L-') === 0) {
+        $deleteLeadIdRaw = substr($deleteLeadIdRaw, 2);
+    }
+    $deleteLeadId = intval($deleteLeadIdRaw);
+    if ($deleteLeadId <= 0) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Lead id is required.']);
+        $conn->close();
+        exit;
+    }
+
+    $exists = $conn->query("SELECT id FROM leads WHERE id = " . $deleteLeadId . " LIMIT 1");
+    if (!$exists || $exists->num_rows === 0) {
+        http_response_code(404);
+        echo json_encode(['success' => false, 'message' => 'Lead not found.']);
+        $conn->close();
+        exit;
+    }
+
+    $deleted = $conn->query("DELETE FROM leads WHERE id = " . $deleteLeadId . " LIMIT 1");
+    if ($deleted) {
+        echo json_encode(['success' => true, 'message' => 'Lead deleted.', 'id' => $deleteLeadId]);
+    } else {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'message' => 'Delete failed: ' . $conn->error]);
+    }
+    $conn->close();
+    exit;
+}
+
 $mid = isset($data['mid']) ? trim((string)$data['mid']) : '';
 $quoteLinkAppend = isset($data['quote_link_append']) ? trim((string)$data['quote_link_append']) : '';
 
@@ -124,8 +198,7 @@ if ($quoteLinkAppend !== '') {
     $currentAssign = isset($row['Assign']) ? trim((string)$row['Assign']) : '';
     $currentIsOpen = $isUnassignedAssign($currentAssign);
     $assignToSet = null;
-    if ($isAdmin) $assignToSet = 'Open';
-    else if ($currentIsOpen && $userCode !== '') $assignToSet = $userCode;
+    if (!$isAdmin && $currentIsOpen && $userCode !== '') $assignToSet = $userCode;
     $existingEditTrace = isset($row['edit_trace']) ? (string)$row['edit_trace'] : '';
     $nextEditTrace = $appendEditTrace($existingEditTrace, $editEntry);
 
@@ -141,9 +214,6 @@ if ($quoteLinkAppend !== '') {
         $assignEsc = $conn->real_escape_string($assignToSet);
         $setParts[] = "Assign = '$assignEsc'";
         $currentAssign = $assignToSet;
-    } else if ($isAdmin && $currentAssign !== 'Open') {
-        $setParts[] = "Assign = 'Open'";
-        $currentAssign = 'Open';
     }
     $upd = $conn->query("UPDATE leads SET " . implode(', ', $setParts) . " WHERE id = $idSaved");
     if (!$upd) {
@@ -207,7 +277,7 @@ if ($placeOrder) {
         }
     }
 
-    $assignRow = $conn->query("SELECT Assign, edit_trace FROM leads WHERE id = $leadIdInt LIMIT 1");
+    $assignRow = $conn->query("SELECT Assign, originally_assigned, edit_trace FROM leads WHERE id = $leadIdInt LIMIT 1");
     if (!$assignRow || $assignRow->num_rows === 0) {
         echo json_encode(['success' => false, 'message' => 'Lead not found.']);
         $conn->close();
@@ -216,16 +286,22 @@ if ($placeOrder) {
     $assignDb = $assignRow->fetch_assoc();
     $currentAssign = isset($assignDb['Assign']) ? trim((string)$assignDb['Assign']) : '';
     $currentIsOpen = $isUnassignedAssign($currentAssign);
+    $originallyAssigned = isset($assignDb['originally_assigned']) ? trim((string)$assignDb['originally_assigned']) : '';
     $existingEditTrace = isset($assignDb['edit_trace']) ? (string)$assignDb['edit_trace'] : '';
 
     if (in_array('Assign', $table_columns, true)) {
         $fields_to_process = array_values(array_filter($fields_to_process, function ($f) { return $f !== 'Assign'; }));
         unset($escaped_values['Assign']);
 
-        if ($isAdmin) {
+        if ($isAdmin && $requestedAssign !== null) {
             $fields_to_process[] = 'Assign';
-            $escaped_values['Assign'] = 'Open';
-            $currentAssign = 'Open';
+            $escaped_values['Assign'] = $conn->real_escape_string($requestedAssign);
+            if ($requestedAssign === 'Open' && $isAssignedAssign($currentAssign)) {
+                $fields_to_process[] = 'originally_assigned';
+                $escaped_values['originally_assigned'] = $conn->real_escape_string($currentAssign);
+                $originallyAssigned = $currentAssign;
+            }
+            $currentAssign = $requestedAssign;
         } else if ($currentIsOpen && $userCode !== '') {
             $fields_to_process[] = 'Assign';
             $escaped_values['Assign'] = $conn->real_escape_string($userCode);
@@ -421,13 +497,15 @@ if ($placeOrder) {
     }
     $stmt->close();
 
-    $qr = $conn->query("SELECT Assign, quote_links, edit_trace FROM leads WHERE id = $leadIdInt LIMIT 1");
+    $qr = $conn->query("SELECT Assign, originally_assigned, quote_links, edit_trace FROM leads WHERE id = $leadIdInt LIMIT 1");
     $outAssign = $currentAssign;
+    $outOriginallyAssigned = $originallyAssigned;
     $outQuoteLinks = null;
     $outEditTrace = null;
     if ($qr && $qr->num_rows > 0) {
         $qrRow = $qr->fetch_assoc();
         if (isset($qrRow['Assign'])) $outAssign = $qrRow['Assign'];
+        if (isset($qrRow['originally_assigned'])) $outOriginallyAssigned = $qrRow['originally_assigned'];
         if (isset($qrRow['quote_links'])) $outQuoteLinks = $qrRow['quote_links'];
         if (isset($qrRow['edit_trace'])) $outEditTrace = $qrRow['edit_trace'];
     }
@@ -437,6 +515,7 @@ if ($placeOrder) {
         'message' => 'Order placed.',
         'id' => $leadIdInt,
         'assign' => $outAssign,
+        'originally_assigned' => $outOriginallyAssigned,
         'quote_links' => $outQuoteLinks,
         'edit_trace' => $outEditTrace,
         'order_idno' => $idnoVal
@@ -484,9 +563,14 @@ if (empty($leadId) && empty($data['whatsapp_number'])) {
 }
 
 if (empty($leadId)) {
-    if ($isAdmin && in_array('Assign', $table_columns) && !isset($escaped_values['Assign'])) {
+    if (in_array('Assign', $table_columns)) {
+        $fields_to_process = array_values(array_filter($fields_to_process, function($f) { return $f !== 'Assign'; }));
+        unset($escaped_values['Assign']);
+        $newAssign = $isAdmin
+            ? ($requestedAssign !== null ? $requestedAssign : 'Open')
+            : ($userCode !== '' ? $userCode : 'Open');
         $fields_to_process[] = 'Assign';
-        $escaped_values['Assign'] = 'Open';
+        $escaped_values['Assign'] = $conn->real_escape_string($newAssign);
     }
     if (in_array('edit_trace', $table_columns) && !isset($escaped_values['edit_trace'])) {
         $fields_to_process[] = 'edit_trace';
@@ -513,7 +597,7 @@ if (empty($leadId)) {
 } else {
     // UPDATE
     $leadIdInt = intval($leadId);
-    $assignRow = $conn->query("SELECT Assign, edit_trace FROM leads WHERE id = $leadIdInt LIMIT 1");
+    $assignRow = $conn->query("SELECT Assign, originally_assigned, edit_trace FROM leads WHERE id = $leadIdInt LIMIT 1");
     if (!$assignRow || $assignRow->num_rows === 0) {
         echo json_encode(['success' => false, 'message' => 'Lead not found.']);
         $conn->close();
@@ -522,16 +606,22 @@ if (empty($leadId)) {
     $assignDb = $assignRow->fetch_assoc();
     $currentAssign = isset($assignDb['Assign']) ? trim((string)$assignDb['Assign']) : '';
     $currentIsOpen = $isUnassignedAssign($currentAssign);
+    $originallyAssigned = isset($assignDb['originally_assigned']) ? trim((string)$assignDb['originally_assigned']) : '';
     $existingEditTrace = isset($assignDb['edit_trace']) ? (string)$assignDb['edit_trace'] : '';
 
     if (in_array('Assign', $table_columns)) {
         $fields_to_process = array_values(array_filter($fields_to_process, function($f) { return $f !== 'Assign'; }));
         unset($escaped_values['Assign']);
 
-        if ($isAdmin) {
+        if ($isAdmin && $requestedAssign !== null) {
             $fields_to_process[] = 'Assign';
-            $escaped_values['Assign'] = 'Open';
-            $currentAssign = 'Open';
+            $escaped_values['Assign'] = $conn->real_escape_string($requestedAssign);
+            if ($requestedAssign === 'Open' && $isAssignedAssign($currentAssign)) {
+                $fields_to_process[] = 'originally_assigned';
+                $escaped_values['originally_assigned'] = $conn->real_escape_string($currentAssign);
+                $originallyAssigned = $currentAssign;
+            }
+            $currentAssign = $requestedAssign;
         } else if ($currentIsOpen && $userCode !== '') {
             $fields_to_process[] = 'Assign';
             $escaped_values['Assign'] = $conn->real_escape_string($userCode);
@@ -557,21 +647,23 @@ if (empty($leadId)) {
 
         if ($result) {
             $outAssign = $currentAssign;
-            $qr = $conn->query("SELECT Assign, quote_links, edit_trace FROM leads WHERE id = $leadIdInt LIMIT 1");
+            $qr = $conn->query("SELECT Assign, originally_assigned, quote_links, edit_trace FROM leads WHERE id = $leadIdInt LIMIT 1");
             $outQuoteLinks = null;
             $outEditTrace = null;
+            $outOriginallyAssigned = $originallyAssigned;
             if ($qr && $qr->num_rows > 0) {
                 $qrRow = $qr->fetch_assoc();
                 if (isset($qrRow['Assign'])) $outAssign = $qrRow['Assign'];
+                if (isset($qrRow['originally_assigned'])) $outOriginallyAssigned = $qrRow['originally_assigned'];
                 if (isset($qrRow['quote_links'])) $outQuoteLinks = $qrRow['quote_links'];
                 if (isset($qrRow['edit_trace'])) $outEditTrace = $qrRow['edit_trace'];
             }
-            echo json_encode(['success' => true, 'message' => 'Lead updated successfully.', 'id' => $leadIdInt, 'assign' => $outAssign, 'quote_links' => $outQuoteLinks, 'edit_trace' => $outEditTrace]);
+            echo json_encode(['success' => true, 'message' => 'Lead updated successfully.', 'id' => $leadIdInt, 'assign' => $outAssign, 'originally_assigned' => $outOriginallyAssigned, 'quote_links' => $outQuoteLinks, 'edit_trace' => $outEditTrace]);
         } else {
             echo json_encode(['success' => false, 'message' => 'Update failed: '.$conn->error]);
         }
     } else {
-        echo json_encode(['success' => true, 'message' => 'No valid fields to update.', 'id' => $leadIdInt, 'assign' => $currentAssign, 'edit_trace' => $existingEditTrace]);
+        echo json_encode(['success' => true, 'message' => 'No valid fields to update.', 'id' => $leadIdInt, 'assign' => $currentAssign, 'originally_assigned' => $originallyAssigned, 'edit_trace' => $existingEditTrace]);
     }
 }
 

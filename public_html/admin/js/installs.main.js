@@ -109,7 +109,7 @@
     const validFormFields = [
       'id', 'name', 'cams', 'bullets', 'dome', 'hdd', 'monitor', 'type',
       'location', 'time', 'date', 'owner', 'technician', 'helper',
-      'resolution', 'map', 'rack', 'notes'
+      'resolution', 'map', 'map_lat', 'map_lng', 'rack', 'notes'
     ];
 
     // Small delay to ensure the form is visible before populating
@@ -157,10 +157,38 @@
     window.editingId = null;
   }
 
+  async function syncMapCoordsFields() {
+    if (!form) return { lat: '', lng: '' };
+    const mapField = form.querySelector('#map');
+    const latField = form.querySelector('#map_lat');
+    const lngField = form.querySelector('#map_lng');
+    if (!mapField || !latField || !lngField) return { lat: '', lng: '' };
+
+    const mapUrl = (mapField.value || '').trim();
+    let coords = null;
+    if (typeof window.extractCoordsFromText === 'function') {
+      coords = window.extractCoordsFromText(mapUrl);
+    }
+    if (!coords && mapUrl && typeof window.resolveCoordsFromMapUrl === 'function') {
+      coords = await window.resolveCoordsFromMapUrl(mapUrl);
+    }
+
+    latField.value = coords && typeof coords.lat !== 'undefined' ? String(coords.lat) : '';
+    lngField.value = coords && typeof coords.lng !== 'undefined' ? String(coords.lng) : '';
+    return { lat: latField.value, lng: lngField.value };
+  }
+
   // Form submission handler
   if (form) {
-    form.onsubmit = function (e) {
+    const mapField = form.querySelector('#map');
+    if (mapField) {
+      mapField.addEventListener('change', () => { syncMapCoordsFields(); });
+      mapField.addEventListener('blur', () => { syncMapCoordsFields(); });
+    }
+
+    form.onsubmit = async function (e) {
       e.preventDefault();
+      const coords = await syncMapCoordsFields();
 
       // Collect form data and map to database field names
       const data = {
@@ -180,6 +208,8 @@
         helper: form.helper.value,
         resolution: form.resolution.value,
         map: form.map.value,
+        map_lat: coords.lat,
+        map_lng: coords.lng,
         rack: form.rack.value,
         notes: form.notes.value
       };
@@ -213,6 +243,8 @@
             helper: data.helper || '',
             resolution: data.resolution || '',
             map: data.Map || data.map || '',          // Handle case difference
+            map_lat: data.map_lat || '',
+            map_lng: data.map_lng || '',
             rack: data.rack || '',
             notes: data.notes || data.note || ''      // Handle note vs notes
           };

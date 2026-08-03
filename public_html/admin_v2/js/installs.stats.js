@@ -64,27 +64,19 @@ console.log("Stats module loaded");
         }
       },
       {
-        label: 'Next Week',
-        icon: 'fas fa-chevron-down',
-        color: '#111827',
-        action: () => {
-          if (typeof window.changeWeek === 'function') window.changeWeek(1);
-        }
-      },
-      {
-        label: 'Previous Week',
-        icon: 'fas fa-chevron-up',
-        color: '#111827',
-        action: () => {
-          if (typeof window.changeWeek === 'function') window.changeWeek(-1);
-        }
-      },
-      {
         label: 'Stats',
         icon: 'fas fa-chart-pie',
         color: '#007bff',
         action: () => {
           if (typeof window.openOwnerStatsModal === 'function') window.openOwnerStatsModal(false);
+        }
+      },
+      {
+        label: 'Pending Payments',
+        icon: 'fas fa-hourglass-half',
+        color: '#dc2626',
+        action: () => {
+          if (typeof window.openPendingPaymentsModal === 'function') window.openPendingPaymentsModal();
         }
       },
       {
@@ -103,12 +95,30 @@ console.log("Stats module loaded");
 
     if (authRole === 'admin') {
       links.splice(1, 0, {
+        label: 'History',
+        icon: 'fas fa-clock-rotate-left',
+        color: '#111827',
+        action: () => {
+          if (typeof window.openInstallHistory === 'function') window.openInstallHistory('');
+        }
+      });
+
+      links.splice(1, 0, {
         label: 'Profit',
         icon: 'fas fa-indian-rupee-sign',
         color: '#15803d',
         action: () => {
           if (typeof window.toggleProfitVisibility === 'function') window.toggleProfitVisibility();
         }
+      });
+    }
+
+    if (authRole === 'admin' || authRole === 'manager') {
+      links.push({
+        label: 'Google Ads Command Center',
+        icon: 'fas fa-chart-line',
+        color: '#dc2626',
+        url: `${window.location.origin}/admin_v2/smart/gads_conversion.php`
       });
     }
 
@@ -203,7 +213,7 @@ console.log("Stats module loaded");
 
   function buildOwnerCardHTML(title, data, cardId, offset = 0) {
     // Exclude DAR as requested
-    const owners = ['AMR', 'DOM', 'BHA', 'VAR', 'ZOY'];
+    const owners = ['AMR', 'DOM', 'VAR', 'ZOY', 'SUR'];
     const types = ['WIFI', 'DVR', 'NVR'];
     let titleContent = title.toUpperCase();
 
@@ -261,9 +271,9 @@ console.log("Stats module loaded");
         }
         .owner-highlight-AMR { --glow-color: #ff6b6b; --glow-color-alpha: rgba(255, 107, 107, 0.2); }
         .owner-highlight-DOM { --glow-color: #63e6be; --glow-color-alpha: rgba(99, 230, 190, 0.2); }
-        .owner-highlight-BHA { --glow-color: #fcc419; --glow-color-alpha: rgba(252, 196, 25, 0.2); }
         .owner-highlight-VAR { --glow-color: #845ef7; --glow-color-alpha: rgba(132, 94, 247, 0.2); }
         .owner-highlight-ZOY { --glow-color: #ff922b; --glow-color-alpha: rgba(255, 146, 43, 0.2); }
+        .owner-highlight-SUR { --glow-color: #0ea5e9; --glow-color-alpha: rgba(14, 165, 233, 0.2); }
       </style>
     ` : '';
 
@@ -330,7 +340,7 @@ console.log("Stats module loaded");
       return d >= currentWeekStart && d <= weekEnd;
     });
 
-    const weekStats = { AMR: { WIFI: 0, DVR: 0, NVR: 0 }, DOM: { WIFI: 0, DVR: 0, NVR: 0 }, BHA: { WIFI: 0, DVR: 0, NVR: 0 }, VAR: { WIFI: 0, DVR: 0, NVR: 0 }, ZOY: { WIFI: 0, DVR: 0, NVR: 0 } };
+    const weekStats = { AMR: { WIFI: 0, DVR: 0, NVR: 0 }, DOM: { WIFI: 0, DVR: 0, NVR: 0 }, VAR: { WIFI: 0, DVR: 0, NVR: 0 }, ZOY: { WIFI: 0, DVR: 0, NVR: 0 }, SUR: { WIFI: 0, DVR: 0, NVR: 0 } };
     weekInstalls.forEach(install => {
       if (install.owner && weekStats[install.owner] && weekStats[install.owner][install.type] !== undefined) {
         weekStats[install.owner][install.type]++;
@@ -362,7 +372,7 @@ console.log("Stats module loaded");
       return d >= monthStart && d <= monthEnd;
     });
 
-    const monthStats = { AMR: { WIFI: 0, DVR: 0, NVR: 0 }, DOM: { WIFI: 0, DVR: 0, NVR: 0 }, BHA: { WIFI: 0, DVR: 0, NVR: 0 }, VAR: { WIFI: 0, DVR: 0, NVR: 0 }, ZOY: { WIFI: 0, DVR: 0, NVR: 0 } };
+    const monthStats = { AMR: { WIFI: 0, DVR: 0, NVR: 0 }, DOM: { WIFI: 0, DVR: 0, NVR: 0 }, VAR: { WIFI: 0, DVR: 0, NVR: 0 }, ZOY: { WIFI: 0, DVR: 0, NVR: 0 }, SUR: { WIFI: 0, DVR: 0, NVR: 0 } };
     monthInstalls.forEach(install => {
       if (install.owner && monthStats[install.owner] && monthStats[install.owner][install.type] !== undefined) {
         monthStats[install.owner][install.type]++;
@@ -441,8 +451,8 @@ console.log("Stats module loaded");
     const displayedMonthEnd = new Date(currentWeekStart.getFullYear(), currentWeekStart.getMonth() + 1, 0);
     displayedMonthEnd.setHours(23, 59, 59, 999);
 
-    const weekStats = { AMR: { WIFI: 0, DVR: 0, NVR: 0 }, DOM: { WIFI: 0, DVR: 0, NVR: 0 }, BHA: { WIFI: 0, DVR: 0, NVR: 0 }, VAR: { WIFI: 0, DVR: 0, NVR: 0 }, ZOY: { WIFI: 0, DVR: 0, NVR: 0 } };
-    const monthStats = { AMR: { WIFI: 0, DVR: 0, NVR: 0 }, DOM: { WIFI: 0, DVR: 0, NVR: 0 }, BHA: { WIFI: 0, DVR: 0, NVR: 0 }, VAR: { WIFI: 0, DVR: 0, NVR: 0 }, ZOY: { WIFI: 0, DVR: 0, NVR: 0 } };
+    const weekStats = { AMR: { WIFI: 0, DVR: 0, NVR: 0 }, DOM: { WIFI: 0, DVR: 0, NVR: 0 }, VAR: { WIFI: 0, DVR: 0, NVR: 0 }, ZOY: { WIFI: 0, DVR: 0, NVR: 0 }, SUR: { WIFI: 0, DVR: 0, NVR: 0 } };
+    const monthStats = { AMR: { WIFI: 0, DVR: 0, NVR: 0 }, DOM: { WIFI: 0, DVR: 0, NVR: 0 }, VAR: { WIFI: 0, DVR: 0, NVR: 0 }, ZOY: { WIFI: 0, DVR: 0, NVR: 0 }, SUR: { WIFI: 0, DVR: 0, NVR: 0 } };
 
     allInstalls.forEach(install => {
       if (!install.date || !install.owner) return;
@@ -459,31 +469,31 @@ console.log("Stats module loaded");
     // Remove DAR rows
     setText('weekAMR', `<div class="number">${weekStats.AMR.WIFI}</div>WiFi<div class="number">${weekStats.AMR.DVR}</div>DVR<div class="number">${weekStats.AMR.NVR}</div>NVR<br>AMR`);
     setText('weekDOM', `<div class="number">${weekStats.DOM.WIFI}</div>WiFi<div class="number">${weekStats.DOM.DVR}</div>DVR<div class="number">${weekStats.DOM.NVR}</div>NVR<br>DOM`);
-    setText('weekBHA', `<div class="number">${weekStats.BHA.WIFI}</div>WiFi<div class="number">${weekStats.BHA.DVR}</div>DVR<div class="number">${weekStats.BHA.NVR}</div>NVR<br>BHA`);
     setText('weekVAR', `<div class="number">${weekStats.VAR.WIFI}</div>WiFi<div class="number">${weekStats.VAR.DVR}</div>DVR<div class="number">${weekStats.VAR.NVR}</div>NVR<br>VAR`);
     setText('weekZOY', `<div class="number">${weekStats.ZOY.WIFI}</div>WiFi<div class="number">${weekStats.ZOY.DVR}</div>DVR<div class="number">${weekStats.ZOY.NVR}</div>NVR<br>ZOY`);
+    setText('weekSUR', `<div class="number">${weekStats.SUR.WIFI}</div>WiFi<div class="number">${weekStats.SUR.DVR}</div>DVR<div class="number">${weekStats.SUR.NVR}</div>NVR<br>SUR`);
 
     setText('monthAMR', `<div class="number">${monthStats.AMR.WIFI}</div>WiFi<div class="number">${monthStats.AMR.DVR}</div>DVR<div class="number">${monthStats.AMR.NVR}</div>NVR<br>AMR`);
     setText('monthDOM', `<div class="number">${monthStats.DOM.WIFI}</div>WiFi<div class="number">${monthStats.DOM.DVR}</div>DVR<div class="number">${monthStats.DOM.NVR}</div>NVR<br>DOM`);
-    setText('monthBHA', `<div class="number">${monthStats.BHA.WIFI}</div>WiFi<div class="number">${monthStats.BHA.DVR}</div>DVR<div class="number">${monthStats.BHA.NVR}</div>NVR<br>BHA`);
     setText('monthVAR', `<div class="number">${monthStats.VAR.WIFI}</div>WiFi<div class="number">${monthStats.VAR.DVR}</div>DVR<div class="number">${monthStats.VAR.NVR}</div>NVR<br>VAR`);
     setText('monthZOY', `<div class="number">${monthStats.ZOY.WIFI}</div>WiFi<div class="number">${monthStats.ZOY.DVR}</div>DVR<div class="number">${monthStats.ZOY.NVR}</div>NVR<br>ZOY`);
+    setText('monthSUR', `<div class="number">${monthStats.SUR.WIFI}</div>WiFi<div class="number">${monthStats.SUR.DVR}</div>DVR<div class="number">${monthStats.SUR.NVR}</div>NVR<br>SUR`);
 
     const weekTotal = /* exclude DAR */
       weekStats.AMR.WIFI + weekStats.AMR.DVR + weekStats.AMR.NVR
       + weekStats.DOM.WIFI + weekStats.DOM.DVR + weekStats.DOM.NVR
-      + weekStats.BHA.WIFI + weekStats.BHA.DVR + weekStats.BHA.NVR
       + weekStats.VAR.WIFI + weekStats.VAR.DVR + weekStats.VAR.NVR
-      + weekStats.ZOY.WIFI + weekStats.ZOY.DVR + weekStats.ZOY.NVR;
+      + weekStats.ZOY.WIFI + weekStats.ZOY.DVR + weekStats.ZOY.NVR
+      + weekStats.SUR.WIFI + weekStats.SUR.DVR + weekStats.SUR.NVR;
     const dayOfWeek = (today.getDay() === 0 ? 7 : today.getDay());
     const projectedWeek = Math.round((weekTotal / dayOfWeek) * 7);
     const thisWeekEl = document.getElementById('thisWeek'); if (thisWeekEl) thisWeekEl.textContent = `${weekTotal} (~${projectedWeek} / w)`;
 
     const totalSoFar = monthStats.AMR.WIFI + monthStats.AMR.DVR + monthStats.AMR.NVR
       + monthStats.DOM.WIFI + monthStats.DOM.DVR + monthStats.DOM.NVR
-      + monthStats.BHA.WIFI + monthStats.BHA.DVR + monthStats.BHA.NVR
       + monthStats.VAR.WIFI + monthStats.VAR.DVR + monthStats.VAR.NVR
-      + monthStats.ZOY.WIFI + monthStats.ZOY.DVR + monthStats.ZOY.NVR;
+      + monthStats.ZOY.WIFI + monthStats.ZOY.DVR + monthStats.ZOY.NVR
+      + monthStats.SUR.WIFI + monthStats.SUR.DVR + monthStats.SUR.NVR;
     const currentDay = today.getDate();
     const totalDays = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
     const projected = Math.round((totalSoFar / currentDay) * totalDays);

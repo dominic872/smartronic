@@ -3,7 +3,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 require_once __DIR__ . '/../auth.php';
-if (!isset($role) || $role !== 'admin') {
+if (!isset($role) || !isElevatedRole((string)$role)) {
     http_response_code(403);
     echo 'Forbidden';
     exit;
@@ -197,7 +197,9 @@ $buildHref = function(array $overrides = []) use ($baseQuery): string {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Campaign Report</title>
+    <title>SM Ads | Campaign Report</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/content/uploads/2025/01/cropped-Site-Icon-32x32.png">
+  <link rel="apple-touch-icon" href="/content/uploads/2025/01/cropped-Site-Icon-180x180.png">
 </head>
 <body style="margin:0; background:#f3f4f6;">
     <div style="max-width: 1100px; margin: 16px auto; padding: 0 12px; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color:#111827;">

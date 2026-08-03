@@ -294,47 +294,140 @@ button {
       }
     }
 
-    // Dynamic items based on brand selection
-    const brandItems = {
-      'CP PLUS': [
-        { name: "CP PLUS BULLET", options: [], quantityRange: 20, id: "resolution-bullet", kind: "camera" },
-        { name: "CP PLUS DOME", options: [], quantityRange: 20, id: "resolution-dome", kind: "camera" },
-        { name: "CP PLUS DVR", options: ["2 MP 4 CH", "2 MP 8 CH", "2 MP 16 CH", "2 MP 32 CH", "5 MP 4 CH", "5 MP 8 CH", "5 MP 16 CH", "5 MP 32 CH"], quantityRange: 1, id: "type" }
-      ],
-      'Hikvision': [
-        { name: "HIKVISON BULLET", options: [], quantityRange: 20, id: "resolution-bullet", kind: "camera" },
-        { name: "HIKVISON DOME", options: [], quantityRange: 20, id: "resolution-dome", kind: "camera" },
-        { name: "HIKVISON DVR", options: ["2 MP 4 CH", "2 MP 8 CH", "2 MP 16 CH", "2 MP 32 CH", "5 MP 4 CH", "5 MP 8 CH", "5 MP 16 CH", "5 MP 32 CH"], quantityRange: 1, id: "type" }
-      ],
-      'PRAMA': [
-        { name: "PRAMA BULLET", options: [], quantityRange: 20, id: "resolution-bullet", kind: "camera" },
-        { name: "PRAMA DOME", options: [], quantityRange: 20, id: "resolution-dome", kind: "camera" },
-        { name: "PRAMA DVR", options: ["2 MP 4 CH", "2 MP 8 CH", "2 MP 16 CH", "2 MP 32 CH", "5 MP 4 CH", "5 MP 8 CH", "5 MP 16 CH", "5 MP 32 CH"], quantityRange: 1, id: "type" }
-      ]
+    function formatMaterialINR(value) {
+      const amount = Number(value);
+      if (!Number.isFinite(amount)) return 'n/a';
+      return `₹${Math.round(amount).toLocaleString('en-IN')}`;
+    }
+
+    function getInstallPricingInputFromForm() {
+      const form = document.getElementById('installForm');
+      const getVal = id => {
+        const el = form ? form.querySelector(`#${id}`) : null;
+        return el ? (el.value || '') : '';
+      };
+      return {
+        id: getVal('id'),
+        name: getVal('name'),
+        cams: getVal('cams'),
+        bullets: getVal('bullets'),
+        dome: getVal('dome'),
+        hdd: getVal('hdd'),
+        type: getVal('type'),
+        resolution: getVal('resolution'),
+        brand: getVal('brand'),
+        cam_type: getVal('cam_type'),
+        monitor: getVal('monitor'),
+        rack: getVal('rack')
+      };
+    }
+
+    async function updateMaterialCostRowFromDataJson() {
+      const copyBox = document.getElementById('copy');
+      const outputTable = document.getElementById('output-table');
+      if (!copyBox || !outputTable || typeof window.calculateInstallPricing !== 'function') return;
+
+      let row = document.getElementById('material-cost-row');
+      if (!row) {
+        row = document.createElement('div');
+        row.id = 'material-cost-row';
+        row.style.cssText = 'margin-top:10px;padding-top:8px;border-top:1px solid #ddd;display:none;justify-content:space-between;gap:12px;font-weight:700;';
+        row.innerHTML = `
+          <span>Material Cost</span>
+          <span id="material-cost-amount">Calculating...</span>
+        `;
+        outputTable.insertAdjacentElement('afterend', row);
+      }
+
+      if (outputTable.style.display === 'none') {
+        row.style.display = 'none';
+        return;
+      }
+
+      row.style.display = 'flex';
+      const amountEl = row.querySelector('#material-cost-amount');
+      if (amountEl) amountEl.textContent = 'Calculating...';
+
+      try {
+        const pricing = await window.calculateInstallPricing(getInstallPricingInputFromForm());
+        row.dataset.materialCost = String(pricing.materialCost || 0);
+        row.dataset.priceSource = pricing.source || 'data.json';
+        if (amountEl) amountEl.textContent = formatMaterialINR(pricing.materialCost);
+
+        const profitContent = document.getElementById('profit-content');
+        if (profitContent) {
+          profitContent.dataset.materialCost = String(pricing.materialCost || 0);
+          profitContent.dataset.priceSource = pricing.source || 'data.json';
+        }
+      } catch (err) {
+        console.warn('Unable to update material-cost-row from data.json:', err);
+        row.dataset.materialCost = '';
+        if (amountEl) amountEl.textContent = 'n/a';
+      }
+    }
+
+    const brandLabels = {
+      'CP PLUS': 'CP PLUS',
+      'Hikvision': 'HIKVISON',
+      'PRAMA': 'PRAMA',
+      'SECUREYE': 'SECUREYE'
+    };
+    const recorderOptionsByType = {
+      DVR: ["2 MP 4 CH", "2 MP 8 CH", "2 MP 16 CH", "2 MP 32 CH", "5 MP 4 CH", "5 MP 8 CH", "5 MP 16 CH", "5 MP 32 CH"],
+      NVR: ["4 CH", "8 CH", "16 CH", "32 CH"]
     };
 
-    // Common items for all brands
-    const commonItems = [
-      { name: "Hard Disk Consistian", options: ["500 GB", "1 TB Seagate (3yrs)", "2 TB Toshiba (3yrs)", "3 TB", "4 TB", "6 TB"], quantityRange: 1, id: "hdd" },
-      { name: "SMPS", options: ["4 CH FYBRE", "8 CH FYBRE", "16 CH FYBRE", "32 CH FYBRE"], quantityRange: 1 },
-      { name: "DC PIN", options: [], quantityRange: 40 },
-      { name: "Back Box", options: [], quantityRange: 40 },
-      { name: "BNC NO", options: [], quantityRange: 40 },
-      { name: "C Pin bundle", options: [], quantityRange: 5 },
-      { name: "Dlink Cable 3+1", options: [], quantityRange: 5 },
-      { name: "Dlink Cable Cat 6", options: ["90 mtrs 3+1"], quantityRange: 5 },
-      { name: "LED TV", options: ["15 Inches", "19 Inches", "22 Inches", "24 Inches"], quantityRange: 1, id:"monitor" },
-      { name: "LED TV Clamp", options: [], quantityRange: 1, id: "clamp" },
-      { name: "Dvr rack", options: [], quantityRange: 1, id:"rack" },
-      { name: "Sim Router", options: [], quantityRange: 1, id: "sim-router" },
-      { name: "Wifi Extender", options: [], quantityRange: 1, id: "wifi-extender" },
-      { name: "HDMI Cable", options: [], quantityRange: 1, id: "hdmi" }
-    ];
+    function getMaterialSystemType() {
+      const params = new URLSearchParams(window.location.search);
+      const paramType = String(params.get('type') || '').trim().toUpperCase();
+      if (paramType.includes('NVR')) return 'NVR';
+      const typeField = document.getElementById('type');
+      const value = String(typeField ? typeField.value : '').trim().toUpperCase();
+      return value.includes('NVR') ? 'NVR' : 'DVR';
+    }
+
+    function buildBrandItems(brand, systemType) {
+      const label = brandLabels[brand] || 'SECUREYE';
+      const recorderType = systemType === 'NVR' ? 'NVR' : 'DVR';
+      return [
+        { name: `${label} BULLET`, options: [], quantityRange: 20, id: "resolution-bullet", kind: "camera" },
+        { name: `${label} DOME`, options: [], quantityRange: 20, id: "resolution-dome", kind: "camera" },
+        { name: `${label} ${recorderType}`, options: recorderOptionsByType[recorderType], quantityRange: 1, id: "type" }
+      ];
+    }
+
+    function getCommonItems(systemType) {
+      const recorderRackName = systemType === 'NVR' ? 'Nvr rack' : 'Dvr rack';
+      const transportItems = systemType === 'NVR'
+        ? [
+            { name: "POE", options: ["4 CH POE", "8 CH POE", "16 CH POE", "32 CH POE"], quantityRange: 1 },
+            { name: "Back Box", options: [], quantityRange: 40 },
+            { name: "Dlink Cable Cat 6", options: ["90 mtrs Cat 6"], quantityRange: 5 }
+          ]
+        : [
+            { name: "SMPS", options: ["4 CH FYBRE", "8 CH FYBRE", "16 CH FYBRE", "32 CH FYBRE"], quantityRange: 1 },
+            { name: "DC PIN", options: [], quantityRange: 40 },
+            { name: "Back Box", options: [], quantityRange: 40 },
+            { name: "BNC NO", options: [], quantityRange: 40 },
+            { name: "C Pin bundle", options: [], quantityRange: 5 },
+            { name: "Dlink Cable 3+1", options: [], quantityRange: 5 }
+          ];
+      return [
+        { name: "Hard Disk Consistian", options: ["500 GB", "1 TB Seagate (3yrs)", "1 TB Consistent (2yrs)", "2 TB Toshiba (3yrs)", "2 TB Consistent (2yrs)", "3 TB", "4 TB", "6 TB"], quantityRange: 1, id: "hdd" },
+        ...transportItems,
+        { name: "LED TV", options: ["15 Inches", "19 Inches", "22 Inches", "24 Inches"], quantityRange: 1, id:"monitor" },
+        { name: "LED TV Clamp", options: [], quantityRange: 1, id: "clamp" },
+        { name: recorderRackName, options: [], quantityRange: 1, id:"rack" },
+        { name: "Sim Router", options: [], quantityRange: 1, id: "sim-router" },
+        { name: "Wifi Extender", options: [], quantityRange: 1, id: "wifi-extender" },
+        { name: "HDMI Cable", options: [], quantityRange: 1, id: "hdmi" }
+      ];
+    }
 
     let items = [];
 
     function setMaterialBrand(brand) {
-      activeMaterialBrand = brand && brandItems[brand] ? brand : '';
+      activeMaterialBrand = brand && brandLabels[brand] ? brand : '';
       updateItems();
     }
 
@@ -342,21 +435,22 @@ button {
     function updateItems() {
       const brandField = document.getElementById('brand');
       const brand = activeMaterialBrand || (brandField ? brandField.value : '');
+      const systemType = getMaterialSystemType();
       
       // Get values from requirements tab
       const reqBrand = document.getElementById('brand') ? document.getElementById('brand').value : '';
       const reqCamType = document.getElementById('cam_type') ? document.getElementById('cam_type').value : '';
       
       // Set defaults if no brand or cam_type selected in requirements
-      const selectedBrand = reqBrand || 'PRAMA';
+      const selectedBrand = brand || reqBrand || 'SECUREYE';
       const selectedCamType = reqCamType || 'Normal with mic';
       
       items = [];
       
-      if (selectedBrand && brandItems[selectedBrand]) {
-        items = [...brandItems[selectedBrand], ...commonItems];
+      if (selectedBrand && brandLabels[selectedBrand]) {
+        items = [...buildBrandItems(selectedBrand, systemType), ...getCommonItems(systemType)];
       } else {
-        items = commonItems;
+        items = getCommonItems(systemType);
       }
       
       regenerateForm();
@@ -556,6 +650,8 @@ button {
     outputTable.style.display = "none";
     shareBtn.style.display = "none";
   }
+
+  updateMaterialCostRowFromDataJson();
 }
 
 // Add this outside of the generateTable function
@@ -587,6 +683,12 @@ document.getElementById("equipment-form").addEventListener("submit", generateTab
 function updateDependentFields() {
   let totalCameras = 0;
   let cameraType = null;
+  const systemType = getMaterialSystemType();
+  const isNvr = systemType === 'NVR';
+  const getChannels = (value) => {
+    const match = String(value || '').match(/(\d+)\s*CH/i);
+    return match ? parseInt(match[1], 10) || 0 : 0;
+  };
 
 	  items.forEach((item, index) => {
 	    if (item.name.includes("BULLET") || item.name.includes("DOME")) {
@@ -604,13 +706,13 @@ function updateDependentFields() {
     }
   });
 
-  // Update DVR
-	  const dvrIndex = items.findIndex(i => i.name.includes("DVR"));
+  // Update recorder
+	  const dvrIndex = items.findIndex(i => i.name.includes("DVR") || i.name.includes("NVR"));
 	  const dvrSelect = document.querySelector(`[name=option-${dvrIndex}]`);
 	  const dvrQty = document.querySelector(`[name=qty-${dvrIndex}]`);
-	  if (cameraType && dvrSelect && dvrQty) {
+	  if ((cameraType || isNvr) && dvrSelect && dvrQty) {
 	    const choices = Array.from(dvrSelect.options).map(o => o.value);
-	    const suitable = choices.find(opt => opt.startsWith(cameraType) && parseInt(opt.split(" ")[2]) >= totalCameras);
+	    const suitable = choices.find(opt => (isNvr || opt.startsWith(cameraType)) && getChannels(opt) >= totalCameras);
 	    if (suitable) {
       dvrSelect.value = suitable;
       dvrQty.value = 1;
@@ -628,16 +730,27 @@ function updateDependentFields() {
 //   else hddSelect.value = "4 TB";
 	  if (hddQty) hddQty.value = 1;
 
-	  // SMPS = same as DVR
+	  // SMPS/POE = same channel size as recorder
 	  const smpsIndex = items.findIndex(i => i.name === "SMPS");
 	  const smpsSelect = document.querySelector(`[name=option-${smpsIndex}]`);
 	  const smpsQty = document.querySelector(`[name=qty-${smpsIndex}]`);
 	  if (dvrSelect && smpsSelect && smpsQty && dvrSelect.value) {
-	    const ch = dvrSelect.value.split(" ")[2]; // get CH number
+	    const ch = String(getChannels(dvrSelect.value)); // get CH number
 	    const smpsMatch = Array.from(smpsSelect.options).find(o => o.value.includes(ch));
 	    if (smpsMatch) {
       smpsSelect.value = smpsMatch.value;
       smpsQty.value = 1;
+    }
+  }
+	  const poeIndex = items.findIndex(i => i.name === "POE");
+	  const poeSelect = document.querySelector(`[name=option-${poeIndex}]`);
+	  const poeQty = document.querySelector(`[name=qty-${poeIndex}]`);
+	  if (dvrSelect && poeSelect && poeQty && dvrSelect.value) {
+	    const ch = String(getChannels(dvrSelect.value));
+	    const poeMatch = Array.from(poeSelect.options).find(o => o.value.includes(ch));
+	    if (poeMatch) {
+      poeSelect.value = poeMatch.value;
+      poeQty.value = 1;
     }
   }
 
@@ -657,6 +770,13 @@ function updateDependentFields() {
 	  if (cable3Index >= 0) {
 	    const cable3Qty = document.querySelector(`[name=qty-${cable3Index}]`);
 	    if (cable3Qty) cable3Qty.value = totalCameras <= 4 ? 1 : 2;
+	  }
+	  const cable6Index = items.findIndex(x => x.name === "Dlink Cable Cat 6");
+	  if (cable6Index >= 0) {
+	    const cable6Qty = document.querySelector(`[name=qty-${cable6Index}]`);
+	    const cable6Select = document.querySelector(`[name=option-${cable6Index}]`);
+	    if (cable6Select && cable6Select.options.length) cable6Select.selectedIndex = 0;
+	    if (cable6Qty) cable6Qty.value = totalCameras <= 4 ? 1 : 2;
 	  }
 
 	    const ledTVIndex = items.findIndex(i => i.name === "LED TV");

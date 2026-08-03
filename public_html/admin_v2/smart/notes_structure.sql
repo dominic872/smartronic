@@ -8,5 +8,6 @@ CREATE TABLE `notes` (
   `sort_order` int(11) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT current_timestamp(),
   `username` varchar(100) DEFAULT NULL,
+  `priority_level` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

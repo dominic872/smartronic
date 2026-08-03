@@ -94,11 +94,15 @@
 
   <li><strong>Installation visit condition:</strong> Customers are requested to ensure site readiness at the time of installation. If the technician is required to revisit the site multiple times due to customer-side delays, incomplete arrangements, or rescheduling beyond company control, the service warranty may stand void.</li>
 
+  <li><strong>Fault priority condition:</strong> Issues such as no audio, wavy display, shaking picture, flickering, or similar non-critical disturbances will not be treated as high-priority faults. Such issues may be rectified during scheduled visits when our team is available in the same area for other installations or service work.</li>
+
   <li><strong>Exclusions:</strong> Warranty does not cover pins, cables, loose connections, oxidation, corrosion, SMPS, or network issues.</li>
 
   <li><strong>Additional exclusions:</strong> SD cards, adapters, and camera stands are not covered under warranty. Wi-Fi, solar, and SIM-based cameras are covered only under brand/manufacturer warranty.</li>
 
   <li><strong>Out-of-warranty service:</strong> A visiting charge of ₹750 will apply for out-of-warranty products.</li>
+
+  <li><strong>Distance-based visiting charge:</strong> Locations beyond 15 KM from HSR Layout will be subject to a ₹750 visiting charge for service visits.</li>
 
   <li><strong>Office hours:</strong> Monday – Friday, 10:00 AM to 6:00 PM.</li>
 
@@ -114,7 +118,7 @@
 
   <div class="footer">
     Mobile: 8496080849 | hello@smartronic.online | www.smartronic.online<br>
-    13th Main Road, ITI Layout, HSR Layout, Bangalore 560068
+    Smartronic, 809, 25th Cross, HSR Layout, Bangalore 560 102
   </div>
 </div>
 

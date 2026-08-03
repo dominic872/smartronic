@@ -55,11 +55,11 @@ class QuoteTest {
         // Test page access with different roles
         $this->setAuthCookie('admin');
         $response = $this->makeRequest('GET');
-        $this->assertContains('<title>CCTV Requirement Form — Quotation</title>', $response, 'Should load quote page with admin role');
+        $this->assertContains('<title>SM Quote | CCTV Requirement</title>', $response, 'Should load quote page with admin role');
         
         $this->setAuthCookie('market');
         $response = $this->makeRequest('GET');
-        $this->assertContains('<title>CCTV Requirement Form — Quotation</title>', $response, 'Should load quote page with market role');
+        $this->assertContains('<title>SM Quote | CCTV Requirement</title>', $response, 'Should load quote page with market role');
         
         // Test admin-specific features
         $this->setAuthCookie('admin');

@@ -1,3 +1,78 @@
+<?php
+function smartronic_homepage_resolve_whatsapp_number() {
+    $configPhp = __DIR__ . '/admin_v2/smart/whatsapp_leads_config.php';
+    $configTxt = __DIR__ . '/admin_v2/smart/whatsapp_leads_config.txt';
+    $whatsappNumberList = [];
+    $whatsappNumber = null;
+
+    if (file_exists($configPhp)) {
+        include $configPhp;
+        if (isset($whatsappNumber) && (is_string($whatsappNumber) || $whatsappNumber === 'AUTO')) {
+            if ($whatsappNumber !== 'AUTO') {
+                $whatsappNumber = preg_replace('/\D+/', '', $whatsappNumber);
+            }
+        }
+
+        if ($whatsappNumber === 'AUTO') {
+            date_default_timezone_set('Asia/Kolkata');
+            $today = date('D');
+            if (isset($whatsappSchedule) && isset($whatsappSchedule[$today])) {
+                $whatsappNumber = preg_replace('/\D+/', '', (string)$whatsappSchedule[$today]);
+            } elseif (isset($whatsappNumberList) && count($whatsappNumberList) > 0) {
+                $whatsappNumber = preg_replace('/\D+/', '', (string)$whatsappNumberList[0]);
+            }
+        }
+
+        $whatsappAssigneeCookie = isset($_COOKIE['assignee']) ? (string)$_COOKIE['assignee'] : '';
+        if ($whatsappAssigneeCookie !== '' && isset($whatsappNumberLabels) && is_array($whatsappNumberLabels)) {
+            $cookieRaw = trim($whatsappAssigneeCookie);
+            $cookieName = strtolower($cookieRaw);
+            $cookieCode = strtoupper(preg_replace('/[^a-zA-Z]/', '', $cookieRaw));
+            if ($cookieCode !== '') $cookieCode = substr($cookieCode, 0, 3);
+            $cookieDigits = preg_replace('/\D+/', '', $cookieRaw);
+            if (strlen($cookieDigits) > 10 && substr($cookieDigits, 0, 2) === '91') $cookieDigits = substr($cookieDigits, -10);
+            if (strlen($cookieDigits) > 10) $cookieDigits = substr($cookieDigits, -10);
+
+            foreach ($whatsappNumberLabels as $num => $label) {
+                if (!is_string($label)) continue;
+                $numDigits = preg_replace('/\D+/', '', (string)$num);
+                $labelName = strtolower(trim($label));
+                $labelCode = strtoupper(preg_replace('/[^a-zA-Z]/', '', $label));
+                if ($labelCode !== '') $labelCode = substr($labelCode, 0, 3);
+                $numLast10 = strlen($numDigits) >= 10 ? substr($numDigits, -10) : $numDigits;
+
+                if (($cookieDigits !== '' && $numLast10 !== '' && $cookieDigits === $numLast10) ||
+                    ($cookieName !== '' && $cookieName === $labelName) ||
+                    ($cookieCode !== '' && $labelCode !== '' && $cookieCode === $labelCode)) {
+                    if ($numDigits !== '') {
+                        $whatsappNumber = $numDigits;
+                    }
+                    break;
+                }
+            }
+        }
+
+        if (!$whatsappNumber && isset($whatsappNumberList) && is_array($whatsappNumberList) && count($whatsappNumberList) > 0) {
+            $whatsappNumber = preg_replace('/\D+/', '', (string)$whatsappNumberList[0]);
+        }
+    } elseif (file_exists($configTxt)) {
+        $lines = file($configTxt, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        $lines = array_values(array_filter(array_map('trim', $lines), function ($line) {
+            return $line !== '';
+        }));
+        if (!empty($lines)) {
+            $whatsappNumber = preg_replace('/\D+/', '', $lines[0]);
+        }
+    }
+
+    return $whatsappNumber ?: '919886735991';
+}
+
+$homepageContactNumber = smartronic_homepage_resolve_whatsapp_number();
+$homepageCallHref = 'tel:+' . $homepageContactNumber;
+$homepageCallDigits = preg_replace('/\D+/', '', $homepageContactNumber);
+$homepageCallDisplay = strlen($homepageCallDigits) > 10 ? substr($homepageCallDigits, -10) : $homepageCallDigits;
+?>
 <!DOCTYPE html>
 <html lang="en-US">
 <head>
@@ -169,7 +244,16 @@ window._wpemojiSettings = {"baseUrl":"https:\/\/s.w.org\/images\/core\/emoji\/15
 <link rel="stylesheet" id="uag-google-fonts-382-css" href="//fonts.googleapis.com/css?family=Raleway%3A400%2C400italic%7CRoboto+Flex%3A500%2C400%2C500italic%2C400italic&#038;subset=latin&#038;display=fallback&#038;ver=2.13.5" media="print" onload="this.media='all'">
 <link rel="stylesheet" id="uag-style-382-css" href="content/uploads/uag-plugin/assets/0/uag-css-382.css?ver=1737555549" media="all">
 <link rel="stylesheet" id="custom-css-css" href="content/themes/twentytwentyfour/style.css?ver=6.7.1" media="all">
-<link rel="stylesheet" href="assets/css/homepage-custom.css" media="all">
+<style id="homepage-custom-inline-css">
+<?php
+$homepageCustomCss = __DIR__ . '/assets/css/homepage-custom.css';
+if (is_file($homepageCustomCss)) {
+    readfile($homepageCustomCss);
+} else {
+    echo "@keyframes blink{0%{opacity:1}20%{opacity:0}25%{opacity:1}100%{opacity:1}}.blinking-image{animation:blink 1.75s infinite}.shimmer-text{display:inline-block;color:#0f172a;font-weight:800;line-height:1.65}";
+}
+?>
+</style>
 <noscript><link rel="stylesheet" href="content/plugins/brand-rating-plugin/css/style.css?ver=6.7.1"></noscript>
 <noscript><link rel="stylesheet" href="content/plugins/ultimate-addons-for-gutenberg/assets/css/aos.min.css?ver=2.13.5"></noscript>
 <noscript><link rel="stylesheet" href="//fonts.googleapis.com/css?family=Raleway%3A400%2C400italic%7CRoboto+Flex%3A500%2C400%2C500italic%2C400italic&#038;subset=latin&#038;display=fallback&#038;ver=2.13.5"></noscript>
@@ -198,11 +282,20 @@ window._wpemojiSettings = {"baseUrl":"https:\/\/s.w.org\/images\/core\/emoji\/15
 <link rel="icon" href="content/uploads/2025/01/cropped-Site-Icon-192x192.png" sizes="192x192">
 <link rel="apple-touch-icon" href="content/uploads/2025/01/cropped-Site-Icon-180x180.png">
 <meta name="msapplication-TileImage" content="content/uploads/2025/01/cropped-Site-Icon-270x270.png">
-
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-PK3WH497');</script>
+<!-- End Google Tag Manager -->
 </head>
 
 <body class="home page-template-default page page-id-382 wp-custom-logo wp-embed-responsive" data-popup-gads="<?php echo htmlspecialchars(isset($_GET['gads']) ? trim((string)$_GET['gads']) : '', ENT_QUOTES, 'UTF-8'); ?>">
-
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PK3WH497"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
 <div class="wp-site-blocks">
 <header class="wp-block-template-part">
 <div class="wp-block-group alignwide main-menu-navigation nav-link has-base-background-color has-background has-global-padding is-layout-constrained wp-block-group-is-layout-constrained" style="padding-top:10px;padding-bottom:10px">
@@ -264,7 +357,7 @@ $is_gads_13k = isset($_GET['gads']) && $_GET['gads'] === '13k';
             </h2>
           <?php else: ?>
             <h2 class="uagb-ifb-title">
-              Professional CCTV Installation <span class="hl">Starting ₹15,000</span> Get Instant Quote
+              Professional CCTV Installation <span class="hl">Starting ₹14,900</span> Get Instant Quote
               
             </h2>
           <?php endif; ?>
@@ -272,25 +365,25 @@ $is_gads_13k = isset($_GET['gads']) && $_GET['gads'] === '13k';
 
         <div class="uagb-ifb-desc gads-text">
           <?php if ($is_gads_13k): ?>
-            <span class="shimmer-text">Includes 500GB Hard Disk | Free Installation | 2-Year Warranty + 5-Year Camera Replacement</span>
+            <span class="shimmer-text">Free Installation + 20% Off Today<br>2-Year Service Warranty | Up to 5-Year Camera Replacement with AMC</span>
+            <div class="gads-desc">Home CCTV setup from ₹14,900 with installation</div>
             <div class="gads-desc">
               Secure your home or office with the CP Plus 4-Camera Combo for just ₹13,390. 
               Comes with motion detection, night vision, AMC, free installation, and 2 years full warranty — 
               trusted by thousands of satisfied customers.
             </div>
             <div class="ads-trust-signals ads-trust-signals--hero">
-              <span><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i> 4.8 Rating</span>
-              <span><i class="fas fa-shield-alt" style="color:#2ecc71;"></i> 1500+ Installations</span>
-              <span><i class="fas fa-building" style="color:#3498db;"></i> Trusted by Homes & Offices</span>
+              <span>⭐⭐⭐⭐⭐ 4.8 Google Rating</span>
+              <span><i class="fas fa-certificate" style="color:#2ecc71;"></i> ISO 9001:2015 Certified</span>
+              <span><i class="fas fa-shield-alt" style="color:#2ecc71;"></i> Protecting 2200+ Homes & Businesses</span>
             </div>
           <?php else: ?>
-            <span class="shimmer-text">Free Installation | 2-Year Service Warranty + 5-Year Free Camera Replacement with AMC |
-            
-            Also Get Now 20% Off with Free Setup</span>
+            <span class="shimmer-text">Free Installation + 20% Off Today<br> | 2-Year Service Warranty | 5-Year Camera Replacement with AMC</span>
+            <div class="gads-desc">Home CCTV setup from ₹14,900 with installation</div>
             <div class="ads-trust-signals ads-trust-signals--hero">
-              <span><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i> 4.8 Rating</span>
-              <span><i class="fas fa-shield-alt" style="color:#2ecc71;"></i> 1500+ Installations</span>
-              <span><i class="fas fa-building" style="color:#3498db;"></i> Trusted by Homes & Offices</span>
+              <span>⭐⭐⭐⭐⭐ 4.8 Google Rating</span>
+              <span><i class="fas fa-certificate" style="color:#2ecc71;"></i> ISO 9001:2015 Certified</span>
+              <span><i class="fas fa-shield-alt" style="color:#2ecc71;"></i> Protecting 2200+ Homes & Businesses</span>
             </div>
           <?php endif; ?>
         </div>
@@ -353,6 +446,7 @@ $is_gads_13k = isset($_GET['gads']) && $_GET['gads'] === '13k';
 <div class="wp-block-columns is-layout-flex wp-container-core-columns-is-layout-3 wp-block-columns-is-layout-flex">
 <div class="wp-block-column form-holder is-layout-flow wp-block-column-is-layout-flow">    <div class="crf-container">
         <form id="cctv-requirement-form" class="crf-form">
+            <input type="hidden" name="city" value="Bangalore">
             <!-- No of Dome and Bullet Cameras -->
             <div class="crf-form-row bg-camera">
                 <div class="crf-form-col">
@@ -446,7 +540,8 @@ $is_gads_13k = isset($_GET['gads']) && $_GET['gads'] === '13k';
                     </svg>
                         <input type="tel" id="num-whatsapp" class="input" placeholder="Your WhatsApp number">
                     </div>
-                    <small>We send the quote here, in a few minutes ..</small>
+                    <small>We send the quote here, in a few minutes.</small>
+                    <small class="form-reassurance">No spam. Our CCTV expert will contact you once with pricing and options.</small>
                 </div>
 
                 
@@ -1255,7 +1350,7 @@ $is_gads_13k = isset($_GET['gads']) && $_GET['gads'] === '13k';
 		sibling.parentElement.insertBefore( skipLink, sibling );
 	}() );</script>
 <script src="content/plugins/brand-rating-plugin/js/script.js" id="brp-script-js" defer></script>
-<script id="crf-form-script-js-extra">var crf_ajax_object = {"ajax_url":"\admin_v2\/admin-ajax.php"};</script>
+<script id="crf-form-script-js-extra">var crf_ajax_object = {"ajax_url":"\/admin_v2\/admin-ajax.php"};</script>
 <script src="content/plugins/cctv-requirement-form/assets/form-script.js" id="crf-form-script-js" defer></script>
 <script src="content/plugins/ultimate-addons-for-gutenberg/assets/js/aos.min.js?ver=2.13.5" id="uagb-aos-js-js" defer></script>
 <script src="content/plugins/ultimate-addons-for-gutenberg/assets/js/spectra-animations.min.js?ver=2.13.5" id="uagb-animation-js-js" defer></script>
@@ -1291,6 +1386,14 @@ $is_gads_13k = isset($_GET['gads']) && $_GET['gads'] === '13k';
         <i class="fab fa-whatsapp"></i>
     </button>
 </form>
+<a
+  href="<?php echo htmlspecialchars($homepageCallHref, ENT_QUOTES, 'UTF-8'); ?>"
+  class="btn-call"
+  aria-label="Call Smartronic"
+  title="Call Smartronic"
+>
+    <i class="fas fa-phone-alt"></i>
+</a>
 <a href="https://smartronic.online/admin_v2/smart/whatsapp_leads.php?key=9f4a73c2e9b84bdc902f1a7e5d13acbd" style="display:none;">
     WhatsApp Chat
 </a>
@@ -1307,13 +1410,16 @@ $is_gads_13k = isset($_GET['gads']) && $_GET['gads'] === '13k';
       <button type="button" class="promo-popup__close" id="promoPopupClose" aria-label="Close popup">&times;</button>
       <div class="promo-popup__grid">
         <div class="promo-popup__content">
-          <div class="promo-popup__eyebrow">Limited Offer</div>
-          <h3 id="promoPopupTitle">Get 20% OFF Today <br /> Book Your Installation Now</h3>
+          <div class="promo-popup__eyebrow">Today’s Offer: Free Installation + 20% Off</div>
+          <h3 id="promoPopupTitle">Get CCTV Quote in 5 Minutes</h3>
+          <p class="promo-popup__subtitle">Free site inspection + installation included</p>
           <form id="promoPopupForm" class="promo-popup__form" novalidate>
+            <input type="hidden" name="city" value="Bangalore">
             <div class="promo-popup__field">
               <i class="fab fa-whatsapp" aria-hidden="true"></i>
               <input type="tel" id="promoPopupPhone" name="phone" inputmode="numeric" placeholder="WhatsApp number" autofocus>
             </div>
+            <div class="promo-popup__note">No spam. Our CCTV expert will contact you once with pricing and options.</div>
             <div class="promo-popup__field">
               <i class="fas fa-user-circle" aria-hidden="true"></i>
               <input type="text" id="promoPopupName" name="name" placeholder="Your name">
@@ -1325,7 +1431,10 @@ $is_gads_13k = isset($_GET['gads']) && $_GET['gads'] === '13k';
                 <a id="promoPopupTermsLink" href="invoice/terms.php" target="_blank" rel="noopener">Terms of Service</a>.
               </label>
             </div>
-            <button type="submit" class="promo-popup__submit" id="promoPopupSubmit">Get now</button>
+            <button type="submit" class="promo-popup__submit" id="promoPopupSubmit">Call Me Now</button>
+            <a class="promo-popup__quick-call" href="<?php echo htmlspecialchars($homepageCallHref, ENT_QUOTES, 'UTF-8'); ?>">
+              Prefer calling? Call <?php echo htmlspecialchars($homepageCallDisplay, ENT_QUOTES, 'UTF-8'); ?>
+            </a>
             <div class="promo-popup__callback">
               <i class="fas fa-phone-alt"></i>
               <span>Our expert will call you within 5 minutes</span>
@@ -1336,7 +1445,7 @@ $is_gads_13k = isset($_GET['gads']) && $_GET['gads'] === '13k';
         <div class="promo-popup__benefits">
           <div class="promo-popup__benefit">
             <span class="promo-popup__tick"><i class="fas fa-check"></i></span>
-            <span>FREE INSTALLATION</span>
+            <span>Home CCTV setup from ₹14,900 with installation</span>
           </div>
           <div class="promo-popup__benefit">
             <span class="promo-popup__tick"><i class="fas fa-check"></i></span>
@@ -1347,9 +1456,9 @@ $is_gads_13k = isset($_GET['gads']) && $_GET['gads'] === '13k';
             <span>Extendable Warranty up to 5 Years</span>
           </div>
           <div class="ads-trust-signals">
-            <span><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i> 4.8 Rating</span>
-            <span><i class="fas fa-shield-alt" style="color:#2ecc71;"></i> 1500+ Installations</span>
-            <span><i class="fas fa-building" style="color:#3498db;"></i> Trusted by Homes & Offices</span>
+            <span>⭐⭐⭐⭐⭐ 4.8 Google Rating</span>
+            <span><i class="fas fa-certificate" style="color:#2ecc71;"></i> ISO 9001:2015 Certified</span>
+            <span><i class="fas fa-shield-alt" style="color:#2ecc71;"></i> Protecting 2200+ Homes & Businesses</span>
           </div>
           <div class="promo-popup__support-list">
             <div class="promo-popup__support-item"><i class="fas fa-check"></i> Free Site Inspection</div>
@@ -1360,8 +1469,6 @@ $is_gads_13k = isset($_GET['gads']) && $_GET['gads'] === '13k';
     </div>
   </div>
  
-</body>
-</html>
 <script>
 
     
@@ -1384,6 +1491,94 @@ $is_gads_13k = isset($_GET['gads']) && $_GET['gads'] === '13k';
             scrollDepthTicking = true;
             window.requestAnimationFrame(updateScrollDepth);
         }, { passive: true });
+
+        const initAttentionText = function (root) {
+            const scope = root && root.querySelectorAll ? root : document;
+            const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+            scope.querySelectorAll(".shimmer-text").forEach(function (element) {
+                if (element.dataset.attentionReady === "1") {
+                    return;
+                }
+
+                const text = (element.textContent || "").replace(/\s+/g, " ").trim();
+                if (!text) {
+                    return;
+                }
+
+                element.textContent = "";
+                text.split(" ").forEach(function (word) {
+                    const wordSpan = document.createElement("span");
+                    wordSpan.className = "attention-word";
+                    wordSpan.textContent = word;
+                    element.appendChild(wordSpan);
+                });
+                element.dataset.attentionReady = "1";
+
+                const words = Array.from(element.querySelectorAll(".attention-word"));
+                if (!words.length) {
+                    return;
+                }
+
+                if (reduceMotion) {
+                    element.classList.add("attention-text--complete");
+                    words.forEach(function (word) {
+                        word.classList.add("is-revealed");
+                    });
+                    return;
+                }
+
+                let currentIndex = -1;
+                let timerId = null;
+
+                const renderWords = function () {
+                    words.forEach(function (word, index) {
+                        const isRevealed = currentIndex > index;
+                        const isActive = currentIndex === index;
+                        word.classList.toggle("is-revealed", isRevealed);
+                        word.classList.toggle("is-active", isActive);
+                    });
+                    element.classList.toggle("attention-text--complete", currentIndex >= words.length);
+                };
+
+                const queueNext = function (delay) {
+                    timerId = window.setTimeout(runSequence, delay);
+                };
+
+                const runSequence = function () {
+                    if (!document.body.contains(element)) {
+                        if (timerId) {
+                            window.clearTimeout(timerId);
+                        }
+                        return;
+                    }
+
+                    if (currentIndex < words.length - 1) {
+                        currentIndex += 1;
+                        renderWords();
+                        queueNext(320);
+                        return;
+                    }
+
+                    if (currentIndex === words.length - 1) {
+                        currentIndex = words.length;
+                        renderWords();
+                        queueNext(1400);
+                        return;
+                    }
+
+                    currentIndex = words.length;
+                    renderWords();
+                    queueNext(1400);
+                };
+
+                runSequence();
+            });
+        };
+
+        document.addEventListener("DOMContentLoaded", function () {
+            initAttentionText(document);
+        });
 
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -1429,18 +1624,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Send data to the server
         function sendData(data) {
-            const body = JSON.stringify(data);
-            if (navigator.sendBeacon) {
-                const blob = new Blob([body], { type: 'application/json' });
-                navigator.sendBeacon('https://smartronic.online/admin/track.php', blob);
-                return;
-            }
-            fetch('https://smartronic.online/admin/track.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: body,
-                keepalive: true,
-            }).catch(function () {});
+            // Visitor tracking disabled temporarily; it must not interfere with lead submission.
+            return;
         }
 
         // Send user activity when the page is being hidden
@@ -1452,11 +1637,9 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
 
-        // Tracking pixel for capturing visitor info after initial render settles
+        // Visitor tracking pixel disabled; it can remain pending and should not affect UX.
         const loadTrackingPixel = function () {
-            const img = document.getElementById('tracking-image');
-            if (!img) return;
-            img.src = `https://smartronic.online/admin/capture.php?timestamp=${Date.now()}`;
+            return;
         };
         if (window.requestIdleCallback) {
             window.requestIdleCallback(loadTrackingPixel, { timeout: 2500 });
@@ -1481,6 +1664,7 @@ document.addEventListener("DOMContentLoaded", function () {
       document.body.classList.add("overlay-active"); // Disable body scroll
       document.querySelector("#quotation-overlay-form").innerHTML += quoteSection;
 	  document.querySelector("#quotation").innerHTML = '';
+      initAttentionText(document.querySelector("#quotation-overlay-form"));
     }
   }
 
@@ -1496,6 +1680,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Restore content back to the original section
     document.querySelector("#quotation").innerHTML = quoteSection;
+    initAttentionText(document.querySelector("#quotation"));
 	window.location.hash = ""; // Remove #show-quotation from URL
 	handleCCTVFormSubmission();
   });
@@ -1511,11 +1696,13 @@ document.addEventListener("DOMContentLoaded", function () {
   const popupTermsLink = document.getElementById("promoPopupTermsLink");
   const popupSubmit = document.getElementById("promoPopupSubmit");
   const popupMessage = document.getElementById("promoPopupMessage");
+  const popupCity = popupForm ? popupForm.querySelector('input[name="city"]') : null;
   const mainPhone = document.getElementById("num-whatsapp");
   const mainForm = document.getElementById("cctv-requirement-form");
   const formHolder = document.querySelector(".form-holder");
   const successMessage = document.querySelector(".form-success-message");
   const popupStateKey = "smartronicPromoPopupState";
+  const popupClosedAtKey = "smartronicPromoPopupClosedAt";
   const popupGads = <?php echo json_encode(isset($_GET['gads']) ? trim((string)$_GET['gads']) : ''); ?>;
 
   if (!popup || !popupForm || !popupPhone || !popupName) {
@@ -1548,14 +1735,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
   let popupOpen = false;
   let popupLocked = false;
+  let popupDismissed = false;
   let popupScrollY = 0;
   let mainFormEngaged = false;
   let mainFormSubmitted = false;
-  const popupDelay = window.innerWidth <= 767 ? 3000 : 10000;
+  const popupDelay = 10000;
+  const popupReopenCooldown = 60000;
+  let popupClosedAt = 0;
 
   try {
-    if (window.sessionStorage.getItem(popupStateKey) === "closed") {
+    const savedPopupState = window.sessionStorage.getItem(popupStateKey);
+    if (savedPopupState === "submitted") {
       popupLocked = true;
+      mainFormSubmitted = true;
+    } else if (savedPopupState === "closed") {
+      popupDismissed = true;
+      popupClosedAt = parseInt(window.sessionStorage.getItem(popupClosedAtKey) || "0", 10) || Date.now();
     }
   } catch (e) {}
 
@@ -1582,9 +1777,20 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   const setPopupState = function (value) {
-    popupLocked = value === "closed";
+    popupLocked = value === "submitted";
+    popupDismissed = value === "closed";
+    if (value === "closed") {
+      popupClosedAt = Date.now();
+    } else {
+      popupClosedAt = 0;
+    }
     try {
       window.sessionStorage.setItem(popupStateKey, value);
+      if (value === "closed") {
+        window.sessionStorage.setItem(popupClosedAtKey, String(popupClosedAt));
+      } else {
+        window.sessionStorage.removeItem(popupClosedAtKey);
+      }
     } catch (e) {}
   };
 
@@ -1605,6 +1811,10 @@ document.addEventListener("DOMContentLoaded", function () {
   const openPopup = function (options) {
     const opts = options || {};
     if (popupLocked || popupOpen || mainFormSubmitted) return;
+    if (popupDismissed) {
+      if (!opts.ignoreDismissed) return;
+      if (Date.now() - popupClosedAt < popupReopenCooldown) return;
+    }
     if (!opts.ignoreEngaged && mainFormEngaged) return;
     popup.classList.add("is-open");
     popup.setAttribute("aria-hidden", "false");
@@ -1633,7 +1843,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document.addEventListener("mousemove", function (event) {
     if (popupLocked || popupOpen) return;
     if (window.innerWidth > 767 && event.clientY <= 90) {
-      openPopup({ ignoreEngaged: true });
+      openPopup({ ignoreEngaged: true, ignoreDismissed: true });
     }
   });
 
@@ -1646,14 +1856,14 @@ document.addEventListener("DOMContentLoaded", function () {
     mainForm.addEventListener("change", markMainFormEngaged);
     mainForm.addEventListener("submit", function () {
       mainFormSubmitted = true;
-      setPopupState("closed");
+      setPopupState("submitted");
       closePopup(false);
     });
   }
 
   window.addEventListener("smartronic:leadSubmitted", function () {
     mainFormSubmitted = true;
-    setPopupState("closed");
+    setPopupState("submitted");
     closePopup(false);
   });
 
@@ -1724,13 +1934,21 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     const payload = new URLSearchParams();
+    const popupPageParams = new URLSearchParams(window.location.search);
     payload.set("action", "popup_lead_capture");
     payload.set("customer_name", name);
     payload.set("whatsapp_number", phone);
     payload.set("gads", popupGads);
     payload.set("popup_device", window.innerWidth <= 767 ? "pop-mobile" : "pop-desk");
+    if (popupPageParams.has("gad_campaignid")) {
+      payload.set("gad_campaignid", popupPageParams.get("gad_campaignid") || "");
+    }
+    if (popupCity && popupCity.value.trim()) {
+      payload.set("city", popupCity.value.trim());
+    }
 
-    fetch("admin_v2/admin-ajax.php", {
+    const popupAjaxUrl = "/admin_v2/admin-ajax.php" + (window.location.search || "");
+    fetch(popupAjaxUrl, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
       body: payload.toString()
@@ -1755,7 +1973,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         syncMainFormName(name);
         mainFormSubmitted = true;
-        setPopupState("closed");
+        setPopupState("submitted");
         closePopup(false);
         if (typeof window.showLeadSuccessState === "function") {
           window.showLeadSuccessState();
@@ -1778,7 +1996,7 @@ document.addEventListener("DOMContentLoaded", function () {
       .finally(function () {
         if (popupSubmit) {
           popupSubmit.dataset.loading = "0";
-          popupSubmit.textContent = "Get now";
+          popupSubmit.textContent = "Call Me Now";
         }
         syncPopupSubmitState();
       });
@@ -1892,13 +2110,12 @@ body {
 .hide-button {
     display: none !important;
 }
-.btn-whatsapp {
+.btn-whatsapp,
+.btn-call {
   position: fixed;
-  bottom: 80px;
   right: 20px;
   width: 70px;
   height: 70px;
-  background: #25d366 !important;
   color: white;
   border-radius: 50%;
   display: flex;
@@ -1908,7 +2125,17 @@ body {
   text-decoration: none;
   box-shadow: 0 4px 15px rgba(0,0,0,0.2);
   animation: wppPulse 1.6s infinite ease-out;
-  z-index: 9999;
+  z-index: 99999;
+}
+
+.btn-whatsapp {
+  bottom: 80px;
+  background: #25d366 !important;
+}
+
+.btn-call {
+    bottom: 180px;
+    background: #25b4d3 !important;
 }
 
 @keyframes wppPulse {
@@ -2044,6 +2271,65 @@ footer.wp-block-template-part {
   color: #444;
 }
 
+.shimmer-text {
+  display: inline-block;
+  font-weight: 800;
+  line-height: 1.65;
+  color: #0f172a;
+  -webkit-text-fill-color: currentColor;
+}
+
+.shimmer-text .attention-word {
+  display: inline-block;
+  margin-right: 0.28em;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: none;
+  transition:
+    opacity 0.26s ease,
+    transform 0.3s ease,
+    filter 0.3s ease,
+    color 0.26s ease,
+    text-shadow 0.3s ease;
+}
+
+.shimmer-text .attention-word.is-revealed {
+  opacity: 0.72;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+  color:rgb(0 154 255);
+}
+
+.shimmer-text .attention-word.is-active {
+  opacity: 1;
+  transform: translateY(-1px) scale(1.02);
+  filter: blur(0);
+  color: #d97706;
+  text-shadow: 0 0 18px rgba(245, 158, 11, 0.35);
+}
+
+.shimmer-text.attention-text--complete .attention-word {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+  color: #0f172a;
+  text-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer-text .attention-word,
+  .shimmer-text .attention-word.is-revealed,
+  .shimmer-text .attention-word.is-active,
+  .shimmer-text.attention-text--complete .attention-word {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    color: #0f172a;
+    text-shadow: none;
+    transition: none;
+  }
+}
+
 .ads-trust-signals span {
   display: inline-flex;
   align-items: center;
@@ -2056,23 +2342,68 @@ footer.wp-block-template-part {
 
 .ads-trust-signals--hero {
   justify-content: center;
-  font-size: 16px;
+  font-size: 18px;
   margin-top: 18px;
   gap: 12px;
+  color: #3498dc;
 }
 
 .ads-trust-signals--hero span {
+  position: relative;
+  isolation: isolate;
   gap: 7px;
   padding: 12px 16px;
   border-radius: 8px;
   background: #ffffff;
-  border: 1px solid rgb(52 152 220);
+  border: 2px solid #dbeafe;
   box-shadow: 0 14px 28px rgba(14, 77, 182, 0.14);
   color: #3498dc;
+  overflow: hidden;
+}
+
+.ads-trust-signals--hero span::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(120deg, #ff3b30, #ffcc00, #34c759, #00c7be, #007aff, #af52de, #ff2d55, #ff3b30);
+  background-size: 300% 300%;
+  opacity: 0;
+  pointer-events: none;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: adsTrustBorderOneByOne 6s linear infinite;
+}
+
+.ads-trust-signals--hero span:nth-child(2)::before {
+  animation-delay: 2s;
+}
+
+.ads-trust-signals--hero span:nth-child(3)::before {
+  animation-delay: 4s;
 }
 
 .ads-trust-signals--hero i {
   color: #ffd45b;
+}
+
+@keyframes adsTrustBorderOneByOne {
+  0%, 32% {
+    opacity: 1;
+    background-position: 0% 50%;
+  }
+  16% {
+    opacity: 1;
+    background-position: 100% 50%;
+  }
+  36%, 100% {
+    opacity: 0;
+    background-position: 200% 50%;
+  }
 }
 
 .promo-popup .ads-trust-signals {
@@ -2148,12 +2479,20 @@ footer.wp-block-template-part {
 }
 
 .promo-popup__content h3 {
-  margin: 16px 0 20px;
+  margin: 16px 0 8px;
   font-size: clamp(28px, 3.8vw, 38px);
   line-height: 1.04;
   font-weight: 800;
   color: #13233a;
   font-family: "Raleway";
+}
+
+.promo-popup__subtitle {
+  margin: 0 0 10px;
+  color: #1f6f43;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.35;
 }
 
 .promo-popup__form {
@@ -2195,6 +2534,19 @@ footer.wp-block-template-part {
   outline: none;
   border-color: #0f56d9;
   box-shadow: 0 0 0 4px rgba(15, 86, 217, 0.12);
+}
+
+.form-reassurance,
+.promo-popup__note {
+  display: block;
+  color: #2f5f46;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.promo-popup__note {
+  margin-top: -8px;
+  font-size: 13px;
 }
 
 .promo-popup__consent {
@@ -2244,6 +2596,20 @@ footer.wp-block-template-part {
 .promo-popup__submit:disabled {
   opacity: 0.7;
   cursor: wait;
+}
+
+.promo-popup__quick-call {
+  display: block;
+  margin-top: -4px;
+  color: #0f56d9;
+  font-size: 14px;
+  font-weight: 800;
+  text-align: center;
+  text-decoration: none;
+}
+
+.promo-popup__quick-call:hover {
+  text-decoration: underline;
 }
 
 .promo-popup__message {
@@ -2336,18 +2702,16 @@ footer.wp-block-template-part {
 
   .ads-trust-signals--hero {
     justify-content: center;
-    font-size: 13px;
+    font-size: 18px;
     gap: 10px;
   }
 
   .ads-trust-signals--hero span {
-    width: auto;
+    width: 100%;
+    max-width: 320px;
     justify-content: center;
-    padding: 0;
-    border-radius: 0;
-    background: transparent;
-    border: none;
-    box-shadow: none;
+    padding: 12px 14px;
+    border-radius: 8px;
   }
 
   .promo-popup__support-item,
@@ -2381,8 +2745,11 @@ if (strpos($referer, 'google.com') !== false) {
 }
 
 // Send message to Telegram
-$url = "https://api.telegram.org/bot$botToken/sendMessage?chat_id=$chatID&text=" . urlencode($message);
-file_get_contents($url);
+// Temporarily disabled because Telegram API access may be blocked and can slow/break page handling.
+// $url = "https://api.telegram.org/bot$botToken/sendMessage?chat_id=$chatID&text=" . urlencode($message);
+// file_get_contents($url);
 ?>
 
  
+</body>
+</html>

@@ -5,8 +5,9 @@
         // $loginUrl = 'login.php?redirect=' . urlencode($currentUrl);
         // Get full URL including protocol and host
         $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
-        $fullUrl = $protocol . $_SERVER['HTTP_HOST'] . $currentUrl;
-        $loginUrl = '../login.php?redirect=' . urlencode($fullUrl);
+        $host = $_SERVER['HTTP_HOST'] ?? 'smartronic.online';
+        $fullUrl = $protocol . $host . $currentUrl;
+        $loginUrl = $protocol . $host . '/admin_v2/login.php?redirect=' . urlencode($fullUrl);
 
         header("Location: $loginUrl");
         exit();
@@ -54,9 +55,22 @@
         }
     }
 
+    if (!function_exists('isElevatedRole')) {
+        function isElevatedRole(string $role): bool {
+            $role = strtolower(trim($role));
+            return in_array($role, ['admin', 'manager'], true);
+        }
+    }
+
+    if (!function_exists('isStrictAdminRole')) {
+        function isStrictAdminRole(string $role): bool {
+            return strtolower(trim($role)) === 'admin';
+        }
+    }
+
     if (!function_exists('getAllowedSmartPages')) {
         function getAllowedSmartPages(string $role, string $authPages): array {
-            if ($role === 'admin') {
+            if (isElevatedRole($role)) {
                 return ['install', 'quote', 'lead', 'gads_stats'];
             }
             if ($role !== 'market') {
@@ -81,9 +95,9 @@
     if (!function_exists('canAccessSmartPage')) {
         function canAccessSmartPage(string $pageKey, string $role, string $authPages): bool {
             if ($pageKey === 'gads_stats') {
-                return $role === 'admin';
+                return isElevatedRole($role);
             }
-            if ($role === 'admin') {
+            if (isElevatedRole($role)) {
                 return true;
             }
             if ($role === 'market' && strtolower(trim($authPages)) === 'all') {

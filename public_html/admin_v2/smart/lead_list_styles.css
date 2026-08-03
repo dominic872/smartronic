@@ -928,6 +928,26 @@ ease;
   font-weight: bold;
 }
 
+.assign-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  border: 1px solid #2f8ad3;
+  color: #2f8ad3;
+  background: transparent;
+}
+
+.assign-badge.is-sur {
+  background: #f28c28;
+  border-color: #f28c28;
+  color: #ffffff;
+}
+
 .lead-controls-right {
   display: flex;
   gap: 15px;

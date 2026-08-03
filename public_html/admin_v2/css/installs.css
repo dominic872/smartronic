@@ -283,6 +283,90 @@ body {
 
     .event.missing { border: 2px dashed red; }
 
+    .install-map-inline-toggle {
+      width: 22px;
+      height: 22px;
+      border: 1px solid #cbd5e1;
+      border-radius: 999px;
+      background: #fff;
+      color: #475569;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+
+    .install-map-inline-toggle i {
+      font-size: 12px;
+      transition: transform 0.16s ease;
+    }
+
+    .event.map-inline-open .install-map-inline-toggle {
+      background: #111827;
+      color: #fff;
+      border-color: #111827;
+    }
+
+    .event.map-inline-open .install-map-inline-toggle i {
+      transform: rotate(180deg);
+    }
+
+    .install-inline-map-wrap {
+      display: none;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed #cbd5e1;
+    }
+
+    .event.map-inline-open .install-inline-map-wrap {
+      display: block;
+    }
+
+    .install-geo-plot {
+      width: 100%;
+      max-width: 100%;
+      position: relative;
+    }
+
+    .install-geo-map {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      height: 180px;
+      border-radius: 8px;
+      border: 1px solid #dbe3ef;
+      object-fit: cover;
+      background: #e5e7eb;
+    }
+
+    .install-geo-overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 180px;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    .install-geo-meta {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 2;
+    }
+
+    .install-geo-pill {
+      display: inline-block;
+      color: #0f172a;
+      font-weight: 900;
+      font-size: 20px;
+      line-height: 1.05;
+      text-shadow: 0 1px 2px rgba(255,255,255,0.95);
+    }
+
     .event .icons {
       display: none;
       position: absolute;
@@ -924,15 +1008,11 @@ body {
   }
   .leaves {
     color: white;
-    background: repeating-linear-gradient(
-        45deg,
-        #e00,
-        #e00 10px,
-        #d00 10px,
-        #d00 20px
-        );
+    background: #fff7d2;
+    border-radius: 4px;
     padding: 2px;
-    margin: 2px;
+    padding-left: 6px;
+    border: 1px #999 solid;
 }
 
 .distance {
@@ -1224,8 +1304,8 @@ body.np-modal-open {
   text-align: center;
   padding: 2px 6px;
   border-radius: 999px;
-  background: rgba(15, 23, 42, 0.12);
-  color: #374151;
+  background: #dc2626;
+  color: #ffffff;
   font-size: 11px;
   font-weight: 700;
   text-transform: none;
@@ -1680,10 +1760,12 @@ body.np-modal-open {
 }
 
 /* Leaves strip (if shown) */
-.week.current .day .leaves{
-  margin-top: 8px;
-  font-size: 12px;
-  color: #b91c1c; /* red-700 */
+.week.current .day .leaves {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #ff2121;
+    text-transform: uppercase;
+    font-weight: 900;
 }
 
 /* Notes groups (from your earlier setup) */

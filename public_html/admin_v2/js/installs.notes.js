@@ -46,22 +46,59 @@
   }
   window.moveNoteToDate = moveNoteToDate;
 
+  const notesBulkCache = new Map();
+  const notesBulkPending = new Map();
+  let notesBulkFlushTimer = null;
+
+  function flushNotesBulkFetch() {
+    const pending = Array.from(notesBulkPending.entries());
+    notesBulkPending.clear();
+    notesBulkFlushTimer = null;
+    if (!pending.length) return;
+
+    const dates = pending.map(([date]) => date);
+    const resolversByDate = new Map(pending);
+    const url = `installs.php?get_notes_bulk=1&dates=${encodeURIComponent(dates.join(','))}&t=${Date.now()}`;
+    const load = () => fetch(url, { cache: 'no-store' });
+    const fetchPromise = typeof window.scheduleInstallApiFetch === 'function'
+      ? window.scheduleInstallApiFetch(load)
+      : load();
+
+    fetchPromise
+      .then(async res => {
+        const contentType = res.headers.get('content-type') || '';
+        const raw = await res.text();
+        if (!res.ok) throw new Error(`Notes bulk HTTP ${res.status}: ${raw}`);
+        if (!contentType.includes('application/json')) throw new Error(`Notes bulk non-JSON: ${raw}`);
+        return JSON.parse(raw);
+      })
+      .then(data => {
+        const notesByDate = data && data.success && data.notes ? data.notes : {};
+        dates.forEach(date => {
+          const notes = Array.isArray(notesByDate[date]) ? notesByDate[date] : [];
+          notesBulkCache.set(date, notes);
+          (resolversByDate.get(date) || []).forEach(resolve => resolve(notes));
+        });
+      })
+      .catch(err => {
+        console.error('Error fetching bulk notes', err);
+        dates.forEach(date => {
+          notesBulkCache.set(date, []);
+          (resolversByDate.get(date) || []).forEach(resolve => resolve([]));
+        });
+      });
+  }
+
   async function fetchNotes(date) {
-    try {
-      const url = `${NOTES_API}?date=${encodeURIComponent(date)}&t=${Date.now()}`;
-      const res = await fetch(url, { cache: 'no-store' });
-      const contentType = res.headers.get('content-type') || '';
-      const raw = await res.text();
-      if (!res.ok) { console.error('Notes API HTTP error:', res.status, raw); return []; }
-      if (!contentType.includes('application/json')) { console.error('Notes API non-JSON response:', raw); return []; }
-      const data = JSON.parse(raw);
-      if (!data || data.success !== true) return [];
-      if (Number(data.moved_count || 0) > 0) queueNotesAutoRender();
-      return Array.isArray(data.notes) ? data.notes : [];
-    } catch (e) {
-      console.error(`Error fetching notes for ${date}`, e);
-      return [];
-    }
+    if (notesBulkCache.has(date)) return notesBulkCache.get(date);
+    return new Promise(resolve => {
+      const list = notesBulkPending.get(date) || [];
+      list.push(resolve);
+      notesBulkPending.set(date, list);
+      if (!notesBulkFlushTimer) {
+        notesBulkFlushTimer = setTimeout(flushNotesBulkFetch, 0);
+      }
+    });
   }
   window.fetchNotes = fetchNotes;
 
@@ -531,7 +568,8 @@
     const fetchedNotes = await fetchNotes(dateStr);
     const movedNotes = await moveOpenNotesToToday(fetchedNotes, dateStr);
     const notesWithAutoDone = await autoMarkOldNotesDone(movedNotes);
-    const notes = notesWithAutoDone.sort((a, b) => {
+    const visibleNotes = notesWithAutoDone.filter(note => getNoteAgeDays(note) <= 14);
+    const notes = visibleNotes.sort((a, b) => {
       const ageDiff = getNoteAgeDays(b) - getNoteAgeDays(a);
       if (ageDiff !== 0) return ageDiff;
       return (Number(a.sort_order) || 0) - (Number(b.sort_order) || 0);

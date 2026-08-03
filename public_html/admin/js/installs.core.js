@@ -208,12 +208,12 @@
             <div class="names"><strong>${ev.owner || ''}</strong> | <a href="#" onclick="sendToWhatsapp(event, ${JSON.stringify(ev).replace(/"/g, '&quot;')})">${ev.technician || ''}</a> | ${ev.helper || ''}</div>
             <div class="icons"><i class="fas fa-edit" onclick="editInstall('${ev.id}')" title="Edit"></i><i class="fas fa-trash" onclick="deleteInstall('${ev.id}')" title="Delete"></i></div>
           `;
-          if (destination) {
-            fetch(`../distance_api.php?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}`)
-              .then(res => res.json())
+          if (destination && typeof window.requestInstallDistance === 'function') {
+            window.requestInstallDistance({ origin, destination, mapUrl: ev.map || '', coords: (ev.map_lat && ev.map_lng) ? { lat: ev.map_lat, lng: ev.map_lng } : null })
               .then(data => {
                 const distEl = div.querySelector(`#dist-${ev.id}`);
-                if (data.distance_km !== undefined) distEl.innerHTML = `<span class="distance">${Math.round(data.distance_km)}</span>`; else distEl.innerHTML = '';
+                if (!distEl) return;
+                if (data && data.distance_km !== undefined) distEl.innerHTML = `<span class="distance">${Math.round(data.distance_km)}</span>`; else distEl.innerHTML = '';
               })
               .catch(err => console.error('Distance fetch error:', err));
           }

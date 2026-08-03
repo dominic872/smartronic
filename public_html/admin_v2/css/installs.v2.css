@@ -1,0 +1,165 @@
+body.installs-v2 {
+  overflow-x: hidden;
+}
+
+.installs-v2 .calendar {
+  padding: 14px;
+}
+
+.installs-v2 .weekdays {
+  display: none;
+}
+
+.installs-v2 .weeks {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.installs-v2 .timeline-week {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
+  overflow: visible;
+  padding: 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.installs-v2 .timeline-week-heading {
+  position: sticky;
+  top: 60px;
+  z-index: 40;
+  padding: 8px 12px;
+  border-radius: 7px;
+  background: #111827;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+
+.installs-v2 .timeline-week.current {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, .12);
+}
+
+.installs-v2 .timeline-week .day,
+.installs-v2 .timeline-week.current .day {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  min-height: 150px;
+  margin: 0;
+  padding: 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f8fafc;
+  scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain;
+  transition: background-color .2s ease, border-color .2s ease;
+}
+
+.installs-v2 .timeline-week .day:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.installs-v2 .timeline-week .day.today {
+  border: 2px solid #0b8fd1;
+  background: #e0f2fe;
+}
+
+.installs-v2 .day-header {
+  position: sticky;
+  left: 0;
+  z-index: 12;
+  flex: 0 0 150px;
+  align-self: stretch;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-right: 10px;
+  border-right: 1px solid #dbe3ec;
+  background: inherit;
+}
+
+.installs-v2 .day-header .date {
+  width: 100%;
+  box-sizing: border-box;
+  line-height: 1.35;
+}
+
+.installs-v2 .day-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+
+.installs-v2 .day-header .day-map-toggle,
+.installs-v2 .day-header .day-note-select-toggle,
+.installs-v2 .day-header .day-add-note {
+  width: 34px;
+  height: 34px;
+}
+
+.installs-v2 .day > .event,
+.installs-v2 .day > .note,
+.installs-v2 .day > .leaves {
+  flex: 0 0 270px;
+  min-width: 270px;
+  height: auto;
+  margin: 0;
+  box-sizing: border-box;
+  scroll-snap-align: start;
+}
+
+.installs-v2 .day > .event {
+  align-self: stretch;
+  overflow-y: auto;
+}
+
+.installs-v2 .day > .note {
+  align-self: stretch;
+}
+
+.installs-v2 .day > .leaves {
+  flex-basis: 190px;
+  min-width: 190px;
+  align-self: stretch;
+}
+
+.installs-v2 .day.dragover {
+  transform: none;
+  border-color: #0284c7;
+  background: #dff4ff;
+}
+
+@media (max-width: 768px) {
+  .installs-v2 .calendar {
+    padding: 8px;
+  }
+
+  .installs-v2 .timeline-week {
+    padding: 5px;
+  }
+
+  .installs-v2 .timeline-week-heading {
+    top: 58px;
+  }
+
+  .installs-v2 .day-header {
+    flex-basis: 112px;
+  }
+
+  .installs-v2 .day > .event,
+  .installs-v2 .day > .note {
+    flex-basis: 250px;
+    min-width: 250px;
+  }
+}

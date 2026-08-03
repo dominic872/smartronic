@@ -77,7 +77,7 @@ $getMonthCode = function() {
     return $monthLetters[$month] ?? 'X';
 };
 
-$assignees = ['AMR', 'VAR', 'ZOY'];
+$assignees = ['AMR', 'VAR'];
 $assign = $assignees[0];
 $newId = 0;
 $newMid = '';

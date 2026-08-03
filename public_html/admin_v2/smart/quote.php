@@ -1,19 +1,39 @@
 <?php
 ob_start();
 require_once '../auth.php'; // Assuming we create auth.php in admin folder
-requireSmartPageAccess('quote', $role, $authPages);
+$roleLower = strtolower(trim((string)($role ?? ($_COOKIE['auth_role'] ?? ''))));
+$authPagesValue = (string)($authPages ?? ($_COOKIE['auth_pages'] ?? ''));
 
-// Check if user is admin
-$isAdmin = isset($_COOKIE['auth_role']) && $_COOKIE['auth_role'] === 'admin';
-$isMarket = isset($_COOKIE['auth_role']) && $_COOKIE['auth_role'] === 'market';
-$allowedSmartPages = getAllowedSmartPages($role, $authPages);
+if (function_exists('requireSmartPageAccess')) {
+  requireSmartPageAccess('quote', $roleLower, $authPagesValue);
+} else {
+  $pagesFallback = strtolower(trim($authPagesValue));
+  $partsFallback = preg_split('/[\s,]+/', $pagesFallback) ?: [];
+  $canAccessQuoteFallback = in_array($roleLower, ['admin', 'manager'], true)
+    || ($roleLower === 'market' && ($pagesFallback === 'all' || in_array('quote', $partsFallback, true)));
+  if (!$canAccessQuoteFallback) {
+    echo "No access";
+    exit;
+  }
+}
+
+// On this page, manager should follow the market experience.
+$isAdmin = function_exists('isStrictAdminRole')
+  ? isStrictAdminRole($roleLower)
+  : ($roleLower === 'admin');
+$isMarket = in_array($roleLower, ['market', 'manager'], true);
+$allowedSmartPages = function_exists('getAllowedSmartPages')
+  ? getAllowedSmartPages($roleLower, $authPagesValue)
+  : ($isAdmin ? ['install', 'quote', 'lead', 'gads_stats'] : []);
 ?>
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>CCTV Requirement Form — Quotation</title>
+  <title>SM Quote | CCTV Requirement</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/content/uploads/2025/01/cropped-Site-Icon-32x32.png">
+  <link rel="apple-touch-icon" href="/content/uploads/2025/01/cropped-Site-Icon-180x180.png">
 
   <!-- Optional materialize for base look -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
@@ -22,14 +42,29 @@ $allowedSmartPages = getAllowedSmartPages($role, $authPages);
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <!-- Local stylesheet -->
-  <link href="styles.css?v=147" rel="stylesheet">
+  <link href="styles.css?v=148" rel="stylesheet">
+  <style>
+    @media (max-width: 768px) {
+      #main-logo {
+        content: url('https://smartronic.online/content/uploads/2025/01/smartronic_small_logo.png');
+        width: 40px;
+        height: 40px;
+      }
+    }
+  </style>
 </head>
-<body class="grey lighten-4<?php echo (!isset($_COOKIE['auth_role']) || $_COOKIE['auth_role'] !== 'admin') ? ' not-admin' : ' is-admin'; ?><?php echo ($isMarket && !$isAdmin) ? ' is-market' : ''; ?>">
+<body class="grey lighten-4<?php echo $isAdmin ? ' is-admin' : ' not-admin'; ?><?php echo ($isMarket && !$isAdmin) ? ' is-market' : ''; ?>">
+  <div class="controls quote-controls">
+    <div class="logo-section">
+      <a href="/admin_v2/smart/" class="custom-logo-link" rel="home" aria-current="page">
+        <img id="main-logo" width="200" height="40" src="https://smartronic.online/content/uploads/2025/01/smarthome-black2.svg" class="custom-logo" alt="Smartronic | CCTV with Free Installation | Smart Home Automation" decoding="async">
+      </a>
+      <?php echo "<h2>Hello, $nameAssign!</h2>"; ?>
+    </div>
+  </div>
 
   <section class="crf-form-wrapper">
     <div class="container">
-      <h5 class="center-align page-title">CCTV Requirement Form — Quotation</h5>
-
       <div class="crf-container">
         
         <!-- LEFT COLUMN: Form Selection -->
@@ -239,6 +274,11 @@ $allowedSmartPages = getAllowedSmartPages($role, $authPages);
 
   <!-- External data + script -->
   <script>
+    const quoteSmartBase = new URL('.', window.location.href);
+    const quoteAdminBase = new URL('../', quoteSmartBase);
+    const quoteAssetUrl = (path) => new URL(path, quoteSmartBase).href;
+    const quoteAdminUrl = (path) => new URL(path, quoteAdminBase).href;
+
     function mountQuoteFloatingMenu() {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('floating_menu') === '0') return true;
@@ -250,7 +290,7 @@ $allowedSmartPages = getAllowedSmartPages($role, $authPages);
           label: 'Lead List',
           icon: 'fas fa-users',
           color: '#e11d48',
-          url: `${window.location.origin}/admin_v2/smart/lead_list_enhanced.php`
+          url: quoteAssetUrl('lead_list_enhanced.php')
         });
       }
       if (allowedPages.includes('install')) {
@@ -258,7 +298,7 @@ $allowedSmartPages = getAllowedSmartPages($role, $authPages);
           label: 'Installs',
           icon: 'fa-solid fa-screwdriver-wrench',
           color: '#2563eb',
-          url: `${window.location.origin}/admin_v2/smart/installs.php`
+          url: quoteAssetUrl('installs.php')
         });
       }
       if (allowedPages.includes('quote')) {
@@ -266,12 +306,20 @@ $allowedSmartPages = getAllowedSmartPages($role, $authPages);
           label: 'Quote Tool',
           icon: 'fas fa-calculator',
           color: '#6f42c1',
-          url: `${window.location.origin}/admin_v2/smart/quote.php`
+          url: quoteAssetUrl('quote.php')
+        });
+      }
+      if (allowedPages.includes('gads_stats')) {
+        links.push({
+          label: 'Google Ads Command Center',
+          icon: 'fas fa-chart-line',
+          color: '#dc2626',
+          url: quoteAssetUrl('gads_conversion.php')
         });
       }
       window.SmartFloatingMenu.mount({
         links,
-        baseBottom: 140,
+        baseBottom: 190,
         step: 60
       });
       return true;
@@ -280,11 +328,11 @@ $allowedSmartPages = getAllowedSmartPages($role, $authPages);
     function initQuoteFloatingMenu() {
       if (mountQuoteFloatingMenu()) return;
       const s = document.createElement('script');
-      s.src = '/admin_v2/js/floating_icon_menu.js';
+      s.src = quoteAdminUrl('js/floating_icon_menu.js');
       s.onload = () => { mountQuoteFloatingMenu(); };
       s.onerror = () => {
         const fallback = document.createElement('script');
-        fallback.src = '../js/floating_icon_menu.js';
+        fallback.src = '/admin_v2/js/floating_icon_menu.js';
         fallback.onload = () => { mountQuoteFloatingMenu(); };
         document.head.appendChild(fallback);
       };
@@ -304,7 +352,7 @@ $allowedSmartPages = getAllowedSmartPages($role, $authPages);
   </script>
   <script>
     // Load data from JSON 
-    fetch('/admin_v2/smart/data.json?v=157', { cache: 'no-store' })
+    const loadQuoteData = (src, isFallback = false) => fetch(src, { cache: 'no-store' })
       .then(response => {
         console.log('Response status:', response.status);
         if (!response.ok) {
@@ -342,8 +390,8 @@ $allowedSmartPages = getAllowedSmartPages($role, $authPages);
           };
           s.onerror = function() {
             if (!isFallback) {
-              console.warn('Primary load failed, trying relative scripts.js');
-              loadScript('scripts.js?v=158', true);
+              console.warn('Primary load failed, trying absolute scripts.js');
+              loadScript('/admin_v2/smart/scripts.js?v=164', true);
             } else {
               console.error('Failed to load scripts.js after fallback');
             }
@@ -351,14 +399,19 @@ $allowedSmartPages = getAllowedSmartPages($role, $authPages);
           document.head.appendChild(s);
         };
 
-        // Try absolute first, then fallback relative
-        loadScript('/admin_v2/smart/scripts.js?v=158');
+        // Try page-relative first, then absolute for production roots.
+        loadScript(quoteAssetUrl('scripts.js?v=164'));
       })
       .catch(error => {
+        if (!isFallback) {
+          console.warn('Primary data.json load failed, trying absolute path:', error);
+          return loadQuoteData('/admin_v2/smart/data.json?v=157', true);
+        }
         console.error('Failed to load data.json:', error);
-        // Show error to user
         alert('Failed to load product data. Please refresh the page.');
       });
+
+    loadQuoteData(quoteAssetUrl('data.json?v=157'));
   </script>
 
 </body>

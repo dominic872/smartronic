@@ -5,7 +5,9 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 require '../config.php';
 
-if (!isset($_COOKIE['auth_role']) || ($_COOKIE['auth_role'] !== 'admin' && $_COOKIE['auth_role'] !== 'market')) {
+$authRole = strtolower(trim((string)($_COOKIE['auth_role'] ?? '')));
+$isAdminLike = in_array($authRole, ['admin', 'manager'], true);
+if (!isset($_COOKIE['auth_role']) || (!$isAdminLike && $authRole !== 'market')) {
     echo "No access";
     exit;
 }
@@ -128,7 +130,7 @@ if (isset($_GET['get_messages']) || $_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $role = $_COOKIE['auth_role'] ?? '';
-        if ($role !== 'admin') {
+        if (!in_array(strtolower(trim((string)$role)), ['admin', 'manager'], true)) {
             http_response_code(403);
             echo json_encode(['success' => false, 'message' => 'Not allowed']);
             exit;
@@ -174,7 +176,7 @@ if ($owner_result = $conn->query($owner_query)) {
 }
 
 $nameAssign = $_COOKIE['auth_name'] ?? 'User';
-$isAdmin = (($_COOKIE['auth_role'] ?? '') === 'admin');
+$isAdmin = $isAdminLike;
 
 ?>
 <!DOCTYPE html>
@@ -182,7 +184,9 @@ $isAdmin = (($_COOKIE['auth_role'] ?? '') === 'admin');
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-    <title>WhatsApp Messenger</title>
+    <title>SM WhatsApp | Messenger</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/content/uploads/2025/01/cropped-Site-Icon-32x32.png">
+  <link rel="apple-touch-icon" href="/content/uploads/2025/01/cropped-Site-Icon-180x180.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -442,8 +446,6 @@ $isAdmin = (($_COOKIE['auth_role'] ?? '') === 'admin');
                                 </div>
                                 <div class="mine-links">
                                     <a href="#" class="mine-filter-link active" data-mine="">All</a>
-                                    <span class="mine-sep">|</span>
-                                    <a href="#" class="mine-filter-link" data-mine="zoy">Zoya</a>
                                     <span class="mine-sep">|</span>
                                     <a href="#" class="mine-filter-link" data-mine="var">Varsha</a>
                                     <span class="mine-sep">|</span>

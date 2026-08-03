@@ -6,10 +6,18 @@ ini_set('display_errors', 1);
 require '../config.php';
 requireSmartPageAccess('lead', $role, $authPages);
 
+if (!function_exists('isElevatedRole')) {
+    function isElevatedRole(string $role): bool {
+        $role = strtolower(trim($role));
+        return in_array($role, ['admin', 'manager'], true);
+    }
+}
+
 // Set timezone to India
 date_default_timezone_set('Asia/Kolkata');
 
-$isAdmin = isset($_COOKIE['auth_role']) && $_COOKIE['auth_role'] === 'admin';
+$isAdmin = isElevatedRole($role);
+$canDeleteLead = strtolower(trim((string)$role)) === 'admin';
 $allowedSmartPages = getAllowedSmartPages($role, $authPages);
 $authName = $_COOKIE['auth_name'] ?? '';
 $authUser = $_COOKIE['auth_user'] ?? '';
@@ -23,12 +31,14 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-  <title>Lead List</title>
+  <title>SM Leads | Enhanced</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/content/uploads/2025/01/cropped-Site-Icon-32x32.png">
+  <link rel="apple-touch-icon" href="/content/uploads/2025/01/cropped-Site-Icon-180x180.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="lead_list_styles_enhanced.css">
+  <link rel="stylesheet" href="lead_list_styles_enhanced.css?v=2">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
   <style>
     @media (max-width: 768px) {
@@ -52,14 +62,36 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
     .qr-placeholder {
         display: none !important;
     }
+    .lead-qr-fallback {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 96px;
+        min-height: 96px;
+        padding: 10px;
+        border-radius: 10px;
+        background: #eef6ff;
+        color: #0f172a;
+        border: 1px solid #bfdbfe;
+        font-family: monospace;
+        font-size: 14px;
+        font-weight: 700;
+        text-align: center;
+        word-break: break-word;
+    }
     .assign-badge {
         border: 1px solid #ccc;
-        padding: 2px 8px;
+
         border-radius: 4px;
         font-size: 12px;
         font-weight: 500;
         background-color: transparent;
         color: #555;
+    }
+    .assign-badge.is-sur {
+        background-color: #f28c28;
+        border-color: #f28c28;
+        color: #fff;
     }
     .lead-avatar-section h3 {
         margin: 0;
@@ -244,17 +276,6 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
       color: #0f172a;
       font: inherit;
     }
-    .custom-go-btn {
-      border: none;
-      background: transparent;
-      color: #111827;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      padding: 6px;
-    }
-    .custom-go-btn:hover { color: #0f62fe; }
 	    .filter-counts-bar {
 	      position: fixed;
 	      top: 160px;
@@ -547,6 +568,28 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
       border: 0;
       display: block;
     }
+
+    .lead-delete-btn {
+      width: 28px;
+      height: 28px;
+      border: 0;
+      border-radius: 7px;
+      background: #fee2e2;
+      color: #b91c1c;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+    }
+    .lead-delete-btn:hover {
+      background: #dc2626;
+      color: #fff;
+    }
+    .lead-delete-btn:disabled {
+      cursor: wait;
+      opacity: 0.6;
+    }
     
     /* Mobile responsiveness */
     @media (max-width: 768px) {
@@ -632,7 +675,7 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
   <!-- Header with Logo -->
   <div class="page-header" id="pageHeader">
     <div class="logo-section">
-      <a href="/" class="custom-logo-link" rel="home" aria-current="page">
+      <a href="/admin_v2/smart/" class="custom-logo-link" rel="home" aria-current="page">
         <img id="main-logo" width="200" height="40" src="https://smartronic.online/content/uploads/2025/01/smarthome-black2.svg" class="custom-logo" alt="Smartronic | CCTV with Free Installation | Smart Home Automation" decoding="async">
       </a>
       <?php echo "<h2>Hello, $nameAssign!</h2>";?>
@@ -659,11 +702,11 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
         <div class="mine-links">
           <a href="#" class="mine-filter-link active" data-mine="">All</a>
           <span class="mine-sep">|</span>
-          <a href="#" class="mine-filter-link" data-mine="zoy">Zoya</a>
-          <span class="mine-sep">|</span>
           <a href="#" class="mine-filter-link" data-mine="var">Varsha</a>
           <span class="mine-sep">|</span>
           <a href="#" class="mine-filter-link" data-mine="amr">Amreen</a>
+          <span class="mine-sep">|</span>
+          <a href="#" class="mine-filter-link" data-mine="sur">Surya</a>
         </div>
       <?php } ?>
       <div class="follow-links">
@@ -675,7 +718,7 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
         <a href="#" class="follow-filter-link" data-follow="tomorrow">Tomorrow</a>
       </div>
       <div class="date-range-filter">
-        <span class="date-range-label">Date</span>
+        <span class="date-range-label">Jump to</span>
         <select id="dateRangeSelect" class="date-range-select">
           <option value="latest">Latest</option>
           <option value="this_month">This month</option>
@@ -686,10 +729,6 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
         </select>
         <div id="customDateWrap" class="custom-date-wrap" hidden>
           <span class="date-input-wrap"><input type="date" id="customStartDate" aria-label="Start date"></span>
-          <span class="date-input-wrap"><input type="date" id="customEndDate" aria-label="End date"></span>
-          <button type="button" id="customDateGo" class="custom-go-btn" aria-label="Go">
-            <i class="fa-solid fa-arrow-right"></i>
-          </button>
         </div>
       </div>
     </div>
@@ -860,6 +899,7 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
 
   <script>
     const IS_ADMIN = <?php echo $isAdmin ? 'true' : 'false'; ?>;
+    const CAN_DELETE_LEAD = <?php echo $canDeleteLead ? 'true' : 'false'; ?>;
     const CURRENT_USER_CODE = <?php echo json_encode($userCode); ?>;
     let lastScrollDirection = 'down';
     let offsetStart = 0;
@@ -873,7 +913,6 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
     let col2Query = '';
     let dateMode = 'latest';
     let customStartDate = '';
-    let customEndDate = '';
     const INITIAL_PAGE_SIZE = 50;
     const PAGE_SIZE = 100;
     const MAX_ROWS = 200;
@@ -1965,6 +2004,12 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
     // Function to create inline edit form
     function createInlineEditForm(leadData) {
       const rid = leadData.id || '';
+      const cleanFieldValue = (value) => {
+        const text = String(value ?? '').trim();
+        return text === '-' || text.toLowerCase() === 'na' ? '' : text;
+      };
+      const selectedAssign = cleanFieldValue(leadData.Assign) || 'Open';
+      const selectedArea = cleanFieldValue(leadData.Area);
       const code = `L-${rid}`;
       const qPhone = leadData.whatsapp_number || '';
       const qCams = leadData.num_cameras || '';
@@ -2000,7 +2045,7 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
                   </div>
                   <div class="input-group area-input-group">
                     <label for="leadArea-${rid}">Area</label>
-                    <input id="leadArea-${rid}" type="text" name="Area" value="${leadData.Area || ''}" placeholder="Location" autocomplete="off">
+                    <input id="leadArea-${rid}" type="text" name="Area" value="${escapeAttr(selectedArea)}" placeholder="Location" autocomplete="off">
                     <div class="area-suggest" hidden></div>
                   </div>
                 </div>
@@ -2041,7 +2086,12 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
                 <div class="form-row details-row">
                   <div class="input-group">
                     <label for="leadAssign-${rid}">Assign To</label>
-                    <input id="leadAssign-${rid}" type="text" name="Assign" value="${leadData.Assign || ''}" placeholder="Staff">
+                    <select id="leadAssign-${rid}" name="Assign">
+                      <option value="Open" ${selectedAssign.toLowerCase() === 'open' ? 'selected' : ''}>Open</option>
+                      <option value="AMR" ${selectedAssign.toUpperCase() === 'AMR' ? 'selected' : ''}>AMR</option>
+                      <option value="VAR" ${selectedAssign.toUpperCase() === 'VAR' ? 'selected' : ''}>VAR</option>
+                      <option value="SUR" ${selectedAssign.toUpperCase() === 'SUR' ? 'selected' : ''}>SUR</option>
+                    </select>
                   </div>
                 </div>
 
@@ -2055,7 +2105,7 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
 
               <div class="grid-right">
                 <!-- Moved QR Code here -->
-                <div class="lead-qr-code" data-phone="${leadData.whatsapp_number || ''}" style="margin-bottom: 12px;"></div>
+                <div class="lead-qr-code" data-phone="${escapeAttr(leadData.whatsapp_number || '')}" style="margin-bottom: 12px;"></div>
                 <a href="tel:${leadData.whatsapp_number || ''}" class="call-icon-mobile">
                   <i class="fas fa-phone"></i>
                 </a>
@@ -2384,17 +2434,35 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
       if (!qrContainer) return;
       
       // Check if QR code already loaded
-      if (qrContainer.querySelector('img')) return;
+      if (qrContainer.querySelector('img') || qrContainer.querySelector('.lead-qr-fallback')) return;
       
-      const phone = qrContainer.getAttribute('data-phone');
-      if (!phone) return;
+      const phone = qrContainer.getAttribute('data-phone') || '';
+      const displayPhone = phone.trim();
+      const digits = displayPhone.replace(/\D/g, '');
+      if (!displayPhone) return;
+
+      const showPhoneFallback = () => {
+        qrContainer.innerHTML = `
+          <a class="lead-qr-fallback" href="tel:+91${escapeAttr(digits || displayPhone)}" title="Call ${escapeAttr(displayPhone)}">
+            ${escapeHtml(displayPhone)}
+          </a>
+        `;
+      };
       
       // Default to phone call (tel:)
-      const callUrl = encodeURIComponent('tel:+91' + phone);
-      qrContainer.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=96x96&data=${callUrl}&bgcolor=3498db&color=fff" alt="QR Code" title="Click to switch to WhatsApp" data-mode="call" data-phone="${phone}">`;
+      const callUrl = encodeURIComponent('tel:+91' + (digits || displayPhone));
+      qrContainer.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=96x96&data=${callUrl}&bgcolor=3498db&color=fff" alt="QR Code" title="Click to switch to WhatsApp" data-mode="call" data-phone="${escapeAttr(digits || displayPhone)}">`;
       
       // Add click event to toggle between call and WhatsApp
       const qrImg = qrContainer.querySelector('img');
+      if (!qrImg) {
+        showPhoneFallback();
+        return;
+      }
+      qrImg.addEventListener('error', showPhoneFallback, { once: true });
+      setTimeout(() => {
+        if (!qrImg.complete || qrImg.naturalWidth === 0) showPhoneFallback();
+      }, 2500);
       qrImg.addEventListener('click', function(e) {
         e.preventDefault();
         toggleQRMode(this);
@@ -2448,6 +2516,14 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
     function createRow(row) {
       const el = document.createElement('div');
       el.className = 'col s12';
+      const cleanDisplayValue = (value) => {
+        const text = String(value ?? '').trim();
+        return text === '-' || text.toLowerCase() === 'na' ? '' : text;
+      };
+      const truncateBadgeText = (value, maxLength = 20) => {
+        const text = String(value ?? '').trim();
+        return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
+      };
 
       // Use display_id field which is either MID or id
       const displayId = row.display_id || row.MID || row.id || '';
@@ -2461,16 +2537,19 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
       const dvr = row.dvr_type || '';
       const hdd = row.hdd_size || '';
       const res = row.camera_resolution || '';
-      const assign = row.Assign || '-';
-      const area = row.Area || '-';
+      const assign = cleanDisplayValue(row.Assign) || 'Open';
+      const area = cleanDisplayValue(row.Area);
       const follow = row.Follow_up || '-';
       const comment = row.comments || '-';
       const created = row.created_at || '-';
       const msg = row.Message || '-';
       const map = row.map_link || '';
       const call_status = row.call_status || '';
-      const col1 = row.Column_1 || '';
-      const col2 = row.Column_2 || row.column_2 || '';
+      const col1 = cleanDisplayValue(row.Column_1 ?? row.column_1);
+      const col2 = cleanDisplayValue(row.Column_2 ?? row.column_2);
+      const col1BadgeText = col1 || 'N/A';
+      const col1BadgeDisplayText = truncateBadgeText(col1BadgeText, 20);
+      const col2BadgeText = col2 || 'N/A';
       const originallyAssigned = (row.originally_assigned || '').trim();
       const editTrace = (row.edit_trace || '').trim();
       
@@ -2553,7 +2632,7 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
              data-day-total="${row.day_total || ''}"
              data-day-rank="${row.day_rank || ''}"
              data-mid="${row.MID || ''}"
-             data-column-1="${col1}"
+             data-column-1="${escapeAttr(col1)}"
              data-column-2="${escapeAttr(col2)}"
              data-name="${name}"
              data-whatsapp-number="${phone}"
@@ -2561,10 +2640,10 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
              data-dvr-type="${dvr}"
              data-hdd-size="${hdd}"
              data-camera-resolution="${res}"
-             data-assign="${assign}"
+             data-assign="${escapeAttr(assign)}"
              data-originally-assigned="${escapeAttr(originallyAssigned)}"
              data-edit-trace="${escapeAttr(editTrace)}"
-             data-area="${area}"
+             data-area="${escapeAttr(area)}"
              data-follow-up="${follow}"
              data-comments="${comment}"
              data-message="${msg}"
@@ -2626,7 +2705,7 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
               </div>
 
               <div class="lead-meta-row">
-                ${area && area !== '-' ? `<span class="lead-phone"><i class="fa fa-map-marker-alt"></i> ${area}</span>` : ''}
+                ${area ? `<span class="lead-phone"><i class="fa fa-map-marker-alt"></i> ${escapeAttr(area)}</span>` : ''}
                 ${follow && follow !== '-' ? `<span class="lead-phone"><i class="fa fa-calendar-alt"></i> ${follow}</span>` : ''}
               </div>
               ${comment && comment !== '-' ? `<div class="lead-comments">${comment}</div>` : ''}
@@ -2639,12 +2718,16 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
           <!-- Portion 3: Controls -->
           <div class="lead-controls-section">
             <div class="lead-controls-left">
-               ${assign && assign !== '-' ? `<span class="assign-badge${isAssignOpenExact ? ' is-open open-animate' : ''}">${assign}</span>` : ''}
-               ${col2 ? `<span class="col2-badge" data-col2-value="${escapeAttr(col2)}" title="${escapeAttr(col2)}" aria-label="${escapeAttr(col2)}">${getCol2BadgeInnerHtml(col2)}</span>` : ''}
-               ${col1 ? `<span class="col1-badge" data-col1-value="${escapeAttr(col1)}">${col1}</span>` : ''}
+               ${assign ? `<span class="assign-badge${isAssignOpenExact ? ' is-open open-animate' : ''}${String(assign).trim().toUpperCase() === 'SUR' ? ' is-sur' : ''}">${escapeAttr(assign)}</span>` : ''}
+               <span class="col2-badge${col2 ? '' : ' is-missing'}" data-col2-value="${escapeAttr(col2)}" title="${escapeAttr(col2BadgeText)}" aria-label="${escapeAttr(col2BadgeText)}">${getCol2BadgeInnerHtml(col2BadgeText)}</span>
+               <span class="col1-badge${col1 ? '' : ' is-missing'}" data-col1-value="${escapeAttr(col1)}" title="${escapeAttr(col1BadgeText)}" aria-label="${escapeAttr(col1BadgeText)}">${escapeAttr(col1BadgeDisplayText)}</span>
                <span class="lead-phone" style="font-size: 12px;">${formattedDate}${relativeTime ? ` • ${relativeTime}` : ''}${showWas ? ` | Was: ${escapeAttr(originallyAssigned)}` : ''}</span>
             </div>
             <div class="lead-actions">
+              ${CAN_DELETE_LEAD ? `
+              <button type="button" class="lead-delete-btn" aria-label="Delete lead" title="Delete lead" data-lead-id="${escapeAttr(rid)}">
+                <i class="fa-solid fa-trash"></i>
+              </button>` : ''}
               ${hasHistory ? `
               <button type="button" class="trace-toggle" aria-label="History" title="History">
                 <i class="fa-solid fa-clock-rotate-left"></i>
@@ -2764,6 +2847,11 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
 
       const gen = viewGeneration;
       listFetchController = new AbortController();
+      let resolvedFetchOffset = fetchOffset;
+      const isInitialDateJump = direction === 'down'
+        && offsetEnd === 0
+        && String(dateMode) === 'custom'
+        && String(customStartDate || '').trim() !== '';
       const dateParams = (() => {
         const raw = String(searchQuery || '').trim();
         const digits = (raw.match(/\d/g) || []).length;
@@ -2774,9 +2862,8 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
         if (!mode || mode === 'latest') return '';
         if (mode === 'custom') {
           const s = String(customStartDate || '').trim();
-          const e = String(customEndDate || '').trim();
-          if (!s || !e) return '';
-          return `&date_mode=custom&date_start=${encodeURIComponent(s)}&date_end=${encodeURIComponent(e)}`;
+          if (!s || !isInitialDateJump) return '';
+          return `&date_mode=custom&date_start=${encodeURIComponent(s)}`;
         }
         return `&date_mode=${encodeURIComponent(mode)}`;
       })();
@@ -2784,6 +2871,13 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
         .then(res => {
           if (gen !== viewGeneration) return null;
           if (!res.ok) throw new Error("Server error");
+          const startOffsetHeader = res.headers.get('X-Lead-Start-Offset');
+          if (isInitialDateJump && startOffsetHeader !== null) {
+            const parsedStartOffset = Number.parseInt(startOffsetHeader, 10);
+            if (Number.isFinite(parsedStartOffset) && parsedStartOffset >= 0) {
+              resolvedFetchOffset = parsedStartOffset;
+            }
+          }
           return res.json();
         })
         .then(data => {
@@ -2795,6 +2889,10 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
           }
 
           if (direction === 'down') {
+            if (isInitialDateJump) {
+              offsetStart = resolvedFetchOffset;
+              offsetEnd = resolvedFetchOffset;
+            }
             data.forEach(row => {
               // Track lead data for stats
               if (row.id && row.created_at) {
@@ -2850,6 +2948,19 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
           
           trimExcessRows();
           rebuildDaySeparators();
+          if (isInitialDateJump) {
+            requestAnimationFrame(() => {
+              const jumpDate = String(customStartDate || '').trim();
+              const cards = Array.from(container.querySelectorAll('.lead-card'));
+              const anchorCard = cards.find(card => {
+                const createdAt = String(card.getAttribute('data-created-at') || '');
+                return createdAt.slice(0, 10) <= jumpDate;
+              });
+              if (anchorCard) {
+                anchorCard.scrollIntoView({ block: 'center', behavior: 'auto' });
+              }
+            });
+          }
           status.innerText = '';
           isLoading = false;
         })
@@ -2916,6 +3027,39 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
     function updateFloatingDate() {
       const floatingDateElement = document.getElementById('floatingDate');
       if (!floatingDateElement) return;
+
+      const getFloatingDateMood = (hour) => {
+        if (hour >= 5 && hour < 12) {
+          return {
+            icon: '🌤️',
+            bgColor: 'rgba(173, 216, 230, 0.8)',
+            textColor: 'black',
+            label: 'Morning'
+          };
+        }
+        if (hour >= 12 && hour < 17) {
+          return {
+            icon: '☀️',
+            bgColor: 'rgba(255, 200, 100, 0.8)',
+            textColor: 'black',
+            label: 'Noon'
+          };
+        }
+        if (hour >= 17 && hour < 20) {
+          return {
+            icon: '🌇',
+            bgColor: 'rgba(200, 120, 60, 0.8)',
+            textColor: 'white',
+            label: 'Evening'
+          };
+        }
+        return {
+          icon: '🌙',
+          bgColor: 'rgb(100 100 100 / 90%)',
+          textColor: 'white',
+          label: 'Night'
+        };
+      };
       
       // Get all lead cards
       const cards = document.querySelectorAll('.lead-card');
@@ -2996,27 +3140,16 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
             
             // Determine background color based on card's time (hour)
             const cardHour = closestCardDateObj.getHours();
-            let cardBgColor = 'rgb(172 172 172 / 84%)'; // Light grey for night (so text is visible)
-            let textColor = 'black';
-            
-            if (cardHour >= 5 && cardHour < 12) {
-              cardBgColor = 'rgba(173, 216, 230, 0.8)'; // Light blue (morning)
-              textColor = 'black';
-            } else if (cardHour >= 12 && cardHour < 17) {
-              cardBgColor = 'rgba(255, 200, 100, 0.8)'; // Light orange (noon)
-              textColor = 'black';
-            } else if (cardHour >= 17 && cardHour < 20) {
-              cardBgColor = 'rgba(200, 120, 60, 0.8)'; // Muted orange (evening)
-              textColor = 'white';
-            } else {
-              cardBgColor = 'rgb(100 100 100 / 90%)'; // Darker grey for night
-              textColor = 'white';
-            }
+            const floatingMood = getFloatingDateMood(cardHour);
             
             // Display card's date, time, and position within records from same date
-            floatingDateElement.textContent = `${cardDateText} ${cardTime} (${cardPositionText}/${cardDateRecords})`;
-            floatingDateElement.style.background = cardBgColor;
-            floatingDateElement.style.color = textColor;
+            floatingDateElement.innerHTML = `
+              <span class="floating-date-icon" aria-hidden="true">${floatingMood.icon}</span>
+              <span class="floating-date-text">${cardDateText} ${cardTime} (${cardPositionText}/${cardDateRecords})</span>
+            `;
+            floatingDateElement.setAttribute('aria-label', `${floatingMood.label}: ${cardDateText} ${cardTime} (${cardPositionText} of ${cardDateRecords})`);
+            floatingDateElement.style.background = floatingMood.bgColor;
+            floatingDateElement.style.color = floatingMood.textColor;
       }
     }
 
@@ -3283,6 +3416,9 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
           addToHistory(savedMid || savedId);
           if (typeof data.assign === 'string' && data.assign.trim() !== '') {
             leadData.Assign = data.assign.trim();
+          }
+          if (typeof data.originally_assigned === 'string') {
+            leadData.originally_assigned = data.originally_assigned.trim();
           }
           if (typeof data.edit_trace === 'string' && data.edit_trace.trim() !== '') {
             leadData.edit_trace = data.edit_trace;
@@ -3563,8 +3699,6 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
       const dateRangeSelect = document.getElementById('dateRangeSelect');
       const customDateWrap = document.getElementById('customDateWrap');
       const customStartInput = document.getElementById('customStartDate');
-      const customEndInput = document.getElementById('customEndDate');
-      const customGoBtn = document.getElementById('customDateGo');
 
       const monthLabel = (d) => d.toLocaleString('default', { month: 'short' });
       const updateDateOptionLabels = () => {
@@ -3600,7 +3734,6 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
       const syncDateUi = () => {
         if (dateRangeSelect) dateRangeSelect.value = dateMode;
         if (customStartInput && customStartDate) customStartInput.value = customStartDate;
-        if (customEndInput && customEndDate) customEndInput.value = customEndDate;
         syncCustomWrap();
       };
       syncDateUi();
@@ -3611,26 +3744,24 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
           syncDateUi();
           if (dateMode !== 'custom') {
             customStartDate = '';
-            customEndDate = '';
             resetStateAndReload();
           }
         });
       }
 
-      const applyCustomRange = (startEl, endEl) => {
-        if (!startEl || !endEl) return;
+      const applyCustomStartDate = (startEl) => {
+        if (!startEl) return;
         const s = String(startEl.value || '').trim();
-        const e = String(endEl.value || '').trim();
-        if (!s || !e) return;
-        if (s > e) return;
+        if (!s) return;
         customStartDate = s;
-        customEndDate = e;
         dateMode = 'custom';
         syncDateUi();
         resetStateAndReload();
       };
 
-      if (customGoBtn) customGoBtn.addEventListener('click', () => applyCustomRange(customStartInput, customEndInput));
+      if (customStartInput) {
+        customStartInput.addEventListener('change', () => applyCustomStartDate(customStartInput));
+      }
       const bindDatePickerOpen = (inputEl) => {
         if (!inputEl) return;
         const wrap = inputEl.closest('.date-input-wrap');
@@ -3644,21 +3775,6 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
         if (wrap) wrap.addEventListener('click', open);
       };
       bindDatePickerOpen(customStartInput);
-      bindDatePickerOpen(customEndInput);
-
-      const syncDateConstraints = () => {
-        if (!customStartInput || !customEndInput) return;
-        const s = String(customStartInput.value || '').trim();
-        const e = String(customEndInput.value || '').trim();
-        if (s) customEndInput.min = s;
-        else customEndInput.removeAttribute('min');
-        if (s && e && e < s) {
-          customEndInput.value = s;
-        }
-      };
-      if (customStartInput) customStartInput.addEventListener('change', () => { syncDateConstraints(); });
-      if (customEndInput) customEndInput.addEventListener('change', () => { syncDateConstraints(); });
-      syncDateConstraints();
 
       // Initialize lastScrollCardsCount
       lastScrollCardsCount = 0;
@@ -3768,6 +3884,64 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
             pop.style.left = `${Math.round(left)}px`;
             pop.style.visibility = 'visible';
             tracePopoverAnchorId = leadId;
+            return;
+          }
+
+          const deleteBtn = event.target.closest('.lead-delete-btn');
+          if (deleteBtn) {
+            event.preventDefault();
+            event.stopPropagation();
+            if (!CAN_DELETE_LEAD) return;
+
+            const card = deleteBtn.closest('.lead-card');
+            const leadId = (deleteBtn.getAttribute('data-lead-id') || (card ? card.getAttribute('data-lead-id') : '') || '').trim();
+            const leadName = card ? (card.getAttribute('data-name') || '').trim() : '';
+            if (!leadId) {
+              showAutoSaveNotification('Lead id missing.', null, 'error');
+              return;
+            }
+            const label = leadName ? `${leadName} (${leadId})` : `Lead ${leadId}`;
+            if (!confirm(`Delete ${label}? This cannot be undone.`)) return;
+
+            deleteBtn.disabled = true;
+            fetch('lead_save.php', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'same-origin',
+              body: JSON.stringify({ deleteLead: true, leadId })
+            })
+              .then(async (response) => {
+                const raw = await response.text();
+                let data = null;
+                try {
+                  data = raw ? JSON.parse(raw) : null;
+                } catch (e) {
+                  throw new Error(raw || 'Failed to delete lead.');
+                }
+                if (!response.ok || !data || !data.success) {
+                  throw new Error((data && data.message) || 'Failed to delete lead.');
+                }
+                return data;
+              })
+              .then(() => {
+                if (card) {
+                  const wrap = card.closest('.col.s12');
+                  const target = wrap || card;
+                  target.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
+                  target.style.opacity = '0';
+                  target.style.transform = 'scale(0.98)';
+                  window.setTimeout(() => {
+                    target.remove();
+                    rebuildDaySeparators();
+                  }, 180);
+                }
+                allLeadsMap.delete(parseInt(leadId, 10));
+                showAutoSaveNotification('Lead deleted.', null, 'success');
+              })
+              .catch((err) => {
+                deleteBtn.disabled = false;
+                showAutoSaveNotification(err && err.message ? err.message : 'Failed to delete lead.', leadId, 'error');
+              });
             return;
           }
 
@@ -4044,6 +4218,9 @@ $userCode = $letters !== '' ? substr($letters, 0, 3) : '';
                   showAutoSaveNotification(data.message || 'Order placed.', leadId);
                   writeOrderDraft(leadId, { quote: leadData.quote, installation_date: leadData.installation_date });
                   if (data.assign) leadData.Assign = data.assign;
+                  if (typeof data.originally_assigned === 'string') {
+                    leadData.originally_assigned = data.originally_assigned.trim();
+                  }
                   if (data.quote_links !== undefined) leadData.quote_links = data.quote_links;
                   if (data.edit_trace !== undefined) leadData.edit_trace = data.edit_trace;
                   updateSingleCard(leadData, leadId);
@@ -4547,7 +4724,9 @@ quoteModal.addEventListener('click', (e) => {
       const was = normalizeAssignValue(assignTag.dataset.assignValue || '');
       assignTag.dataset.assignValue = String(assignVal || '').trim();
       const isOpen = next === 'open';
+      const isSur = next === 'sur';
       assignTag.classList.toggle('is-open', isOpen);
+      assignTag.classList.toggle('is-sur', isSur);
       if (isOpen && was !== 'open') {
         assignTag.classList.remove('open-animate');
         void assignTag.offsetWidth;
@@ -4695,7 +4874,7 @@ quoteModal.addEventListener('click', (e) => {
       updateSpecsFromForm(cardElement, rid);
 
       if (assignInput) {
-        assignInput.addEventListener('keyup', () => updateAssignFromForm(cardElement, rid));
+        assignInput.addEventListener('change', () => updateAssignFromForm(cardElement, rid));
         updateAssignFromForm(cardElement, rid);
       }
 
@@ -5242,6 +5421,14 @@ Looking forward to getting this set up for you soon!`;
           url: `${window.location.origin}/admin_v2/smart/quote.php`
         });
       }
+      if (allowedPages.includes('gads_stats')) {
+        links.push({
+          label: 'Google Ads Command Center',
+          icon: 'fas fa-chart-line',
+          color: '#dc2626',
+          url: `${window.location.origin}/admin_v2/smart/gads_conversion.php`
+        });
+      }
       links.push(
         {
           label: 'Payments',
@@ -5330,6 +5517,34 @@ Looking forward to getting this set up for you soon!`;
         audio.play().catch(e => console.error('Audio playback failed', e));
     }
 
+    const LEAD_NOTIFICATION_KEY = 'smartronic_notified_lead_ids_v1';
+    function readNotifiedLeadIds() {
+        try {
+            return new Set(JSON.parse(localStorage.getItem(LEAD_NOTIFICATION_KEY) || '[]').map(String));
+        } catch (e) {
+            return new Set();
+        }
+    }
+
+    function writeNotifiedLeadIds(ids) {
+        try {
+            localStorage.setItem(LEAD_NOTIFICATION_KEY, JSON.stringify(Array.from(ids).slice(-300)));
+        } catch (e) {}
+    }
+
+    function markLeadIdsNotified(ids) {
+        const notified = readNotifiedLeadIds();
+        ids.map(String).filter(Boolean).forEach(id => notified.add(id));
+        writeNotifiedLeadIds(notified);
+    }
+
+    function getUnnotifiedLeadIds(rows) {
+        const notified = readNotifiedLeadIds();
+        return (Array.isArray(rows) ? rows : [])
+            .map(row => String(row && row.id || '').trim())
+            .filter(id => id && !notified.has(id));
+    }
+
     let lastPresenceActivityAt = Date.now();
 
     function touchPresenceActivity() {
@@ -5350,17 +5565,32 @@ Looking forward to getting this set up for you soon!`;
         const nameMap = {
             amr: 'Amreen',
             var: 'Varsha',
-            zoy: 'Zoya'
+            sur: 'Surya'
         };
-        const allow = new Set(Object.keys(nameMap));
-        const seen = new Set();
+        const normalizePresenceCode = (user) => {
+            const codeRaw = user && user.code ? String(user.code) : '';
+            const nameRaw = user && user.name ? String(user.name) : '';
+            const candidates = [codeRaw, nameRaw];
+            for (const candidate of candidates) {
+                const value = candidate.toLowerCase().replace(/[^a-z]/g, '');
+                if (!value) continue;
+                if (value.startsWith('amreen') || value.startsWith('amr')) return 'amr';
+                if (value.startsWith('varsha') || value.startsWith('var')) return 'var';
+                if (value.startsWith('zoya') || value.startsWith('zoy')) return 'zoy';
+                if (value.startsWith('surya') || value.startsWith('sur')) return 'sur';
+                return value.slice(0, 3);
+            }
+            return '';
+        };
+        const byCode = new Map();
         users.forEach((u) => {
-            const code = (u && u.code ? String(u.code) : '').trim();
-            if (!code) return;
-            const key = code.toLowerCase();
-            if (!allow.has(key)) return;
-            if (seen.has(key)) return;
-            seen.add(key);
+            const key = normalizePresenceCode(u);
+            if (!key || byCode.has(key)) return;
+            byCode.set(key, u);
+        });
+
+        Object.keys(nameMap).forEach((key) => {
+            const u = byCode.get(key) || { active: false };
 
             const chip = document.createElement('span');
             chip.className = 'active-user-chip';
@@ -5409,16 +5639,24 @@ Looking forward to getting this set up for you soon!`;
                 if (data.success && data.new_leads && data.new_leads.length > 0) {
                     const newLeads = data.new_leads;
                     console.log(`Found ${newLeads.length} new leads!`);
+                    const visibleNewLeads = newLeads.filter(row => {
+                        const id = String(row && row.id || '').trim();
+                        return id && !document.querySelector(`.lead-card[data-lead-id="${id}"]`);
+                    });
+                    const unnotifiedIds = getUnnotifiedLeadIds(visibleNewLeads);
                     
                     // Update FAB
-                    newLeadsCount += newLeads.length;
-                    if (newLeadsFab) {
+                    newLeadsCount += visibleNewLeads.length;
+                    if (newLeadsFab && visibleNewLeads.length > 0) {
                         newLeadsFab.classList.add('visible');
                         newLeadsFab.innerHTML = `New <big>${newLeadsCount}</big> Lead${newLeadsCount === 1 ? '' : 's'}`;
                     }
 
-                    // Play Notification Sound
-                    playNotificationSound();
+                    // Play Notification Sound only once per truly new lead id.
+                    if (unnotifiedIds.length > 0) {
+                        playNotificationSound();
+                        markLeadIdsNotified(unnotifiedIds);
+                    }
 
                     // showAutoSaveNotification(`Found ${newLeads.length} new lead(s)! Adding to list...`, null, 'success');
                     
@@ -5433,12 +5671,7 @@ Looking forward to getting this set up for you soon!`;
                     // prepend(103) -> [103, 102, 101, ...]
                     // Yes, this results in DESC order at the top. Correct.
 
-                    newLeads.forEach(row => {
-                        // Check for duplicates before adding
-                        if (document.querySelector(`.lead-card[data-lead-id="${row.id}"]`)) {
-                            return; // Skip duplicate
-                        }
-
+                    visibleNewLeads.forEach(row => {
                         const newCard = createRow(row);
                         
                         // Add highlight effect
@@ -5468,6 +5701,10 @@ Looking forward to getting this set up for you soon!`;
                         if (newId > lastSeenLeadId) {
                             lastSeenLeadId = newId;
                         }
+                    });
+                    newLeads.forEach(row => {
+                        const newId = parseInt(row && row.id);
+                        if (newId > lastSeenLeadId) lastSeenLeadId = newId;
                     });
 
                     rebuildDaySeparators();

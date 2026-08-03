@@ -1,0 +1,3 @@
+# Add this in cPanel Cron Jobs or server crontab to sync every hour.
+# Update /usr/bin/php if your server PHP path is different.
+0 * * * * /usr/bin/php /home/u398852039/domains/smartronic.online/public_html/admin_v2/smart/sync_google_ads.php >/dev/null 2>&1

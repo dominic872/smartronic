@@ -18,13 +18,18 @@ try {
 $monthlyStats = [];
 for ($i = -5; $i <= 0; $i++) {
     $monthStart = date('Y-m-01', strtotime("$i months"));
-    $monthEnd = date('Y-m-t', strtotime("$i months"));
+    $monthEnd = $i === 0 ? date('Y-m-d') : date('Y-m-t', strtotime("$i months"));
     $monthName = date('M', strtotime("$i months"));
     
-    $sqlCount = "SELECT COUNT(*) as count, SUM(CAST(REPLACE(price, ',', '') AS DECIMAL(10,2))) as total_paid 
+    $customerAmountSql = "CASE
+                    WHEN CAST(REPLACE(COALESCE(NULLIF(price, ''), '0'), ',', '') AS DECIMAL(10,2)) > 0
+                    THEN CAST(REPLACE(COALESCE(NULLIF(price, ''), '0'), ',', '') AS DECIMAL(10,2))
+                    ELSE CAST(REPLACE(COALESCE(NULLIF(amount_paid, ''), '0'), ',', '') AS DECIMAL(10,2))
+                 END";
+    $sqlCount = "SELECT COUNT(*) as count, SUM($customerAmountSql) as total_paid
                  FROM orders 
                  WHERE date BETWEEN :from AND :to 
-                 AND price IS NOT NULL 
+                 AND ($customerAmountSql) > 0
                  AND (record_status IS NULL OR record_status != 'DELETED')";
     $stmtCount = $pdo->prepare($sqlCount);
     $stmtCount->execute(['from' => $monthStart, 'to' => $monthEnd]);
@@ -69,7 +74,9 @@ date_default_timezone_set('Asia/Kolkata');
 echo '<!DOCTYPE html>
 <html>
 <head>
-    <title>Profit Calculator</title>
+    <title>SM Profit | Calculator</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/content/uploads/2025/01/cropped-Site-Icon-32x32.png">
+  <link rel="apple-touch-icon" href="/content/uploads/2025/01/cropped-Site-Icon-180x180.png">
     <style>
         body {
             font-family: "Segoe UI", sans-serif;
@@ -214,15 +221,15 @@ echo '<!DOCTYPE html>
 
 // Calculate date ranges for last 6 months
 $currentMonthFrom = date('Y-m-01');
-$currentMonthTo = date('Y-m-t');
+$currentMonthTo = date('Y-m-d');
 
 // Generate last 6 months data (from oldest to newest)
 $months = [];
 for ($i = -5; $i <= 0; $i++) {
     $monthStart = date('Y-m-01', strtotime("$i months"));
-    $monthEnd = date('Y-m-t', strtotime("$i months"));
-    $monthName = date('F Y', strtotime("$i months"));
-    $monthShort = date('M', strtotime("$i months"));
+    $monthEnd = $i === 0 ? date('Y-m-d') : date('Y-m-t', strtotime("$i months"));
+    $monthName = date('F Y', strtotime("$i months")) . ($i === 0 ? ' so far' : '');
+    $monthShort = date('M', strtotime("$i months")) . ($i === 0 ? '*' : '');
     $months[] = [
         'name' => $monthName,
         'short' => $monthShort,
@@ -276,52 +283,268 @@ if (isset($_GET['from']) && isset($_GET['to'])) {
     $fromDate = $_GET['from'];
     $toDate = $_GET['to'];
 
-    function getPriceFromOptions(array $options, string $key): int {
-        return $options[$key] ?? 0;
+    function profitParsePrice($value): float {
+        $n = (float)preg_replace('/[^0-9.\-]/', '', (string)($value ?? ''));
+        return is_finite($n) ? $n : 0.0;
     }
 
-    function calculatePoETotal(int $cameraCount): int {
-        $prices = [8 => 1125, 4 => 825];
-        $total = 0;
-        $remaining = $cameraCount;
-        while ($remaining > 8) {
-            $total += $prices[8];
-            $remaining -= 8;
-        }
-        if ($remaining > 0) {
-            $total += $prices[($remaining <= 4 || $remaining === 4 || $remaining === 8) ? min($remaining, 4) : 8];
-        }
-        return $total;
+    function profitNorm($value): string {
+        return preg_replace('/\s+/', '', strtoupper(trim((string)($value ?? ''))));
     }
 
-    function getChannel(int $numCameras): int {
-        foreach ([4, 8, 16, 32] as $ch) {
-            if ($numCameras <= $ch) return $ch;
+    function profitNormBrand($value): string {
+        $text = strtoupper(trim((string)($value ?? '')));
+        if ($text === 'HIKVISION') return 'HIKVISION';
+        if ($text === 'CPPLUS' || $text === 'CP PLUS') return 'CP PLUS';
+        if ($text === 'PRAMA') return 'PRAMA';
+        if ($text === 'SECUREYE') return 'SECUREYE';
+        return $text !== '' ? $text : 'PRAMA';
+    }
+
+    function profitNormResolution($value): string {
+        $text = profitNorm($value);
+        if (preg_match('/(\d+)(MP|K)?/i', $text, $m)) {
+            return $m[1] . (!empty($m[2]) ? strtoupper($m[2]) : 'MP');
         }
+        return $text !== '' ? $text : '2MP';
+    }
+
+    function profitNormSystemType($value): string {
+        $text = profitNorm($value);
+        if (strpos($text, 'NVR') !== false) return 'NVR';
+        if (strpos($text, 'WIFI') !== false) return 'WIFI';
+        if (strpos($text, 'WIRELESS') !== false) return 'Wireless';
+        return 'DVR';
+    }
+
+    function profitNormCamType($value): string {
+        $text = strtolower(trim((string)($value ?? '')));
+        if (strpos($text, 'hybrid') !== false || strpos($text, 'hybid') !== false) return 'hybrid';
+        if (strpos($text, 'full') !== false || strpos($text, 'colour') !== false || strpos($text, 'color') !== false) return 'full';
+        return 'normal';
+    }
+
+    function profitGetChannel(int $cameraCount): int {
+        if ($cameraCount <= 4) return 4;
+        if ($cameraCount <= 8) return 8;
+        if ($cameraCount <= 16) return 16;
         return 32;
     }
 
-    $hddOptions = [
-        '500GB' => 1550, '1TB' => 2750, '2TB' => 3650, '4TB (2YR)' => 5250,
-        '500 GB (1YR)' => 850, '1TB (1YR)' => 1950, '1TB (3YR)' => 3600,
-        '2TB (1YR)' => 2850, '2TB (3YR)' => 4050, '3TB (1YR)' => 3250,
-        '4TB (1YR)' => 5250, '4TB (3YR)' => 6650
-    ];
+    function profitFirstPricedOption($options): ?array {
+        foreach ((array)$options as $option) {
+            if (profitParsePrice($option['value'] ?? 0) > 0) return $option;
+        }
+        return null;
+    }
 
-    $recorderOptions = [
-        'DVR 2 MP 4CH' => 1950, 'DVR 2 MP 8CH' => 2850, 'DVR 2 MP 16CH' => 4950, 'DVR 2 MP 32CH' => 17750,
-        'DVR 5 MP 4CH' => 2780, 'DVR 5 MP 8CH' => 4500, 'DVR 5 MP 16CH' => 10000, 'DVR 5 MP 32CH' => 21500,
-        'NVR 4CH' => 2850, 'NVR 8CH' => 3390, 'NVR 16CH' => 4950, 'NVR 32CH' => 11050
-    ];
+    function profitPickCameraOption($options, string $camType): ?array {
+        $list = array_values(array_filter((array)$options, function ($option) {
+            return profitParsePrice($option['value'] ?? 0) > 0;
+        }));
+        if (!$list) return profitFirstPricedOption($options);
+        $wanted = profitNormCamType($camType);
+        usort($list, function ($a, $b) use ($wanted) {
+            $score = function ($option) use ($wanted) {
+                $label = strtolower((string)($option['label'] ?? ''));
+                if ($wanted === 'hybrid') return (strpos($label, 'hybrid') !== false || strpos($label, 'hybid') !== false) ? 10 : 0;
+                if ($wanted === 'full') return (strpos($label, 'full') !== false || strpos($label, 'colour') !== false || strpos($label, 'color') !== false) ? 10 : 0;
+                if (strpos($label, 'hybrid') !== false || strpos($label, 'hybid') !== false || strpos($label, 'full') !== false || strpos($label, 'colour') !== false || strpos($label, 'color') !== false) return 0;
+                if (strpos($label, 'mic') !== false) return 9;
+                if (strpos($label, 'normal') !== false || strpos($label, 'nv') !== false || strpos($label, 'night') !== false) return 8;
+                return 1;
+            };
+            return $score($b) <=> $score($a);
+        });
+        return $list[0] ?? null;
+    }
 
-    $cameraOptions = [
-        'DVR 2 MP' => 825, 'DVR 5 MP' => 1150, 'NVR 2 MP' => 2500, 'NVR 5 MP' => 2650
-    ];
+    function profitFindBrandNode(array $data, string $systemType, string $brand): ?array {
+        $typeNode = $data['Type'][$systemType] ?? null;
+        if (!is_array($typeNode)) return null;
+        if (isset($typeNode[$brand]) && is_array($typeNode[$brand])) return $typeNode[$brand];
+        foreach ($typeNode as $key => $node) {
+            if (profitNormBrand($key) === $brand && is_array($node)) return $node;
+        }
+        return null;
+    }
 
+    function profitPickRecorder(?array $brandNode, string $systemType, string $resolution, int $channel): ?array {
+        $channelKey = $channel . 'CH';
+        $recorderNode = null;
+        if ($systemType === 'DVR') {
+            $recorderNode = $brandNode[$resolution]['Recorder'] ?? null;
+        } else {
+            $recorderNode = $brandNode['Recorder'] ?? null;
+        }
+        if (!is_array($recorderNode)) return null;
+        $matchedKey = null;
+        foreach (array_keys($recorderNode) as $key) {
+            if (profitNorm($key) === $channelKey) {
+                $matchedKey = $key;
+                break;
+            }
+        }
+        $matchedKey = $matchedKey ?? array_key_first($recorderNode);
+        return $matchedKey !== null ? profitFirstPricedOption($recorderNode[$matchedKey] ?? []) : null;
+    }
+
+    function profitPickCamera(array $data, ?array $brandNode, string $systemType, string $brand, string $resolution, string $camType): ?array {
+        if ($brandNode) {
+            if ($systemType === 'DVR') {
+                return profitPickCameraOption($brandNode[$resolution]['Camera'] ?? [], $camType);
+            }
+            if (isset($brandNode['Camera'])) {
+                if (array_is_list($brandNode['Camera'])) return profitPickCameraOption($brandNode['Camera'], $camType);
+                $cameraNode = $brandNode['Camera'];
+                $resolutionOptions = $cameraNode[$resolution] ?? $cameraNode[array_key_first($cameraNode)] ?? [];
+                return profitPickCameraOption($resolutionOptions, $camType);
+            }
+        }
+
+        $wifiCameraNode = $data['Type']['WIFI']['Camera'] ?? null;
+        if (!is_array($wifiCameraNode)) return null;
+        $byResolution = $wifiCameraNode[$resolution] ?? $wifiCameraNode[array_key_first($wifiCameraNode)] ?? null;
+        if (!is_array($byResolution)) return null;
+        $byBrand = $byResolution[$brand] ?? $byResolution[array_key_first($byResolution)] ?? [];
+        return profitPickCameraOption($byBrand, $camType);
+    }
+
+    function profitPickHdd(array $data, string $hdd): array {
+        $wanted = profitNorm($hdd);
+        if ($wanted === '') return ['option' => null, 'price' => 0.0];
+        $groups = [];
+        foreach (($data['HDD'] ?? []) as $group) {
+            if (is_array($group)) $groups = array_merge($groups, $group);
+        }
+        $exact = null;
+        $preferred = null;
+        foreach ($groups as $option) {
+            $capacityMatches = profitNorm($option['capacity'] ?? '') === $wanted;
+            $labelMatches = strpos(profitNorm($option['label'] ?? ''), $wanted) !== false;
+            if (!$exact && ($capacityMatches || $labelMatches)) $exact = $option;
+            if (!$preferred && $capacityMatches && strtolower((string)($option['preferred'] ?? '')) === 'true') $preferred = $option;
+        }
+        $option = $preferred ?: $exact;
+        return ['option' => $option, 'price' => profitParsePrice($option['value'] ?? 0)];
+    }
+
+    function profitItemPrice(array $data, string $key, float $fallback = 0): float {
+        $price = profitParsePrice($data['items'][$key]['value'] ?? 0);
+        return $price ?: $fallback;
+    }
+
+    function calculateProfitMaterialFromData(array $data, array $order): array {
+        $cams = (int)($order['quantity'] ?? 0);
+        if ($cams <= 0) {
+            $cams = (int)($order['bullets'] ?? 0) + (int)($order['dome'] ?? 0);
+        }
+        $systemType = profitNormSystemType($order['product'] ?? 'DVR');
+        $brand = profitNormBrand($order['brand'] ?? 'PRAMA');
+        $resolution = profitNormResolution($order['resolution'] ?? '2MP');
+        $camType = (string)($order['cam_type'] ?? '');
+        $hdd = (string)($order['storage'] ?? '');
+        $channel = profitGetChannel($cams);
+        $missing = [];
+
+        $brandNode = profitFindBrandNode($data, $systemType, $brand);
+        if (!$brandNode) $missing[] = "$systemType $brand";
+
+        $cameraOption = profitPickCamera($data, $brandNode, $systemType, $brand, $resolution, $camType);
+        $recorderOption = profitPickRecorder($brandNode, $systemType, $resolution, $channel);
+        $hddResult = profitPickHdd($data, $hdd);
+
+        $cameraUnitPrice = profitParsePrice($cameraOption['value'] ?? 0);
+        $recorderPrice = profitParsePrice($recorderOption['value'] ?? 0);
+        $hddPrice = $hddResult['price'];
+
+        if (!$cameraUnitPrice) $missing[] = "$brand $resolution " . ($camType ?: 'camera');
+        if (!$recorderPrice && $systemType !== 'WIFI' && $systemType !== 'Wireless') $missing[] = "$brand {$channel}CH recorder";
+        if ($hdd !== '' && !$hddPrice) $missing[] = "$hdd HDD";
+
+        $smpsPrice = $cams <= 4 ? profitItemPrice($data, 'SMPS 4', 500) : profitItemPrice($data, 'SMPS 8', 800);
+        $poePrice = $cams <= 4 ? profitItemPrice($data, 'POE 4', 1500) : ($cams <= 8 ? profitItemPrice($data, 'POE 8', 2500) : profitItemPrice($data, 'POE 16', 4500));
+        $bncPrice = profitItemPrice($data, 'BNC WIRED', 20);
+        $dcPrice = profitItemPrice($data, 'DC', 20);
+        $backBoxPrice = profitItemPrice($data, 'BACK BOX', 20);
+        $dlinkPrice = profitItemPrice($data, 'Dlink', 875);
+        $cat6Price = profitItemPrice($data, 'Dlink Cat 6', $dlinkPrice ?: 975);
+
+        $accessories = $systemType === 'NVR'
+            ? $poePrice + ($backBoxPrice * $cams) + ($cat6Price * ceil($cams / 4))
+            : $smpsPrice + ($bncPrice * $cams * 2) + ($dcPrice * $cams) + ($backBoxPrice * $cams) + ($dlinkPrice * ceil($cams / 4));
+
+        $cameraTotal = $cameraUnitPrice * $cams;
+        $subtotal = $cameraTotal + $recorderPrice + $hddPrice + $accessories;
+        $gst = $subtotal * 0.18;
+
+        return [
+            'systemType' => $systemType,
+            'brand' => $brand,
+            'resolution' => $resolution,
+            'camType' => $camType,
+            'cams' => $cams,
+            'channel' => $channel,
+            'cameraLabel' => $cameraOption['label'] ?? '',
+            'cameraUnitPrice' => $cameraUnitPrice,
+            'cameraTotal' => $cameraTotal,
+            'recorderLabel' => $recorderOption['label'] ?? '',
+            'recorderPrice' => $recorderPrice,
+            'hddLabel' => $hddResult['option']['label'] ?? '',
+            'hddPrice' => $hddPrice,
+            'accessories' => $accessories,
+            'subtotal' => $subtotal,
+            'gst' => $gst,
+            'materialCost' => $subtotal + $gst,
+            'missing' => $missing,
+        ];
+    }
+
+    function profitGetOrderMonthKey($date): string {
+        $ts = strtotime((string)$date);
+        return $ts ? date('Y-m', $ts) : date('Y-m');
+    }
+
+    function profitLoadPricingSnapshot(string $monthKey): array {
+        static $cache = [];
+        if (isset($cache[$monthKey])) return $cache[$monthKey];
+
+        $sourcePath = __DIR__ . '/data.json';
+        $snapshotDir = __DIR__ . '/data_snapshots';
+        $snapshotPath = $snapshotDir . '/data_' . preg_replace('/[^0-9-]/', '', $monthKey) . '.json';
+
+        if (!is_dir($snapshotDir)) {
+            @mkdir($snapshotDir, 0755, true);
+        }
+
+        if (!is_file($snapshotPath) && is_file($sourcePath)) {
+            @copy($sourcePath, $snapshotPath);
+        }
+
+        $path = is_file($snapshotPath) ? $snapshotPath : $sourcePath;
+        $data = is_file($path) ? json_decode((string)file_get_contents($path), true) : [];
+        if (!is_array($data)) $data = [];
+
+        $cache[$monthKey] = [
+            'data' => $data,
+            'path' => $path,
+            'label' => basename($path)
+        ];
+        return $cache[$monthKey];
+    }
+
+    $snapshotNotice = "<div style='background:#eef6ff;border:1px solid #bfdbfe;color:#1e3a8a;padding:10px 12px;border-radius:6px;margin-bottom:14px;font-size:14px;'>Pricing source: monthly snapshots in <strong>data_snapshots</strong>. If a month has no snapshot yet, it is created from the current data.json the first time this report runs.</div>";
+    echo $snapshotNotice;
+
+    $customerAmountSql = "CASE
+            WHEN CAST(REPLACE(COALESCE(NULLIF(price, ''), '0'), ',', '') AS DECIMAL(10,2)) > 0
+            THEN CAST(REPLACE(COALESCE(NULLIF(price, ''), '0'), ',', '') AS DECIMAL(10,2))
+            ELSE CAST(REPLACE(COALESCE(NULLIF(amount_paid, ''), '0'), ',', '') AS DECIMAL(10,2))
+        END";
     $sql = "SELECT * 
             FROM orders 
             WHERE date BETWEEN :from AND :to 
-            AND price IS NOT NULL 
+            AND ($customerAmountSql) > 0
             AND (record_status IS NULL OR record_status != 'DELETED')";
     $stmt = $pdo->prepare($sql);
     $stmt->execute(['from' => $fromDate, 'to' => $toDate]);
@@ -334,32 +557,25 @@ if (isset($_GET['from']) && isset($_GET['to'])) {
     $orderCards = ''; // Store order cards HTML
 
     foreach ($orders as $order) {
-        $numCams = (int) $order['quantity'];
-        $dvrType = strtoupper(trim($order['product']));
-        $hddSize = strtoupper(trim($order['storage']));
-        $resolution = strtoupper(trim($order['resolution']));
-        $customerPrice = floatval(str_replace(',', '', $order['price']));
+        $priceValue = profitParsePrice($order['price'] ?? 0);
+        $amountPaidValue = profitParsePrice($order['amount_paid'] ?? 0);
+        $customerPrice = $priceValue > 0 ? $priceValue : $amountPaidValue;
+        if ($customerPrice <= 0) {
+            continue;
+        }
 
-        $channel = getChannel($numCams);
-        $recorderKey = $dvrType === 'DVR' ? "$dvrType $resolution {$channel}CH" : "$dvrType {$channel}CH";
-        $cameraKey = "$dvrType $resolution";
-
-        $cameraUnitPrice = getPriceFromOptions($cameraOptions, $cameraKey);
-        $cameraTotal = $cameraUnitPrice * $numCams;
-        $recorderPrice = getPriceFromOptions($recorderOptions, $recorderKey);
-        $hddPrice = getPriceFromOptions($hddOptions, $hddSize);
-        $poePrice = ($dvrType === 'NVR') ? calculatePoETotal($numCams) : 0;
-        $cablePrice = ($dvrType === 'DVR') ? 1000 : 1600;
-        $smpsPrice = ($dvrType === 'DVR') ? (($numCams > 8) ? 750 : 400) : 0;
-        $accessories = ($numCams * 80) + $cablePrice;
-
-        $subtotal = $hddPrice + $cameraTotal + $recorderPrice + $poePrice + $smpsPrice + $accessories;
-        $gst = $subtotal * 0.18;
-        $vendorCost = $subtotal + $gst;
-        if ($dvrType != 'WIFI') {
-             $profit = $customerPrice - $vendorCost;
-        } else {
-             $profit = $customerPrice * .33;
+        $monthKey = profitGetOrderMonthKey($order['date'] ?? '');
+        $pricingSnapshot = profitLoadPricingSnapshot($monthKey);
+        $breakup = calculateProfitMaterialFromData($pricingSnapshot['data'], $order);
+        $numCams = $breakup['cams'];
+        $dvrType = $breakup['systemType'];
+        $hddSize = strtoupper(trim((string)$order['storage']));
+        $resolution = $breakup['resolution'];
+        $vendorCost = $breakup['materialCost'];
+        $profit = $customerPrice - $vendorCost;
+        $missingHtml = '';
+        if (!empty($breakup['missing'])) {
+            $missingHtml = "<div style='color:#b91c1c;font-size:13px;margin-top:6px;'><span class='label'>Missing data.json pricing:</span> " . htmlspecialchars(implode(', ', $breakup['missing'])) . "</div>";
         }
        
 
@@ -371,9 +587,11 @@ if (isset($_GET['from']) && isset($_GET['to'])) {
         $orderCards .= "<h4>{$order['name']} ({$order['idno']})</h4> ";
         $orderCards .= " <span class='profit label'> ₹" . number_format($profit) . "</span>";
         $orderCards .= "<div><span class='label'>Phone:</span> {$order['phone']} | <span class='label'>Area:</span> {$order['area']} | <span class='label'>Owner:</span> {$order['Owner']}</div>";
-        $orderCards .= "<div><span class='label'>Product:</span> $dvrType | <span class='label'>Resolution:</span> $resolution | <span class='label'>Storage:</span> $hddSize</div>";
-        $orderCards .= "<div><span class='label'>Quantity:</span> $numCams | <span class='label'>Paid:</span> ₹" . number_format($customerPrice) . "</div>";
-        $orderCards .= "<div><span class='label'>Vendor Cost:</span> ₹" . number_format($vendorCost) . "</div>";
+        $orderCards .= "<div><span class='label'>Product:</span> $dvrType | <span class='label'>Brand:</span> {$breakup['brand']} | <span class='label'>Resolution:</span> $resolution | <span class='label'>Storage:</span> $hddSize</div>";
+        $orderCards .= "<div><span class='label'>Quantity:</span> $numCams | <span class='label'>Paid:</span> ₹" . number_format($customerPrice) . " <span style='color:#6b7280;font-size:13px;'>(" . ($priceValue > 0 ? 'actual amount' : 'amount paid') . ")</span></div>";
+        $orderCards .= "<div><span class='label'>Vendor Cost:</span> ₹" . number_format($vendorCost) . " <span style='color:#6b7280;font-size:13px;'>(Camera ₹" . number_format($breakup['cameraTotal']) . " + Recorder ₹" . number_format($breakup['recorderPrice']) . " + HDD ₹" . number_format($breakup['hddPrice']) . " + Accessories ₹" . number_format($breakup['accessories']) . " + GST ₹" . number_format($breakup['gst']) . ")</span></div>";
+        $orderCards .= "<div style='color:#6b7280;font-size:12px;margin-top:4px;'><span class='label'>Pricing snapshot:</span> " . htmlspecialchars($pricingSnapshot['label']) . "</div>";
+        $orderCards .= $missingHtml;
         $orderCards .= "</div>";
     }
     

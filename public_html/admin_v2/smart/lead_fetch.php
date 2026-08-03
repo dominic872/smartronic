@@ -22,7 +22,7 @@ $conn->query("SET time_zone = '+05:30'");
 date_default_timezone_set('Asia/Kolkata');
 
 $role = $_COOKIE['auth_role'] ?? '';
-$isAdmin = ($role === 'admin');
+$isAdmin = in_array(strtolower(trim((string)$role)), ['admin', 'manager'], true);
 $isMarket = ($role === 'market');
 if (!$isAdmin && !$isMarket) {
     http_response_code(403);
@@ -56,6 +56,9 @@ if ($origAssignColRes && $origAssignColRes->num_rows === 0) {
 $hasUpdatedAt = false;
 $colRes = $conn->query("SHOW COLUMNS FROM leads LIKE 'updated_at'");
 if ($colRes && $colRes->num_rows > 0) $hasUpdatedAt = true;
+$hasQuoteLinks = false;
+$quoteLinksColRes = $conn->query("SHOW COLUMNS FROM leads LIKE 'quote_links'");
+if ($quoteLinksColRes && $quoteLinksColRes->num_rows > 0) $hasQuoteLinks = true;
 $tsExpr = $hasUpdatedAt ? "COALESCE(updated_at, created_at)" : "created_at";
 $openCond = "(COALESCE(TRIM(Assign), '') = '' OR LOWER(TRIM(Assign)) = 'open')";
 $statusCol = null;
@@ -67,14 +70,16 @@ if ($statusCol === null) {
 }
 $statusColSql = $statusCol !== null ? "`$statusCol`" : null;
 $assignNotOpenCond = "COALESCE(TRIM(Assign), '') <> '' AND TRIM(Assign) <> '-' AND LOWER(TRIM(Assign)) <> 'open' AND LOWER(TRIM(Assign)) <> 'na'";
+$quoteNotSentCond = $hasQuoteLinks ? "(quote_links IS NULL OR TRIM(quote_links) = '')" : "1=1";
+$staleBaseCond = "$assignNotOpenCond AND $quoteNotSentCond AND $tsExpr IS NOT NULL AND TIMESTAMPDIFF(MINUTE, $tsExpr, NOW()) >= 90";
 $hour = (int)date('G');
 $inQuietWindow = ($hour >= 20 || $hour < 9);
 if (!$inQuietWindow) {
     if ($statusColSql !== null) {
         $statusEmptyCond = "(COALESCE(TRIM($statusColSql), '') = '' OR TRIM($statusColSql) = '-' OR LOWER(TRIM($statusColSql)) = 'na')";
-        $staleRes = $conn->query("SELECT id FROM leads WHERE $assignNotOpenCond AND $statusEmptyCond AND created_at IS NOT NULL AND TIMESTAMPDIFF(MINUTE, created_at, NOW()) >= 90 LIMIT 25");
+        $staleRes = $conn->query("SELECT id FROM leads WHERE $staleBaseCond AND $statusEmptyCond LIMIT 25");
     } else {
-        $staleRes = $conn->query("SELECT id FROM leads WHERE $assignNotOpenCond AND $tsExpr IS NOT NULL AND TIMESTAMPDIFF(MINUTE, $tsExpr, NOW()) >= 90 LIMIT 25");
+        $staleRes = $conn->query("SELECT id FROM leads WHERE $staleBaseCond LIMIT 25");
     }
     $staleIds = [];
     if ($staleRes) {
@@ -253,7 +258,7 @@ $dateModeRaw = isset($_GET['date_mode']) ? trim((string)$_GET['date_mode']) : ''
 $dateModeNorm = strtolower(preg_replace('/[^a-z_]/', '', $dateModeRaw));
 $dateModeNorm = substr($dateModeNorm, 0, 24);
 $dateStartRaw = isset($_GET['date_start']) ? trim((string)$_GET['date_start']) : '';
-$dateEndRaw = isset($_GET['date_end']) ? trim((string)$_GET['date_end']) : '';
+$jumpEndDt = null;
 
 // ✅ Fetch a single lead by ID
 if (!empty($leadId)) {
@@ -388,13 +393,10 @@ if (in_array($dateModeNorm, ['this_month', 'last_month', 'month_minus_2', 'last_
         $startDt = (clone $thisMonthStart)->modify('-1 month');
         $endDt = (clone $thisMonthStart)->modify('+1 month');
     } elseif ($dateModeNorm === 'custom') {
-        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateStartRaw) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateEndRaw)) {
-            $startDt = DateTime::createFromFormat('Y-m-d H:i:s', $dateStartRaw . ' 00:00:00', $tz) ?: null;
-            $endBase = DateTime::createFromFormat('Y-m-d H:i:s', $dateEndRaw . ' 00:00:00', $tz) ?: null;
-            if ($startDt && $endBase) {
-                if ($dateStartRaw <= $dateEndRaw) {
-                    $endDt = (clone $endBase)->modify('+1 day');
-                }
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateStartRaw)) {
+            $endBase = DateTime::createFromFormat('!Y-m-d', $dateStartRaw, $tz) ?: null;
+            if ($endBase && $endBase->format('Y-m-d') === $dateStartRaw) {
+                $jumpEndDt = (clone $endBase)->modify('+1 day');
             }
         }
     }
@@ -453,6 +455,35 @@ if (!empty($search)) {
     }
 
     $andConditions[] = "(" . implode(" OR ", $orConditions) . ")";
+}
+
+if ($dateModeNorm === 'custom' && $jumpEndDt && empty($midsRaw)) {
+    $jumpEndStr = $conn->real_escape_string($jumpEndDt->format('Y-m-d H:i:s'));
+    $anchorConditions = $andConditions;
+    $anchorConditions[] = "(created_at < '$jumpEndStr')";
+    $anchorSql = "SELECT id FROM leads";
+    if (!empty($anchorConditions)) {
+        $anchorSql .= " WHERE " . implode(" AND ", $anchorConditions);
+    }
+    $anchorSql .= " ORDER BY id DESC LIMIT 1";
+    $anchorRes = $conn->query($anchorSql);
+
+    $jumpConditions = $andConditions;
+    if ($anchorRes && ($anchorRow = $anchorRes->fetch_assoc())) {
+        $anchorId = (int)($anchorRow['id'] ?? 0);
+        $jumpConditions[] = "(id > $anchorId)";
+    }
+    $jumpCountSql = "SELECT COUNT(*) AS c FROM leads";
+    if (!empty($jumpConditions)) {
+        $jumpCountSql .= " WHERE " . implode(" AND ", $jumpConditions);
+    }
+    $jumpCountRes = $conn->query($jumpCountSql);
+    $jumpAnchorOffset = 0;
+    if ($jumpCountRes && ($jumpCountRow = $jumpCountRes->fetch_assoc())) {
+        $jumpAnchorOffset = max(0, (int)($jumpCountRow['c'] ?? 0));
+    }
+    $offset = max(0, $jumpAnchorOffset - (int)floor($limit / 2));
+    header('X-Lead-Start-Offset: ' . $offset);
 }
 
 if (isset($_GET['count_summary'])) {

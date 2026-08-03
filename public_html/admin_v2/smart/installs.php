@@ -3,6 +3,7 @@ ob_start();
 require_once '../auth.php'; // Assuming we create auth.php in admin folder
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
+mysqli_report(MYSQLI_REPORT_OFF);
 require '../config.php'; // contains $mysqli = new mysqli(...);
 $error = '';
 
@@ -19,6 +20,259 @@ requireSmartPageAccess('install', $role, $authPages);
 
 // Set timezone to India
 date_default_timezone_set('Asia/Kolkata');
+
+function ensureOrdersMapCoordColumns(mysqli $conn): void {
+    static $done = false;
+    if ($done || $conn->connect_error) return;
+    $done = true;
+
+    $needed = [
+        'map_lat' => "ALTER TABLE orders ADD COLUMN map_lat DECIMAL(10,7) NULL DEFAULT NULL",
+        'map_lng' => "ALTER TABLE orders ADD COLUMN map_lng DECIMAL(10,7) NULL DEFAULT NULL",
+        'admin_event_comment' => "ALTER TABLE orders ADD COLUMN admin_event_comment TEXT NULL DEFAULT NULL",
+        'city' => "ALTER TABLE orders ADD COLUMN city VARCHAR(40) NOT NULL DEFAULT 'Bangalore'",
+        'pending_amount' => "ALTER TABLE orders ADD COLUMN pending_amount DECIMAL(12,2) NOT NULL DEFAULT 0",
+    ];
+
+    foreach ($needed as $column => $sql) {
+        $safeColumn = $conn->real_escape_string($column);
+        $res = $conn->query("SELECT COUNT(*) AS c FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'orders' AND COLUMN_NAME = '{$safeColumn}'");
+        $row = $res ? $res->fetch_assoc() : null;
+        if (!$row || (int)$row['c'] === 0) {
+            $conn->query($sql);
+        }
+    }
+}
+
+function ensureInstallHistoryTable(mysqli $conn): void {
+    static $done = false;
+    if ($done || $conn->connect_error) return;
+    $done = true;
+
+    $conn->query("CREATE TABLE IF NOT EXISTS install_history (
+        id INT NOT NULL AUTO_INCREMENT,
+        order_idno VARCHAR(50) NOT NULL,
+        order_name VARCHAR(255) NULL DEFAULT NULL,
+        action_type VARCHAR(80) NOT NULL,
+        action_label VARCHAR(255) NOT NULL,
+        action_details LONGTEXT NULL DEFAULT NULL,
+        username VARCHAR(255) NULL DEFAULT NULL,
+        user_role VARCHAR(64) NULL DEFAULT NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY idx_install_history_order (order_idno),
+        KEY idx_install_history_created (created_at),
+        KEY idx_install_history_action (action_type)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+}
+
+ensureOrdersMapCoordColumns($conn);
+ensureInstallHistoryTable($conn);
+
+function installsIsAdminRole(): bool {
+    $role = isset($_COOKIE['auth_role']) ? trim((string)$_COOKIE['auth_role']) : '';
+    return strtolower($role) === 'admin';
+}
+
+function updateOrderAdminEventComment(mysqli $conn, string $id, string $comment): void {
+    if ($id === '' || $conn->connect_error || !installsIsAdminRole()) return;
+    $stmt = $conn->prepare("UPDATE orders SET admin_event_comment = ? WHERE idno = ?");
+    if (!$stmt) return;
+    $stmt->bind_param("ss", $comment, $id);
+    $stmt->execute();
+    $stmt->close();
+}
+
+function installHistoryUsername(): string {
+    global $nameAssign, $authUsername, $displayName;
+    $candidates = [
+        $nameAssign ?? '',
+        $displayName ?? '',
+        $authUsername ?? '',
+        $_COOKIE['auth_username'] ?? '',
+        $_COOKIE['username'] ?? '',
+        $_COOKIE['auth_user'] ?? '',
+        $_COOKIE['name'] ?? '',
+    ];
+    foreach ($candidates as $candidate) {
+        $candidate = trim((string)$candidate);
+        if ($candidate !== '') return $candidate;
+    }
+    return 'Unknown';
+}
+
+function installHistoryRole(): string {
+    global $role;
+    $candidate = trim((string)($role ?? ($_COOKIE['auth_role'] ?? '')));
+    return $candidate !== '' ? $candidate : 'unknown';
+}
+
+function fetchInstallSnapshot(mysqli $conn, string $id): ?array {
+    if ($id === '' || $conn->connect_error) return null;
+    $sql = "SELECT idno, name, quantity, bullets, dome, storage, monitor, product, area, city, time, date, Owner, technician, helper, `order`, resolution, brand, cam_type, Map, map_lat, map_lng, rack, notes, admin_event_comment, amount_paid, fully_paid, price, extras, pending_amount, pdf_sent, record_status FROM orders WHERE idno = ? LIMIT 1";
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) return null;
+    $stmt->bind_param("s", $id);
+    if (!$stmt->execute()) {
+        $stmt->close();
+        return null;
+    }
+    $result = $stmt->get_result();
+    $row = $result ? $result->fetch_assoc() : null;
+    $stmt->close();
+    return $row ?: null;
+}
+
+function logInstallHistory(mysqli $conn, string $id, string $actionType, string $actionLabel, array $details = [], ?array $snapshot = null): void {
+    try {
+        if ($id === '' || $conn->connect_error) return;
+        $snapshot = $snapshot ?: fetchInstallSnapshot($conn, $id);
+        $orderName = isset($snapshot['name']) ? trim((string)$snapshot['name']) : '';
+        if ($orderName === '' && isset($details['name'])) $orderName = trim((string)$details['name']);
+        $detailsJson = !empty($details) ? json_encode($details, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : null;
+        $username = installHistoryUsername();
+        $userRole = installHistoryRole();
+        $stmt = $conn->prepare("INSERT INTO install_history (order_idno, order_name, action_type, action_label, action_details, username, user_role) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        if (!$stmt) return;
+        $stmt->bind_param("sssssss", $id, $orderName, $actionType, $actionLabel, $detailsJson, $username, $userRole);
+        $stmt->execute();
+        $stmt->close();
+    } catch (Throwable $e) {
+        error_log('Install history log failed: ' . $e->getMessage());
+    }
+}
+
+function installHistoryValue($value): string {
+    if ($value === null) return '';
+    return trim((string)$value);
+}
+
+function buildInstallChangedFields(?array $before, ?array $after): array {
+    if (!$before || !$after) return [];
+    $fields = [
+        'name' => 'Name',
+        'quantity' => 'Cameras',
+        'bullets' => 'Bullets',
+        'dome' => 'Dome',
+        'storage' => 'HDD',
+        'monitor' => 'Monitor',
+        'product' => 'Type',
+        'area' => 'Location',
+        'city' => 'City',
+        'time' => 'Time',
+        'Owner' => 'Owner',
+        'technician' => 'Technician',
+        'helper' => 'Helper',
+        'order' => 'Order',
+        'resolution' => 'Resolution',
+        'brand' => 'Brand',
+        'cam_type' => 'Camera type',
+        'Map' => 'Map',
+        'map_lat' => 'Map latitude',
+        'map_lng' => 'Map longitude',
+        'rack' => 'Rack',
+        'notes' => 'Notes',
+    ];
+    $changed = [];
+    foreach ($fields as $field => $label) {
+        $old = installHistoryValue($before[$field] ?? '');
+        $new = installHistoryValue($after[$field] ?? '');
+        if ($old !== $new) {
+            $changed[$label] = ['old' => $old, 'new' => $new];
+        }
+    }
+    return $changed;
+}
+
+function logInstallSaveHistory(mysqli $conn, string $id, ?array $before, ?array $after): void {
+    if (!$after) return;
+    if (!$before) {
+        logInstallHistory($conn, $id, 'created', 'Created install', [
+            'name' => $after['name'] ?? '',
+            'date' => normalizeInstallDateInput($after['date'] ?? null),
+            'time' => $after['time'] ?? '',
+        ], $after);
+        return;
+    }
+
+    $oldDate = normalizeInstallDateInput($before['date'] ?? null) ?: '';
+    $newDate = normalizeInstallDateInput($after['date'] ?? null) ?: '';
+    if ($oldDate !== $newDate) {
+        logInstallHistory($conn, $id, 'moved', 'Moved install', [
+            'old_date' => $oldDate,
+            'new_date' => $newDate,
+            'old_time' => $before['time'] ?? '',
+            'new_time' => $after['time'] ?? '',
+        ], $after);
+    }
+
+    $changed = buildInstallChangedFields($before, $after);
+    if (!empty($changed)) {
+        logInstallHistory($conn, $id, 'edited', 'Edited install', ['changed' => $changed], $after);
+    }
+
+    $oldComment = installHistoryValue($before['admin_event_comment'] ?? '');
+    $newComment = installHistoryValue($after['admin_event_comment'] ?? '');
+    if ($oldComment !== $newComment) {
+        logInstallHistory($conn, $id, $newComment === '' ? 'admin_comment_deleted' : 'admin_comment_updated', $newComment === '' ? 'Admin comment deleted' : 'Admin comment updated', [
+            'old_comment' => $oldComment,
+            'new_comment' => $newComment,
+        ], $after);
+    }
+}
+
+function normalizeInstallDateInput($date): ?string {
+    if ($date === null) {
+        return null;
+    }
+    $date = trim((string)$date);
+    if ($date === '' || strtolower($date) === 'null' || $date === '0000-00-00') {
+        return null;
+    }
+    return $date;
+}
+
+function isPastInstallDateForNonAdmin($date): bool {
+    $date = normalizeInstallDateInput($date);
+    if ($date === null || installsIsAdminRole()) {
+        return false;
+    }
+
+    $target = DateTime::createFromFormat('Y-m-d', $date, new DateTimeZone('Asia/Kolkata'));
+    if (!$target || $target->format('Y-m-d') !== $date) {
+        return false;
+    }
+
+    $today = new DateTime('today', new DateTimeZone('Asia/Kolkata'));
+    return $target < $today;
+}
+
+function isRestrictedPastInstallMoveForNonAdmin(mysqli $conn, string $id, $newDate): bool {
+    $newDate = normalizeInstallDateInput($newDate);
+    if ($newDate === null || installsIsAdminRole()) {
+        return false;
+    }
+
+    if (!isPastInstallDateForNonAdmin($newDate)) {
+        return false;
+    }
+
+    $currentDate = null;
+    if ($id !== '') {
+        $stmt = $conn->prepare("SELECT `date` FROM orders WHERE idno = ? LIMIT 1");
+        if ($stmt) {
+            $stmt->bind_param("s", $id);
+            if ($stmt->execute()) {
+                $result = $stmt->get_result();
+                $row = $result ? $result->fetch_assoc() : null;
+                $currentDate = $row && array_key_exists('date', $row) ? $row['date'] : null;
+            }
+            $stmt->close();
+        }
+    }
+
+    return normalizeInstallDateInput($currentDate) !== $newDate;
+}
 
 function findDompdfAutoloadPath(): ?string {
     $candidates = [
@@ -59,7 +313,7 @@ function streamInstallInvoicePdf(string $html, string $filename = 'Smartronic_In
     }
 
     $cleanHtml = preg_replace('#<script\b[^>]*>.*?</script>#is', '', $html);
-    $documentHtml = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"></head><body style="margin:0;padding:16px;background:#fff;font-family:\'DejaVu Sans\',sans-serif;">'
+    $documentHtml = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"></head><body style="margin:0;padding:25px;background:#fff;font-family:\'DejaVu Sans\',sans-serif;">'
         . ($cleanHtml ?: '')
         . '</body></html>';
 
@@ -77,6 +331,31 @@ function streamInstallInvoicePdf(string $html, string $filename = 'Smartronic_In
     $safeFilename = preg_replace('/[^A-Za-z0-9._-]+/', '_', $filename);
     header('Content-Type: application/pdf');
     $dompdf->stream($safeFilename ?: 'Smartronic_Invoice.pdf', ['Attachment' => 1]);
+    exit;
+}
+
+function streamInstallInvoiceWord(string $html, string $filename = 'Smartronic_Invoice.doc'): void {
+    if (!installsIsAdminRole()) {
+        http_response_code(403);
+        header('Content-Type: application/json');
+        echo json_encode(['status' => 'error', 'message' => 'Only admin users can download Word invoices']);
+        exit;
+    }
+
+    $cleanHtml = preg_replace('#<script\b[^>]*>.*?</script>#is', '', $html);
+    $documentHtml = '<!DOCTYPE html>'
+        . '<html lang="en" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">'
+        . '<head><meta charset="UTF-8"><title>Smartronic Invoice</title>'
+        . '<style>@page WordSection1{size:595.3pt 841.9pt;margin:1.2cm;}div.WordSection1{page:WordSection1;}body{margin:0;padding:25px;background:#fff;font-family:\'DejaVu Sans\',Arial,sans-serif;}</style>'
+        . '</head><body><div class="WordSection1">'
+        . ($cleanHtml ?: '')
+        . '</div></body></html>';
+
+    $safeFilename = preg_replace('/[^A-Za-z0-9._-]+/', '_', $filename);
+    header('Content-Type: application/msword; charset=utf-8');
+    header('Content-Disposition: attachment; filename="' . ($safeFilename ?: 'Smartronic_Invoice.doc') . '"');
+    header('Cache-Control: private, max-age=0, must-revalidate');
+    echo $documentHtml;
     exit;
 }
 
@@ -113,17 +392,179 @@ $isApiCall = (
 // Debug: Log API call detection
 error_log("API Call Detection - Method: " . $_SERVER['REQUEST_METHOD'] . ", X-Requested-With: " . ($_SERVER['HTTP_X_REQUESTED_WITH'] ?? 'not set') . ", Content-Type: " . ($_SERVER['CONTENT_TYPE'] ?? 'not set') . ", isApiCall: " . ($isApiCall ? 'true' : 'false'));
 
+if (isset($_GET['get_leaves_bulk'])) {
+    header('Content-Type: application/json');
+    if ($conn->connect_error) {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'message' => 'DB connection failed']);
+        exit;
+    }
+
+    $rawDates = isset($_GET['dates']) ? (string)$_GET['dates'] : '';
+    $dates = array_values(array_unique(array_filter(array_map('trim', explode(',', $rawDates)), function ($date) {
+        return (bool)preg_match('/^\d{4}-\d{2}-\d{2}$/', $date);
+    })));
+
+    if (empty($dates)) {
+        echo json_encode(['success' => true, 'leaves' => []]);
+        exit;
+    }
+
+    $dates = array_slice($dates, 0, 45);
+    $placeholders = implode(',', array_fill(0, count($dates), '?'));
+    $types = str_repeat('s', count($dates));
+    $sql = "
+        SELECT leaves.leave_date, users.fullname, leaves.reason
+        FROM leaves
+        JOIN users ON users.id = leaves.user_id
+        WHERE leaves.leave_date IN ($placeholders)
+        ORDER BY leaves.leave_date ASC, users.fullname ASC
+    ";
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Leaves query prepare failed',
+            'error_number' => (int)$conn->errno,
+            'error' => $conn->error,
+            'source_line' => __LINE__
+        ]);
+        exit;
+    }
+
+    $stmt->bind_param($types, ...$dates);
+    if (!$stmt->execute()) {
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Leaves query execute failed',
+            'error_number' => (int)$stmt->errno,
+            'error' => $stmt->error,
+            'source_line' => __LINE__
+        ]);
+        exit;
+    }
+
+    $result = $stmt->get_result();
+    $leaves = [];
+    while ($row = $result->fetch_assoc()) {
+        $date = (string)($row['leave_date'] ?? '');
+        if ($date === '') continue;
+        if (!isset($leaves[$date])) $leaves[$date] = [];
+        $leaves[$date][] = [
+            'fullname' => $row['fullname'] ?? '',
+            'reason' => $row['reason'] ?? ''
+        ];
+    }
+
+    echo json_encode(['success' => true, 'leaves' => $leaves]);
+    exit;
+}
+
+if (isset($_GET['get_notes_bulk'])) {
+    header('Content-Type: application/json');
+    if ($conn->connect_error) {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'message' => 'DB connection failed']);
+        exit;
+    }
+
+    $rawDates = isset($_GET['dates']) ? (string)$_GET['dates'] : '';
+    $dates = array_values(array_unique(array_filter(array_map('trim', explode(',', $rawDates)), function ($date) {
+        return (bool)preg_match('/^\d{4}-\d{2}-\d{2}$/', $date);
+    })));
+
+    if (empty($dates)) {
+        echo json_encode(['success' => true, 'notes' => []]);
+        exit;
+    }
+
+    $notesColumnExists = function (string $column) use ($conn): bool {
+        $stmt = $conn->prepare("SELECT COUNT(*) AS c FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'notes' AND COLUMN_NAME = ?");
+        if (!$stmt) return false;
+        $stmt->bind_param("s", $column);
+        if (!$stmt->execute()) return false;
+        $row = $stmt->get_result()->fetch_assoc();
+        return ((int)($row['c'] ?? 0)) > 0;
+    };
+
+    $dates = array_slice($dates, 0, 45);
+    $placeholders = implode(',', array_fill(0, count($dates), '?'));
+    $types = str_repeat('s', count($dates));
+    $optionalSelect = [
+        $notesColumnExists('is_done') ? 'is_done' : '0 AS is_done',
+        $notesColumnExists('done_by') ? 'done_by' : 'NULL AS done_by',
+        $notesColumnExists('done_at') ? 'done_at' : 'NULL AS done_at',
+        $notesColumnExists('assigned_to') ? 'assigned_to' : 'NULL AS assigned_to',
+        $notesColumnExists('assigned_history') ? 'assigned_history' : 'NULL AS assigned_history',
+        $notesColumnExists('reopen_reason') ? 'reopen_reason' : 'NULL AS reopen_reason',
+        $notesColumnExists('reopened_by') ? 'reopened_by' : 'NULL AS reopened_by',
+        $notesColumnExists('reopened_at') ? 'reopened_at' : 'NULL AS reopened_at',
+        $notesColumnExists('reopen_history') ? 'reopen_history' : 'NULL AS reopen_history',
+        $notesColumnExists('priority_level') ? 'priority_level' : '0 AS priority_level'
+    ];
+    $optionalSql = implode(', ', $optionalSelect);
+    $sql = "
+        SELECT id, type, title, description, date, sort_order, username, created_at, $optionalSql
+        FROM notes
+        WHERE date IN ($placeholders)
+        ORDER BY date ASC, sort_order ASC, id ASC
+    ";
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Notes query prepare failed',
+            'error_number' => (int)$conn->errno,
+            'error' => $conn->error,
+            'source_line' => __LINE__
+        ]);
+        exit;
+    }
+
+    $stmt->bind_param($types, ...$dates);
+    if (!$stmt->execute()) {
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Notes query execute failed',
+            'error_number' => (int)$stmt->errno,
+            'error' => $stmt->error,
+            'source_line' => __LINE__
+        ]);
+        exit;
+    }
+
+    $result = $stmt->get_result();
+    $notes = [];
+    while ($row = $result->fetch_assoc()) {
+        $date = (string)($row['date'] ?? '');
+        if ($date === '') continue;
+        if (!isset($notes[$date])) $notes[$date] = [];
+        $notes[$date][] = $row;
+    }
+
+    echo json_encode(['success' => true, 'notes' => $notes]);
+    exit;
+}
+
 // Lightweight GET endpoint to fetch extras for a given order idno
 if (isset($_GET['get_extras']) && isset($_GET['id'])) {
     header('Content-Type: application/json');
     if ($conn->connect_error) { http_response_code(500); echo json_encode(['success'=>false,'message'=>'DB connection failed']); exit; }
     $id = $_GET['id'];
-    $stmt = $conn->prepare("SELECT extras FROM orders WHERE idno = ? LIMIT 1");
+    $stmt = $conn->prepare("SELECT extras, pending_amount FROM orders WHERE idno = ? LIMIT 1");
     $stmt->bind_param("s", $id);
     if (!$stmt->execute()) { http_response_code(500); echo json_encode(['success'=>false,'message'=>'Query failed']); exit; }
     $res = $stmt->get_result();
     $row = $res->fetch_assoc();
-    echo json_encode(['success'=>true,'extras'=> $row ? ($row['extras'] ?? '') : '' ]);
+    echo json_encode([
+        'success' => true,
+        'extras' => $row ? ($row['extras'] ?? '') : '',
+        'pending_amount' => $row ? ($row['pending_amount'] ?? 0) : 0
+    ]);
     exit;
 }
 
@@ -132,17 +573,61 @@ if (isset($_GET['get_payment']) && isset($_GET['id'])) {
     header('Content-Type: application/json');
     if ($conn->connect_error) { http_response_code(500); echo json_encode(['success'=>false,'message'=>'DB connection failed']); exit; }
     $id = $_GET['id'];
-    $stmt = $conn->prepare("SELECT amount_paid, fully_paid FROM orders WHERE idno = ? LIMIT 1");
+    $stmt = $conn->prepare("SELECT amount_paid, fully_paid, price, pending_amount FROM orders WHERE idno = ? LIMIT 1");
     $stmt->bind_param("s", $id);
     if (!$stmt->execute()) { http_response_code(500); echo json_encode(['success'=>false,'message'=>'Query failed']); exit; }
     $res = $stmt->get_result();
     $row = $res->fetch_assoc();
-    echo json_encode(['success'=>true, 'amount_paid' => $row ? $row['amount_paid'] : null, 'fully_paid' => $row ? (bool)$row['fully_paid'] : false]);
+    echo json_encode([
+        'success'=>true,
+        'amount_paid' => $row ? $row['amount_paid'] : null,
+        'fully_paid' => $row ? (bool)$row['fully_paid'] : false,
+        'actual_amount' => $row ? ($row['price'] ?? null) : null,
+        'pending_amount' => $row ? ($row['pending_amount'] ?? 0) : 0
+    ]);
+    exit;
+}
+
+// Lightweight GET endpoint to fetch install history
+if (isset($_GET['get_history'])) {
+    header('Content-Type: application/json');
+    if (!installsIsAdminRole()) { http_response_code(403); echo json_encode(['success'=>false,'message'=>'Only admin can view install history']); exit; }
+    if ($conn->connect_error) { http_response_code(500); echo json_encode(['success'=>false,'message'=>'DB connection failed']); exit; }
+
+    $id = isset($_GET['id']) ? trim((string)$_GET['id']) : '';
+    $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 100;
+    $limit = max(1, min(300, $limit));
+    $rows = [];
+
+    if ($id !== '') {
+        $stmt = $conn->prepare("SELECT id, order_idno, order_name, action_type, action_label, action_details, username, user_role, created_at FROM install_history WHERE order_idno = ? ORDER BY created_at DESC, id DESC LIMIT ?");
+        if (!$stmt) { http_response_code(500); echo json_encode(['success'=>false,'message'=>'History query failed']); exit; }
+        $stmt->bind_param("si", $id, $limit);
+    } else {
+        $stmt = $conn->prepare("SELECT id, order_idno, order_name, action_type, action_label, action_details, username, user_role, created_at FROM install_history ORDER BY created_at DESC, id DESC LIMIT ?");
+        if (!$stmt) { http_response_code(500); echo json_encode(['success'=>false,'message'=>'History query failed']); exit; }
+        $stmt->bind_param("i", $limit);
+    }
+
+    if (!$stmt->execute()) { http_response_code(500); echo json_encode(['success'=>false,'message'=>'History query failed']); exit; }
+    $res = $stmt->get_result();
+    while ($row = $res->fetch_assoc()) {
+        $details = [];
+        if (!empty($row['action_details'])) {
+            $decoded = json_decode((string)$row['action_details'], true);
+            if (is_array($decoded)) $details = $decoded;
+        }
+        $row['details'] = $details;
+        unset($row['action_details']);
+        $rows[] = $row;
+    }
+    $stmt->close();
+    echo json_encode(['success' => true, 'history' => $rows]);
     exit;
 }
 
 // GET endpoint for individual record by ID
-if (isset($_GET['id']) && !isset($_GET['get_extras']) && !isset($_GET['get_payment']) && !isset($_GET['render_invoice']) && !isset($_GET['render_material'])) {
+if (isset($_GET['id']) && !isset($_GET['get_extras']) && !isset($_GET['get_payment']) && !isset($_GET['get_history']) && !isset($_GET['render_invoice']) && !isset($_GET['render_material'])) {
     header('Content-Type: application/json');
     
     if ($conn->connect_error) {
@@ -171,6 +656,7 @@ if (isset($_GET['id']) && !isset($_GET['get_extras']) && !isset($_GET['get_payme
             'monitor' => $row['monitor'],
             'type' => $row['product'],
             'location' => $row['area'],
+            'city' => isset($row['city']) && $row['city'] !== '' ? $row['city'] : 'Bangalore',
             'time' => $row['time'],
             'date' => $row['date'],
             'owner' => $row['Owner'],
@@ -181,9 +667,13 @@ if (isset($_GET['id']) && !isset($_GET['get_extras']) && !isset($_GET['get_payme
             'brand' => isset($row['brand']) ? $row['brand'] : '',
             'cam_type' => isset($row['cam_type']) ? $row['cam_type'] : '',
             'map' => $row['Map'],
+            'map_lat' => isset($row['map_lat']) ? $row['map_lat'] : null,
+            'map_lng' => isset($row['map_lng']) ? $row['map_lng'] : null,
             'rack' => $row['rack'],
             'notes' => isset($row['notes']) ? $row['notes'] : '',
-            'pdf_sent' => isset($row['pdf_sent']) ? $row['pdf_sent'] : ''
+            'admin_event_comment' => isset($row['admin_event_comment']) ? $row['admin_event_comment'] : '',
+            'pdf_sent' => isset($row['pdf_sent']) ? $row['pdf_sent'] : '',
+            'pending_amount' => isset($row['pending_amount']) ? $row['pending_amount'] : 0
         ];
         echo json_encode($data);
     } else {
@@ -204,16 +694,117 @@ if ($isApiCall && $_SERVER['REQUEST_METHOD'] === 'PATCH') {
     }
     
     $data = json_decode(file_get_contents('php://input'), true);
+
+    if (isset($data['deleteAdminEventComment']) && $data['deleteAdminEventComment'] === true && !empty($data['id'])) {
+        if (!installsIsAdminRole()) {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'message' => 'Only admin can delete admin event comments']);
+            exit;
+        }
+
+        $idno = trim((string)$data['id']);
+        $beforeSnapshot = fetchInstallSnapshot($conn, $idno);
+        $blankComment = '';
+        $stmt = $conn->prepare("UPDATE orders SET admin_event_comment = ? WHERE idno = ?");
+        $stmt->bind_param("ss", $blankComment, $idno);
+
+        if ($stmt->execute()) {
+            logInstallHistory($conn, $idno, 'admin_comment_deleted', 'Admin comment deleted', [
+                'old_comment' => $beforeSnapshot['admin_event_comment'] ?? '',
+                'new_comment' => '',
+            ], $beforeSnapshot);
+            echo json_encode(['success' => true, 'message' => 'Admin comment deleted']);
+        } else {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Failed to delete admin comment']);
+        }
+        exit;
+    }
     
+    if (isset($data['updateActualAmount']) && $data['updateActualAmount'] === true && !empty($data['id'])) {
+        if (!installsIsAdminRole()) {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'message' => 'Only admin can update actual amount']);
+            exit;
+        }
+
+        $idno = trim((string)$data['id']);
+        $actualRaw = isset($data['actual_amount']) ? trim((string)$data['actual_amount']) : '';
+        $actualClean = preg_replace('/[^0-9.]/', '', $actualRaw);
+        $actualAmount = $actualClean !== '' ? (float)$actualClean : -1;
+        if ($actualAmount < 0) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Enter a valid actual amount']);
+            exit;
+        }
+
+        $actualValue = number_format($actualAmount, 2, '.', '');
+        $beforeSnapshot = fetchInstallSnapshot($conn, $idno);
+        $stmt = $conn->prepare("UPDATE orders SET price = ? WHERE idno = ?");
+        $stmt->bind_param("ss", $actualValue, $idno);
+
+        if ($stmt->execute()) {
+            $afterSnapshot = fetchInstallSnapshot($conn, $idno);
+            logInstallHistory($conn, $idno, 'actual_amount_updated', 'Actual amount updated', [
+                'old_amount' => $beforeSnapshot['price'] ?? '',
+                'new_amount' => $actualValue,
+            ], $afterSnapshot ?: $beforeSnapshot);
+            echo json_encode(['success' => true, 'message' => 'Actual amount updated successfully', 'actual_amount' => $actualValue]);
+        } else {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Failed to update actual amount']);
+        }
+        exit;
+    }
+
+    if (isset($data['updatePendingPayment']) && $data['updatePendingPayment'] === true && !empty($data['id'])) {
+        if (!installsIsAdminRole()) {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'message' => 'Only admin can update pending payment']);
+            exit;
+        }
+
+        $idno = trim((string)$data['id']);
+        $pendingAmount = isset($data['pending_amount']) ? max(0, (float)$data['pending_amount']) : 0.0;
+        $fullyPaidAfter = $pendingAmount <= 0 ? 1 : 0;
+        $beforeSnapshot = fetchInstallSnapshot($conn, $idno);
+        $stmt = $conn->prepare("UPDATE orders SET pending_amount = ?, fully_paid = ? WHERE idno = ?");
+        $stmt->bind_param("dis", $pendingAmount, $fullyPaidAfter, $idno);
+
+        if ($stmt->execute()) {
+            $afterSnapshot = fetchInstallSnapshot($conn, $idno);
+            logInstallHistory($conn, $idno, $pendingAmount > 0 ? 'pending_payment_updated' : 'pending_payment_cleared', $pendingAmount > 0 ? 'Pending payment updated' : 'Pending payment cleared', [
+                'old_pending_amount' => $beforeSnapshot['pending_amount'] ?? '',
+                'new_pending_amount' => $pendingAmount,
+            ], $afterSnapshot ?: $beforeSnapshot);
+            echo json_encode(['success' => true, 'message' => 'Pending payment updated successfully', 'pending_amount' => $pendingAmount]);
+        } else {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Failed to update pending payment']);
+        }
+        exit;
+    }
+
     if (isset($data['updatePayment']) && $data['updatePayment'] === true && !empty($data['id'])) {
         $idno = $data['id'];
         $amount_paid = isset($data['amount_paid']) ? floatval($data['amount_paid']) : null;
         $fully_paid = isset($data['fully_paid']) ? (bool)$data['fully_paid'] : false;
         
-        $stmt = $conn->prepare("UPDATE orders SET amount_paid = ?, fully_paid = ? WHERE idno = ?");
-        $stmt->bind_param("dis", $amount_paid, $fully_paid, $idno);
+        $beforeSnapshot = fetchInstallSnapshot($conn, (string)$idno);
+        $pendingAmount = $fully_paid ? 0.0 : (float)($beforeSnapshot['pending_amount'] ?? 0);
+        $stmt = $conn->prepare("UPDATE orders SET amount_paid = ?, fully_paid = ?, pending_amount = ? WHERE idno = ?");
+        $stmt->bind_param("dids", $amount_paid, $fully_paid, $pendingAmount, $idno);
         
         if ($stmt->execute()) {
+            $afterSnapshot = fetchInstallSnapshot($conn, (string)$idno);
+            logInstallHistory($conn, (string)$idno, 'payment_updated', 'Payment updated', [
+                'old_amount_paid' => $beforeSnapshot['amount_paid'] ?? '',
+                'new_amount_paid' => $amount_paid,
+                'old_fully_paid' => isset($beforeSnapshot['fully_paid']) ? (bool)$beforeSnapshot['fully_paid'] : false,
+                'new_fully_paid' => $fully_paid,
+                'old_pending_amount' => $beforeSnapshot['pending_amount'] ?? '',
+                'new_pending_amount' => $pendingAmount,
+            ], $afterSnapshot ?: $beforeSnapshot);
             echo json_encode(['success' => true, 'message' => 'Payment updated successfully']);
         } else {
             http_response_code(500);
@@ -250,12 +841,29 @@ if ($isApiCall && $_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdfStmt = $conn->prepare("UPDATE orders SET pdf_sent = 'yes' WHERE idno = ?");
             if ($pdfStmt) {
                 $pdfStmt->bind_param("s", $orderId);
-                $pdfStmt->execute();
+                if ($pdfStmt->execute()) {
+                    logInstallHistory($conn, $orderId, 'pdf_sent', 'PDF sent/generated', [
+                        'filename' => 'Smartronic_Invoice_' . $orderId . '.pdf',
+                    ]);
+                }
                 $pdfStmt->close();
             }
         }
 
         streamInstallInvoicePdf($invoiceHtml, 'Smartronic_Invoice_' . $orderId . '.pdf');
+    }
+
+    if (isset($data['invoiceWord']) && $data['invoiceWord'] === true) {
+        $invoiceHtml = isset($data['html']) ? (string)$data['html'] : '';
+        $orderId = isset($data['id']) ? trim((string)$data['id']) : 'invoice';
+        if ($invoiceHtml === '') {
+            http_response_code(400);
+            header('Content-Type: application/json');
+            echo json_encode(['status' => 'error', 'message' => 'Invoice HTML is required']);
+            exit;
+        }
+
+        streamInstallInvoiceWord($invoiceHtml, 'Smartronic_Invoice_' . $orderId . '.doc');
     }
 
     header('Content-Type: application/json');
@@ -270,9 +878,23 @@ if ($isApiCall && $_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($data['extrasOnly']) && $data['extrasOnly'] === true && !empty($data['id'])) {
         $idno = $data['id'];
         $extras = isset($data['extras']) ? $data['extras'] : '';
-        $stmt = $conn->prepare("UPDATE orders SET extras = ? WHERE idno = ?");
-        $stmt->bind_param("ss", $extras, $idno);
+        $pendingAmount = 0.0;
+        $extrasPayload = json_decode((string)$extras, true);
+        if (is_array($extrasPayload) && isset($extrasPayload['pendingWarranty']) && is_array($extrasPayload['pendingWarranty'])) {
+            $pending = $extrasPayload['pendingWarranty'];
+            $pendingAmount = isset($pending['amount']) ? max(0, (float)$pending['amount']) : 0.0;
+        }
+        $beforeSnapshot = fetchInstallSnapshot($conn, (string)$idno);
+        $stmt = $conn->prepare("UPDATE orders SET extras = ?, pending_amount = ? WHERE idno = ?");
+        $stmt->bind_param("sds", $extras, $pendingAmount, $idno);
         if ($stmt->execute()) {
+            $afterSnapshot = fetchInstallSnapshot($conn, (string)$idno);
+            logInstallHistory($conn, (string)$idno, 'extras_updated', 'Extras updated', [
+                'old_extras' => $beforeSnapshot['extras'] ?? '',
+                'new_extras' => $extras,
+                'old_pending_amount' => $beforeSnapshot['pending_amount'] ?? '',
+                'new_pending_amount' => $pendingAmount,
+            ], $afterSnapshot ?: $beforeSnapshot);
             echo json_encode(['success' => true]);
         } else {
             http_response_code(500);
@@ -289,11 +911,17 @@ if ($isApiCall && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $monitor = $data['monitor'] ?? '';
     $type = $data['type'] ?? '';
     $location = $data['location'] ?? '';
+    $city = isset($data['city']) && strtolower(trim((string)$data['city'])) === 'chennai' ? 'Chennai' : 'Bangalore';
     $time = $data['time'] ?? '';
     $date = array_key_exists('date', $data) ? $data['date'] : null;
     if (is_string($date)) {
         $t = trim($date);
         if ($t === '' || strtolower($t) === 'null') $date = null;
+    }
+    if (isRestrictedPastInstallMoveForNonAdmin($conn, (string)$id, $date)) {
+        http_response_code(403);
+        echo json_encode(['status' => 'error', 'message' => 'Only admin can move an event to a past date.']);
+        exit;
     }
     $owner = $data['owner'] ?? '';
     $technician = $data['technician'] ?? '';
@@ -301,11 +929,20 @@ if ($isApiCall && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $order = (int)($data['order'] ?? 0);
     $resolution = $data['resolution'] ?? '';
     $brand = $data['brand'] ?? '';
-    $cam_type = $data['cam_type'] ?? '';
-    $map = $data['map'] ?? '';
-    $rack = $data['rack'] ?? '';
-    $notes = isset($data['notes']) ? $data['notes'] : '';
+	    $cam_type = $data['cam_type'] ?? '';
+	    $map = $data['map'] ?? '';
+	    $mapLat = isset($data['map_lat']) && $data['map_lat'] !== '' ? (string)$data['map_lat'] : '';
+	    $mapLng = isset($data['map_lng']) && $data['map_lng'] !== '' ? (string)$data['map_lng'] : '';
+	    $hasMapLat = $mapLat !== '' ? 1 : 0;
+	    $hasMapLng = $mapLng !== '' ? 1 : 0;
+	    $mapLatValue = $hasMapLat ? (float)$mapLat : 0.0;
+	    $mapLngValue = $hasMapLng ? (float)$mapLng : 0.0;
+	    $rack = $data['rack'] ?? '';
+	    $notes = isset($data['notes']) ? $data['notes'] : '';
+	    $adminEventComment = installsIsAdminRole() && isset($data['admin_event_comment']) ? trim((string)$data['admin_event_comment']) : '';
     
+    $beforeSnapshot = fetchInstallSnapshot($conn, (string)$id);
+
     // Check if record exists
     $checkStmt = $conn->prepare("SELECT idno FROM orders WHERE idno = ? LIMIT 1");
     $checkStmt->bind_param("s", $id);
@@ -313,15 +950,15 @@ if ($isApiCall && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $exists = $checkStmt->get_result()->num_rows > 0;
     $checkStmt->close();
     
-    if ($exists) {
-        // Update existing record
-        $stmt = $conn->prepare("UPDATE orders SET name=?, quantity=?, bullets=?, dome=?, storage=?, monitor=?, product=?, area=?, time=?, date=?, Owner=?, technician=?, helper=?, `order`=?, resolution=?, brand=?, cam_type=?, Map=?, rack=?, notes=? WHERE idno=?");
-        $stmt->bind_param("siiisssssssssisssssss", $name, $cams, $bullets, $dome, $hdd, $monitor, $type, $location, $time, $date, $owner, $technician, $helper, $order, $resolution, $brand, $cam_type, $map, $rack, $notes, $id);
-    } else {
-        // Insert new record
-        $stmt = $conn->prepare("INSERT INTO orders (idno, name, quantity, bullets, dome, storage, monitor, product, area, time, date, Owner, technician, helper, `order`, resolution, brand, cam_type, Map, rack, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssiiissssssssissssss", $id, $name, $cams, $bullets, $dome, $hdd, $monitor, $type, $location, $time, $date, $owner, $technician, $helper, $order, $resolution, $brand, $cam_type, $map, $rack, $notes);
-    }
+	    if ($exists) {
+	        // Update existing record
+	        $stmt = $conn->prepare("UPDATE orders SET name=?, quantity=?, bullets=?, dome=?, storage=?, monitor=?, product=?, area=?, city=?, time=?, date=?, Owner=?, technician=?, helper=?, `order`=?, resolution=?, brand=?, cam_type=?, Map=?, map_lat=IF(? = 1, ?, NULL), map_lng=IF(? = 1, ?, NULL), rack=?, notes=? WHERE idno=?");
+	        $stmt->bind_param("siiissssssssssissssididsss", $name, $cams, $bullets, $dome, $hdd, $monitor, $type, $location, $city, $time, $date, $owner, $technician, $helper, $order, $resolution, $brand, $cam_type, $map, $hasMapLat, $mapLatValue, $hasMapLng, $mapLngValue, $rack, $notes, $id);
+	    } else {
+	        // Insert new record
+	        $stmt = $conn->prepare("INSERT INTO orders (idno, name, quantity, bullets, dome, storage, monitor, product, area, city, time, date, Owner, technician, helper, `order`, resolution, brand, cam_type, Map, map_lat, map_lng, rack, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, IF(? = 1, ?, NULL), IF(? = 1, ?, NULL), ?, ?)");
+	        $stmt->bind_param("ssiiissssssssssissssididss", $id, $name, $cams, $bullets, $dome, $hdd, $monitor, $type, $location, $city, $time, $date, $owner, $technician, $helper, $order, $resolution, $brand, $cam_type, $map, $hasMapLat, $mapLatValue, $hasMapLng, $mapLngValue, $rack, $notes);
+	    }
     $stmt->execute();
     
     if ($stmt->error) {
@@ -330,6 +967,9 @@ if ($isApiCall && $_SERVER['REQUEST_METHOD'] === 'POST') {
         echo json_encode(['status' => 'error', 'message' => 'Database error: ' . $stmt->error]);
         exit;
     }
+    updateOrderAdminEventComment($conn, (string)$id, $adminEventComment);
+    $afterSnapshot = fetchInstallSnapshot($conn, (string)$id);
+    logInstallSaveHistory($conn, (string)$id, $beforeSnapshot, $afterSnapshot);
     
     echo json_encode(['status' => 'ok', 'message' => 'Install saved successfully']);
     exit;
@@ -366,8 +1006,9 @@ if ($isApiCall && $_SERVER['REQUEST_METHOD'] === 'DELETE') {
     $id = $data['id'] ?? '';
 
     if ($id) {
+        $beforeSnapshot = fetchInstallSnapshot($conn, (string)$id);
         $role = isset($_COOKIE['auth_role']) ? $_COOKIE['auth_role'] : '';
-        if ($role !== 'admin') {
+        if (strtolower(trim((string)$role)) !== 'admin') {
             $check = $conn->prepare("SELECT `date` FROM orders WHERE idno = ? LIMIT 1");
             $check->bind_param("s", $id);
             $check->execute();
@@ -387,6 +1028,9 @@ if ($isApiCall && $_SERVER['REQUEST_METHOD'] === 'DELETE') {
         $stmt = $conn->prepare("UPDATE orders SET record_status = 'DELETED' WHERE idno = ?");
         $stmt->bind_param("s", $id);
         if ($stmt->execute()) {
+            logInstallHistory($conn, (string)$id, 'deleted', 'Deleted install', [
+                'record_status' => 'DELETED',
+            ], $beforeSnapshot);
             echo json_encode(['success' => true, 'message' => 'Record marked as deleted']);
         } else {
             http_response_code(500);
@@ -428,11 +1072,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$isApiCall) {
     $monitor = $data['monitor'] ?? '';
     $type = $data['type'] ?? '';
     $location = $data['location'] ?? '';
+    $city = isset($data['city']) && strtolower(trim((string)$data['city'])) === 'chennai' ? 'Chennai' : 'Bangalore';
     $time = $data['time'] ?? '';
     $date = array_key_exists('date', $data) ? $data['date'] : null;
     if (is_string($date)) {
         $t = trim($date);
         if ($t === '' || strtolower($t) === 'null') $date = null;
+    }
+    if (isRestrictedPastInstallMoveForNonAdmin($conn, (string)$id, $date)) {
+        http_response_code(403);
+        echo json_encode(['status' => 'error', 'message' => 'Only admin can move an event to a past date.']);
+        exit;
     }
     $owner = $data['owner'] ?? '';
     $technician = $data['technician'] ?? '';
@@ -442,9 +1092,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$isApiCall) {
     $brand = $data['brand'] ?? '';
     $cam_type = $data['cam_type'] ?? '';
     $map = $data['map'] ?? '';
+    $mapLat = isset($data['map_lat']) && $data['map_lat'] !== '' ? (string)$data['map_lat'] : '';
+    $mapLng = isset($data['map_lng']) && $data['map_lng'] !== '' ? (string)$data['map_lng'] : '';
     $rack = $data['rack'] ?? '';
     $notes = isset($data['notes']) ? $data['notes'] : '';
+    $adminEventComment = installsIsAdminRole() && isset($data['admin_event_comment']) ? trim((string)$data['admin_event_comment']) : '';
     
+    $beforeSnapshot = fetchInstallSnapshot($conn, (string)$id);
+
     // Check if record exists
     $checkStmt = $conn->prepare("SELECT idno FROM orders WHERE idno = ? LIMIT 1");
     $checkStmt->bind_param("s", $id);
@@ -454,12 +1109,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$isApiCall) {
     
     if ($exists) {
         // Update existing record
-        $stmt = $conn->prepare("UPDATE orders SET name=?, quantity=?, bullets=?, dome=?, storage=?, monitor=?, product=?, area=?, time=?, date=?, Owner=?, technician=?, helper=?, `order`=?, resolution=?, brand=?, cam_type=?, Map=?, rack=?, notes=? WHERE idno=?");
-        $stmt->bind_param("siiisssssssssisssssss", $name, $cams, $bullets, $dome, $hdd, $monitor, $type, $location, $time, $date, $owner, $technician, $helper, $order, $resolution, $brand, $cam_type, $map, $rack, $notes, $id);
+        $stmt = $conn->prepare("UPDATE orders SET name=?, quantity=?, bullets=?, dome=?, storage=?, monitor=?, product=?, area=?, city=?, time=?, date=?, Owner=?, technician=?, helper=?, `order`=?, resolution=?, brand=?, cam_type=?, Map=?, map_lat=NULLIF(?, ''), map_lng=NULLIF(?, ''), rack=?, notes=? WHERE idno=?");
+        $stmt->bind_param("siiissssssssssisssssssss", $name, $cams, $bullets, $dome, $hdd, $monitor, $type, $location, $city, $time, $date, $owner, $technician, $helper, $order, $resolution, $brand, $cam_type, $map, $mapLat, $mapLng, $rack, $notes, $id);
     } else {
         // Insert new record
-        $stmt = $conn->prepare("INSERT INTO orders (idno, name, quantity, bullets, dome, storage, monitor, product, area, time, date, Owner, technician, helper, `order`, resolution, brand, cam_type, Map, rack, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssiiissssssssissssss", $id, $name, $cams, $bullets, $dome, $hdd, $monitor, $type, $location, $time, $date, $owner, $technician, $helper, $order, $resolution, $brand, $cam_type, $map, $rack, $notes);
+        $stmt = $conn->prepare("INSERT INTO orders (idno, name, quantity, bullets, dome, storage, monitor, product, area, city, time, date, Owner, technician, helper, `order`, resolution, brand, cam_type, Map, map_lat, map_lng, rack, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULLIF(?, ''), NULLIF(?, ''), ?, ?)");
+        $stmt->bind_param("ssiiissssssssssissssssss", $id, $name, $cams, $bullets, $dome, $hdd, $monitor, $type, $location, $city, $time, $date, $owner, $technician, $helper, $order, $resolution, $brand, $cam_type, $map, $mapLat, $mapLng, $rack, $notes);
     }
     $stmt->execute();
     
@@ -469,6 +1124,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$isApiCall) {
         echo json_encode(['status' => 'error', 'message' => 'Database error: ' . $stmt->error]);
         exit;
     }
+    updateOrderAdminEventComment($conn, (string)$id, $adminEventComment);
+    $afterSnapshot = fetchInstallSnapshot($conn, (string)$id);
+    logInstallSaveHistory($conn, (string)$id, $beforeSnapshot, $afterSnapshot);
     
     echo json_encode(['status' => 'ok', 'message' => 'Install saved successfully']);
     exit;
@@ -500,9 +1158,11 @@ if (isset($_GET['render_material'])) {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CCTV Install Calendar</title>
+  <title>SM Installs | Calendar</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/content/uploads/2025/01/cropped-Site-Icon-32x32.png">
+  <link rel="apple-touch-icon" href="/content/uploads/2025/01/cropped-Site-Icon-180x180.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <link rel="stylesheet" href="../css/installs.css?v=20260420a">
+  <link rel="stylesheet" href="../css/installs.css?v=20260706a">
   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB7BKkBQEI0WpbFFjn8K4VWKRaYeIs3GhU&libraries=places,geometry&loading=async"></script>
   <script src="../js/openlocationcode.js"></script>
   <!-- Transaction Scanner Dependencies -->
@@ -541,7 +1201,7 @@ if (isset($_GET['render_material'])) {
 <body>
   <div class="controls">
     <div class="logo-section">
-      <a href="/" class="custom-logo-link" rel="home" aria-current="page">
+      <a href="/admin_v2/smart/" class="custom-logo-link" rel="home" aria-current="page">
         <img id="main-logo" width="200" height="40" src="https://smartronic.online/content/uploads/2025/01/smarthome-black2.svg" class="custom-logo" alt="Smartronic | CCTV with Free Installation | Smart Home Automation" decoding="async">
       </a>
       <?php echo "<h2>Hello, $nameAssign!</h2>";?>
@@ -903,6 +1563,109 @@ if (isset($_GET['render_material'])) {
       /* Ensure global body margin doesn't change due to injected material styles */
       body { margin: 0 !important; }
 
+      .install-history-panel {
+        position: fixed;
+        top: 90px;
+        right: 18px;
+        z-index: 100001;
+        width: min(390px, calc(100vw - 24px));
+        max-height: calc(100vh - 118px);
+        background: #fff;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        box-shadow: 0 18px 48px rgba(15,23,42,.24);
+        display: none;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .install-history-panel.is-open {
+        display: flex;
+      }
+
+      .install-history-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 11px 12px;
+        background: #111827;
+        color: #fff;
+        cursor: move;
+        user-select: none;
+      }
+
+      .install-history-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 800;
+        font-size: 14px;
+      }
+
+      .install-history-close {
+        width: 28px;
+        height: 28px;
+        border: 0;
+        border-radius: 6px;
+        background: rgba(255,255,255,.14);
+        color: #fff;
+        cursor: pointer;
+      }
+
+      .install-history-subtitle {
+        padding: 9px 12px;
+        border-bottom: 1px solid #e5e7eb;
+        color: #4b5563;
+        font-size: 12px;
+        font-weight: 700;
+        background: #f9fafb;
+      }
+
+      .install-history-list {
+        padding: 8px;
+        overflow: auto;
+      }
+
+      .install-history-item {
+        border: 1px solid #e5e7eb;
+        border-radius: 7px;
+        padding: 9px;
+        margin-bottom: 8px;
+        background: #fff;
+      }
+
+      .install-history-item-title {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        font-weight: 800;
+        color: #111827;
+        font-size: 13px;
+      }
+
+      .install-history-meta {
+        margin-top: 4px;
+        color: #6b7280;
+        font-size: 12px;
+        line-height: 1.35;
+      }
+
+      .install-history-details {
+        margin-top: 6px;
+        color: #374151;
+        font-size: 12px;
+        line-height: 1.4;
+        word-break: break-word;
+      }
+
+      .install-history-empty {
+        padding: 18px 10px;
+        text-align: center;
+        color: #6b7280;
+        font-size: 13px;
+      }
+
       /* Keep header controls aligned and owner-stats pinned to right */
       .controls {
         display: flex;
@@ -969,8 +1732,10 @@ if (isset($_GET['render_material'])) {
         <select id="brand">
           <option value="">Brand</option>
           <option value="PRAMA" selected>PRAMA</option>
+          <option value="SECUREYE">SECUREYE</option>
           <option value="CP PLUS">CP PLUS</option>
           <option value="Hikvision">Hikvision</option>
+
         </select>
         <select id="cam_type">
           <option value="">Camera Type</option>
@@ -990,6 +1755,10 @@ if (isset($_GET['render_material'])) {
         <option value="DVR">DVR</option>
         <option value="NVR">NVR</option>
         <option value="WIFI">WIFI</option>
+      </select>
+      <select id="city">
+        <option value="Bangalore" selected>Bangalore</option>
+        <option value="Chennai">Chennai</option>
       </select>
       
       <select id="hdd">
@@ -1017,6 +1786,8 @@ if (isset($_GET['render_material'])) {
       <input type="text" id="location" placeholder="Location">
       
       <input type="text" id="map" placeholder="Map Link">
+      <input type="hidden" id="map_lat" value="">
+      <input type="hidden" id="map_lng" value="">
       <input type="time" id="time">
       <input type="date" id="date" required>
       <select id="owner">
@@ -1025,25 +1796,30 @@ if (isset($_GET['render_material'])) {
         <option value="AMR">AMR</option>
         <option value="ZOY">ZOY</option>
         <option value="DOM">DOM</option>
+        <option value="SUR">SUR</option>
       </select>
       <select id="technician">
         <option value="">Select Technician</option>
         <option value="SYED">SYED</option>
-        
         <option value="KARTHICK">KARTHICK</option>
-        <option value="ABDUL">ABDUL</option>
-        
-        <option value="DAVID">DAVID</option>
         <option value="PAWAN">PAWAN</option>
         <option value="SIREN">SIREN</option>
+        <option value="Chandan">Chandan</option>
+        <option value="Uday (Chennai)">Uday (Chennai)</option>
+        <option value="Zain">Zain</option>
       </select>
       <select id="helper">
         <option value="">Select Helper</option>
         <option value="KARTHIK">KARTHIK</option>
-        <option value="ABDUL">ABDUL</option>
         <option value="SYED 2">SYED 2</option>
         <option value="Gowtham">Gowtham</option>
+        <option value="Chandan">Chandan</option>
+        <option value="Uday (Chennai)">Uday (Chennai)</option>
+        <option value="Zain">Zain</option>
       </select>
+      <?php if (installsIsAdminRole()): ?>
+      <textarea id="admin_event_comment" placeholder="Admin event comment" rows="2" style="width:100%; min-height:46px; padding:9px 10px; border:1px solid #dc2626; border-radius:6px; background:#fff5f5; color:#991b1b; font-size:14px; box-sizing:border-box; resize:vertical;"></textarea>
+      <?php endif; ?>
       <input type="text" id="notes" placeholder="Notes" />
       <button type="submit">Save</button>
       
@@ -1057,7 +1833,7 @@ if (isset($_GET['render_material'])) {
       <div id="material-content">Click 'Get Material' to load content...</div>
     </div>
 
-    <div id="tab-invoice" class="tab-content" style="flex:1; overflow: auto; padding: 10px; align-items: center; margin: auto; width: 80%; display: none;">
+    <div id="tab-invoice" class="tab-content" style="flex:1; overflow: auto; padding: 8px; align-items: center; margin: auto; width: 95%; display: none;">
       
      
 
@@ -1102,10 +1878,34 @@ if (isset($_GET['render_material'])) {
             </div>
             <div style="border: 1px solid #eee; border-radius: 8px; padding: 12px;">
               <div style="font-weight: 600; margin-bottom: 8px; color: #495057;">Custom</div>
-              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+              <div style="display: flex; flex-direction: column; gap: 8px;">
                 <label style="font-size: 12px;">Label <input type="text" id="ex_custom_label" style="width: 100%; padding: 6px; border: 1px solid #ced4da; border-radius: 4px; margin-top: 2px;"></label>
-                <label style="font-size: 12px;">Item <input type="text" id="ex_custom_item" style="width: 100%; padding: 6px; border: 1px solid #ced4da; border-radius: 4px; margin-top: 2px;"></label>
-                <label style="font-size: 12px;">Total <input type="number" id="ex_custom_total" style="width: 100%; padding: 6px; border: 1px solid #ced4da; border-radius: 4px; margin-top: 2px;"></label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: end;">
+                  <label style="font-size: 12px;">Item <input type="text" id="ex_custom_item" style="width: 100%; padding: 6px; border: 1px solid #ced4da; border-radius: 4px; margin-top: 2px;"></label>
+                  <label style="font-size: 12px;">Total <input type="number" id="ex_custom_total" style="width: 100%; padding: 6px; border: 1px solid #ced4da; border-radius: 4px; margin-top: 2px;"></label>
+                  <button id="ex-add-custom-btn" type="button" title="Add custom item" aria-label="Add custom item" style="border: none; background: transparent; color: #28a745; cursor: pointer; font-size: 28px; font-weight: 700; line-height: 1; padding: 0 4px; display: inline-flex; align-items: center; justify-content: center;">+</button>
+                </div>
+              </div>
+              <div style="margin-top: 8px; font-size: 12px; color: #6c757d;">Add any number of custom items, then click Save Extras to retain them.</div>
+            </div>
+            <div style="border: 1px solid #fecaca; border-radius: 8px; background: #fff1f2; overflow: hidden;">
+              <div onclick="toggleSection('pending-warranty-section')" style="padding: 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; color: #991b1b;">
+                <div>
+                  <div style="font-weight: 700; font-size: 14px;">Custom - Pending Amount</div>
+                  <div style="font-size: 12px; margin-top: 2px;">If filled, no warranty will be provided from Smartronic until cleared.</div>
+                </div>
+                <i id="pending-warranty-caret" class="fas fa-chevron-down" style="transition: transform 0.3s ease;"></i>
+              </div>
+              <div id="pending-warranty-section" style="display: none; padding: 0 12px 12px; border-top: 1px solid #fecaca;">
+                <label style="display:block; font-size: 12px; color: #7f1d1d; margin-top: 10px;">Pending amount label
+                  <input type="text" id="ex_pending_label" value="Amount stands as unpaid" style="width: 100%; padding: 7px; border: 1px solid #fca5a5; border-radius: 4px; margin-top: 3px; background: #fff; color: #7f1d1d;">
+                </label>
+                <label style="display:block; font-size: 12px; color: #7f1d1d; margin-top: 8px;">Pending amount
+                  <input type="number" id="ex_pending_amount" step="0.01" min="0" placeholder="Enter unpaid amount" style="width: 100%; padding: 7px; border: 1px solid #fca5a5; border-radius: 4px; margin-top: 3px; background: #fff; color: #7f1d1d;">
+                </label>
+                <label style="display:block; font-size: 12px; color: #7f1d1d; margin-top: 8px;">Note
+                  <textarea id="ex_pending_note" rows="2" style="width: 100%; padding: 7px; border: 1px solid #fca5a5; border-radius: 4px; margin-top: 3px; background: #fff; color: #7f1d1d; resize: vertical;">No warranty or support from Smartronic is applicable unless the outstanding amount is cleared within 48 hours.</textarea>
+                </label>
               </div>
             </div>
           </div>
@@ -1116,6 +1916,7 @@ if (isset($_GET['render_material'])) {
                   <th style="text-align: left; padding: 8px; border: 1px solid #eee;">Item</th>
                   <th style="text-align: left; padding: 8px; border: 1px solid #eee;">Details</th>
                   <th style="text-align: right; padding: 8px; border: 1px solid #eee;">Amount</th>
+                  <th style="text-align: center; padding: 8px; border: 1px solid #eee; width: 90px;">Action</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -1141,17 +1942,35 @@ if (isset($_GET['render_material'])) {
     </div>
   </div>
 </div> 
+<?php if (installsIsAdminRole()): ?>
+<aside id="install-history-panel" class="install-history-panel" aria-label="Install history">
+  <div class="install-history-head" id="install-history-drag">
+    <div class="install-history-title"><i class="fas fa-clock-rotate-left" aria-hidden="true"></i><span>Install History</span></div>
+    <button class="install-history-close" id="install-history-close" type="button" aria-label="Close history"><i class="fas fa-times" aria-hidden="true"></i></button>
+  </div>
+  <div class="install-history-subtitle" id="install-history-subtitle">Latest actions</div>
+  <div class="install-history-list" id="install-history-list">
+    <div class="install-history-empty">No history loaded</div>
+  </div>
+</aside>
+<?php endif; ?>
+<script>
+window.INSTALLS_CURRENT_ROLE = <?php echo json_encode(strtolower(trim((string)$role))); ?>;
+window.INSTALLS_TODAY = <?php echo json_encode(date('Y-m-d')); ?>;
+</script>
 <script src="../js/installs.utils.js?v=20260404"></script>
-<script src="../js/installs.core.js?v=20260417a"></script>
-<script src="../js/installs.notes.js?v=20260420a"></script>
-<script src="../js/floating_icon_menu.js?v=20260404c"></script>
-<script src="../js/installs.stats.js?v=20260404b"></script>
-<script src="../js/installs.modals.js?v=20260404"></script>
-<script src="../js/installs.content.js?v=20260404"></script>
-<script src="../js/installs.overlay.js?v=20260404"></script>
-<script src="../js/installs.payments.js?v=20260404"></script>
-<script src="../js/installs.integrations.js?v=20260417a"></script>
-<script src="../js/installs.main.js?v=20260417a"></script>
+<script src="../js/installs.pricing.js?v=20260623a"></script>
+<script src="../js/installs.core.js?v=20260726e"></script>
+<script src="../js/installs.week-scroll.js?v=20260618a"></script>
+<script src="../js/installs.notes.js?v=20260726b"></script>
+<script src="../js/floating_icon_menu.js?v=20260618a"></script>
+<script src="../js/installs.stats.js?v=20260711b"></script>
+<script src="../js/installs.modals.js?v=20260616a"></script>
+<script src="../js/installs.content.js?v=20260728a"></script>
+<script src="../js/installs.overlay.js?v=20260728a"></script>
+<script src="../js/installs.payments.js?v=20260711a"></script>
+<script src="../js/installs.integrations.js?v=20260623a"></script>
+<script src="../js/installs.main.js?v=20260623a"></script>
 
 <script>
 // Helper function to get current order ID
@@ -1188,8 +2007,8 @@ function generateQuoteFromForm() {
     
     const fields = [
         'id', 'name', 'cams', 'bullets', 'dome', 'hdd', 'monitor', 'type',
-        'location', 'time', 'date', 'owner', 'technician', 'helper', 
-        'resolution', 'brand', 'cam_type', 'map', 'rack', 'notes'
+        'city', 'location', 'time', 'date', 'owner', 'technician', 'helper',
+        'resolution', 'brand', 'cam_type', 'map', 'rack', 'admin_event_comment', 'notes'
     ];
     
     const formData = {};
@@ -1240,11 +2059,13 @@ function loadPaymentData(orderId) {
                 const amountPaidInput = document.getElementById('amount-paid');
                 const overlayFullyPaid = document.getElementById('overlay-fully-paid');
                 const overlayAmountPaid = document.getElementById('overlay-amount-paid');
+                const overlayActualAmount = document.getElementById('overlay-actual-amount');
                 
                 if (fullyPaidCheckbox) fullyPaidCheckbox.checked = data.fully_paid;
                 if (amountPaidInput) amountPaidInput.value = data.amount_paid || '';
                 if (overlayFullyPaid) overlayFullyPaid.checked = data.fully_paid;
                 if (overlayAmountPaid) overlayAmountPaid.value = data.amount_paid || '';
+                if (overlayActualAmount) overlayActualAmount.value = String(data.actual_amount || '').replace(/[^0-9.]/g, '');
             }
         })
         .catch(error => {

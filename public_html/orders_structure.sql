@@ -53,7 +53,8 @@ CREATE TABLE `orders` (
   `helper` varchar(50) DEFAULT NULL,
   `time` varchar(10) DEFAULT NULL,
   `record_status` text DEFAULT NULL,
-  `notes` varchar(200) NOT NULL
+  `notes` varchar(200) NOT NULL,
+  `admin_event_comment` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --

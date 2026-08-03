@@ -23,51 +23,60 @@ ini_set('display_errors', 1);
   </script>
   <style>
     /* Base layout — scoped to invoice wrapper to avoid affecting parent page */
-    .invoice-body { 
-      font-family: "DejaVu Sans", Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; 
-      color: #1f2937; 
-      line-height: 1.5; 
+    .invoice-body {
+      font-family: "DejaVu Sans", Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      color: #1f2937;
+      line-height: 1.22;
+      font-size: 12px;
     }
-    #invoice { 
-      background: #ffffff; 
-      padding: 32px; 
-      border-radius: 8px; 
+    #invoice {
+      background: #ffffff;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 18px 22px;
+      border-radius: 4px;
       box-shadow: 0 1px 2px rgba(0,0,0,0.06);
     }
 
+    #invoice p { margin: 4px 0; }
+
     /* Headings */
-    .invoice-body h1, .invoice-body h2, .invoice-body h3 { 
-      text-align: left; 
-      padding-bottom: 12px; 
-      border-bottom: 1px solid #e5e7eb; 
-      color: #406bc7; 
-      font-weight: 600; 
-      margin: 0 0 16px 0;
+    .invoice-body h1, .invoice-body h2, .invoice-body h3 {
+      text-align: left;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #e5e7eb;
+      color: #406bc7;
+      font-weight: 600;
+      margin: 0 0 8px 0;
     }
-    .invoice-body h1 { font-size: 26px; }
-    .invoice-body h2 { font-size: 18px; }
+    .invoice-body h1 { font-size: 22px; }
+    .invoice-body h2 { font-size: 15px; }
+    .invoice-body h3 { font-size: 14px; }
 
     /* Sections spacing */
-    .invoice-details, .billing, .items, .total, .terms, .footer { margin-top: 24px; }
+    .invoice-details, .billing, .items, .total, .terms, .footer { margin-top: 12px; }
 
     /* Tables */
-    .items table, .total table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    .items table, .total table { width: 100%; border-collapse: collapse; margin-top: 6px; }
     .items thead th { background: #f3f4f6; color: #111827; }
-    .items th, .items td, .total td { border: 1px solid #d1d5db; padding: 10px; vertical-align: top; }
+    .items th, .items td, .total td { border: 1px solid #d1d5db; padding: 6px 8px; vertical-align: top; }
     .items tbody tr:nth-child(odd) { background: #fafafa; }
 
     /* Totals alignment */
     .total td:first-child { width: 60%; text-align: right; color: #374151; }
     .total td:last-child { text-align: right; font-weight: 700; color: #111827; }
 
+    .terms ul { margin: 6px 0 0 18px; padding: 0; }
+    .terms li { margin: 2px 0; line-height: 1.18; }
+
     /* Footer */
-    .footer { text-align: center; font-size: 12px; color: #6b7280; margin-top: 36px; }
+    .footer { text-align: center; font-size: 11px; color: #6b7280; margin-top: 16px; }
 
     /* Print styles for PDF generation */ 
     @media print {
       html, body { background: red !important; }
       .invoice-body { width: auto; background: none; margin: 0; }
-      #invoice { padding: 40px; box-shadow: none; }
+      #invoice { padding: 14px 18px; box-shadow: none; border-radius: 0; }
       .invoice-body a { color: #111 !important; text-decoration: none; }
     }
   </style>
@@ -128,17 +137,19 @@ if ($conn->connect_error) {
 }
 
 $id = $_GET['id'] ?? '';
-$sql = "SELECT idno, phone, quantity, price, product, storage, resolution, name, owner, note, area, date, location, map FROM orders WHERE idno = '$id'";
+$sql = "SELECT idno, phone, quantity, price, product, storage, resolution, brand, cam_type, name, owner, note, area, date, location, map FROM orders WHERE idno = '$id'";
 $result = $conn->query($sql);
 
 if ($result && $row = $result->fetch_assoc()) {
     $phone = $row['phone'];
-    $quantity = $row['quantity'];
+    $quantity = trim((string)($_GET['cams'] ?? $row['quantity']));
     $price = $row['price'];
-    $product = $row['product'];
-    $storage = $row['storage'];
-    $resolution = $row['resolution'];
-    $name = $row['name'];
+    $product = trim((string)($_GET['type'] ?? $row['product']));
+    $storage = trim((string)($_GET['hdd'] ?? $row['storage']));
+    $resolution = trim((string)($_GET['resolution'] ?? $row['resolution']));
+    $brand = trim((string)($_GET['brand'] ?? $row['brand'] ?? ''));
+    $cam_type = trim((string)($_GET['cam_type'] ?? $row['cam_type'] ?? ''));
+    $name = trim((string)($_GET['name'] ?? $row['name']));
     $owner = $row['owner'];
     $note = $row['note'];
     $area = $row['area'];
@@ -148,6 +159,13 @@ if ($result && $row = $result->fetch_assoc()) {
 } else {
     die("Invoice not found.");
 }
+
+$brandDisplay = $brand !== '' ? $brand : 'HIKVISION';
+$brandDisplay = strtoupper($brandDisplay) === 'HIKVISION' ? 'HIKVISION' : $brandDisplay;
+$isNvrPackage = stripos($product, 'NVR') !== false;
+$accessoryText = $isNvrPackage
+    ? 'POE Switches'
+    : 'BNC & DC Connectors, SMPS (Power Supply)';
 ?>
 <?php
 $formatted_date = date("Ym-d", strtotime($date));
@@ -307,7 +325,7 @@ $invoice_number = $formatted_date . "-" . $id . "-" . $code;
         <tr>
           <td colspan="4">
           <strong>Includes:</strong><br />
-          HIKVISION Full HD <?php echo htmlspecialchars($product); ?> | <?php echo htmlspecialchars($resolution); ?> X <?php echo htmlspecialchars($quantity); ?>  Outdoor / Indoor Cameras with Night Vision, Motion Detection, <?php echo htmlspecialchars($storage); ?> HDD (CCTV Storage), BNC & DC Connectors, SMPS (Power Supply), installation and nessesary accessories.
+          <?php echo htmlspecialchars($brandDisplay); ?> Full HD <?php echo htmlspecialchars($product); ?> | <?php echo htmlspecialchars($resolution); ?> X <?php echo htmlspecialchars($quantity); ?>  Outdoor / Indoor Cameras with Night Vision, Motion Detection, <?php echo htmlspecialchars($storage); ?> HDD (CCTV Storage), <?php echo htmlspecialchars($accessoryText); ?>, installation and nessesary accessories.
 
 
           </td>
@@ -370,7 +388,7 @@ $invoice_number = $formatted_date . "-" . $id . "-" . $code;
 
   <div class="footer">
     Mobile: 8496080849 | hello@smartronic.online | www.smartronic.online<br>
-    13th Main Road, ITI Layout, HSR Layout, Bangalore 560068
+    Smartronic, 809, 25th Cross, HSR Layout, Bangalore 560 102
   </div>
 </div>
 

@@ -32,6 +32,9 @@ jQuery(document).ready(function($) {
             var dryRunParam = getQueryParam("dry_run") || getQueryParam("no_db");
             const customerNameInput = currentForm.querySelector('#customer-name, #gads-name, input[name="customer-name"], input[name="name"]');
             const customerName = customerNameInput ? customerNameInput.value.trim() : '';
+            const cityInput = currentForm.querySelector('input[name="city"]');
+            const cityValue = cityInput ? cityInput.value.trim() : '';
+            const pageQuery = window.location.search.replace(/^\?/, '');
     
             const formData = {
                 action: 'crf_save_form_data',
@@ -42,11 +45,17 @@ jQuery(document).ready(function($) {
                 whatsapp_number: $('#num-whatsapp').val(),
                 gads: gadsParam,  
                 gad_campaignid: gadCampaignIdParam,
+                page_query: pageQuery,
+                page_url: window.location.href,
                 form_device: window.innerWidth <= 767 ? 'main-mobile' : 'main-desk'
             };
 
             if (customerName) {
                 formData.customer_name = customerName;
+            }
+
+            if (cityValue) {
+                formData.city = cityValue;
             }
 
             if (dryRunParam && dryRunParam !== '0') {

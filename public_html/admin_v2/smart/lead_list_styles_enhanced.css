@@ -897,6 +897,13 @@ body::after {
     box-shadow: none;
 }
 
+.assign-badge.is-sur {
+    background: #f28c28;
+    border-color: #f28c28;
+    color: #fff;
+    box-shadow: 0 10px 18px rgba(242, 140, 40, 0.24);
+}
+
 .assign-badge.is-open {
     background: var(--success, #16a34a);
     border-color: var(--success, #16a34a);
@@ -1174,6 +1181,17 @@ body::after {
 
 .col2-badge-icons i {
     font-size: 13px;
+}
+
+.col2-badge.is-missing,
+.col1-badge.is-missing {
+    color: var(--neutral-400) !important;
+    background: var(--neutral-50);
+    border: 1px solid var(--neutral-200);
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 11px !important;
+    font-weight: 600;
 }
 
 .sr-only {
@@ -2093,7 +2111,19 @@ body::after {
     pointer-events: none;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     border: 1px solid rgba(255, 255, 255, 0.3);
-    display: block !important;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 8px;
+}
+
+.floating-date-icon {
+    font-size: 15px;
+    line-height: 1;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.12));
+}
+
+.floating-date-text {
+    line-height: 1.2;
 }
 
 .floating-date.visible {

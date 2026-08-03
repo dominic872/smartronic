@@ -13,7 +13,7 @@ error_reporting(0);
 // Check if the cookie exists and has the right value
 if (
     !isset($_COOKIE['auth_role']) || 
-    ($_COOKIE['auth_role'] !== 'admin' && $_COOKIE['auth_role'] !== 'market')
+    (!isElevatedRole((string)$_COOKIE['auth_role']) && $_COOKIE['auth_role'] !== 'market')
 ) {
     echo "No access";
     exit; // Stop processing the rest of the page

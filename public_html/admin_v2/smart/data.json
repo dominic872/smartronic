@@ -13,8 +13,8 @@
       },
       {
         "capacity": "2 TB",
-        "value": "7750",
-        "label": "2 TB (2Yr) - ₹7750",
+        "value": "8950",
+        "label": "2 TB (2Yr) - ₹8950",
         "preferred": "true"
       },
       {
@@ -43,19 +43,8 @@
       },
       {
         "capacity": "2 TB",
-        "value": "4250",
-        "label": "2 TB (2Yr) - ₹4250"
-      },
-      {
-        "capacity": "4 TB",
-        "value": "5250",
-        "label": "4 TB (2Yr) - ₹5250",
-        "preferred": ""
-      },
-      {
-        "capacity": "6 TB",
-        "value": "8500",
-        "label": "6 TB (2Yr) - ₹8500"
+        "value": "6450",
+        "label": "2 TB (2Yr) - ₹6450"
       }
     ],
     "SEE/WD/TOSH": [
@@ -88,32 +77,38 @@
     "Seagate": [
       {
         "capacity": "2TB",
-        "value": "7750",
-        "label": "2 TB Seagate 3yr - ₹7750",
+        "value": "8750",
+        "label": "2 TB Seagate 3yr - ₹8750",
         "preferred": ""
       },
       {
         "capacity": "1TB",
-        "value": "6650",
-        "label": "1 TB Seagate 3yr - ₹6650",
+        "value": "7650",
+        "label": "1 TB Seagate 3yr - ₹7650",
         "preferred": "true"
       },
       {
         "capacity": "4TB",
-        "value": "10300",
-        "label": "4 TB Seagate 3yr - ₹10300",
+        "value": "14500",
+        "label": "4 TB Seagate/ WD 3yr - ₹14500",
         "preferred": "true"
       },
       {
         "capacity": "6TB",
-        "value": "14000",
-        "label": "6 TB Seagate 3yr - ₹14,000",
+        "value": "21000",
+        "label": "6 TB Seagate 3yr - ₹21,000",
         "preferred": "true"
       },
       {
         "capacity": "8TB",
-        "value": "17500",
-        "label": "8 TB Seagate 3yr - ₹17,500",
+        "value": "35000",
+        "label": "8 TB Seagate/ WD 3yr - ₹35,000",
+        "preferred": "true"
+      },
+      {
+        "capacity": "10TB",
+        "value": "34500",
+        "label": "10 TB Seagate/ WD 3yr - ₹43,500",
         "preferred": "true"
       }
     ]
@@ -316,6 +311,7 @@
           ]
         }
       },
+     
       "CP PLUS": {
         "2MP": {
           "Recorder": {
@@ -401,6 +397,72 @@
             }
           ]
         }
+      },
+      "CONSISTENT": {
+        "2MP": {
+          "Recorder": {
+            "4CH": [
+              {
+                "value": "2550",
+                "label": "4CH DVR - ₹2550+"
+              }
+            ],
+            "8CH": [
+              {
+                "value": "2990",
+                "label": "8CH DVR - ₹2990+"
+              }
+            ],
+            "16CH": [
+              {
+                "value": "4050",
+                "label": "16CH DVR - ₹4050+"
+              }
+            ]
+          },
+          "Camera": [
+            {
+              "value": "650",
+              "label": "2MP Hybrid Dome - ₹650+"
+            },
+            {
+              "value": "650",
+              "label": "2MP Full Colour with Mic Bullet - ₹650+"
+            }
+          ]
+        },
+        "5MP": {
+          "Recorder": {
+            "4CH": [
+              {
+                "value": "2550",
+                "label": "4CH DVR - ₹2550+"
+              }
+            ],
+            "8CH": [
+              {
+                "value": "2990",
+                "label": "8CH DVR - ₹2990+"
+              }
+            ],
+            "16CH": [
+              {
+                "value": "4050",
+                "label": "16CH DVR - ₹4050+"
+              }
+            ]
+          },
+          "Camera": [
+            {
+              "value": "850",
+              "label": "5MP Hybrid with Mic - 850+"
+            },
+            {
+              "value": "850",
+              "label": "5MP Full Colour with Mic - ₹850+"
+            }
+          ]
+        }
       }
     },
     "NVR": {
@@ -435,7 +497,7 @@
           "2MP": [
             {
               "value": "3550",
-              "label": "Normal NV - ₹2700"
+              "label": "2MP Normal NV - ₹2700"
             }
           ],
           "4MP": [
@@ -491,61 +553,120 @@
           "2MP": [
             {
               "value": "2150",
-              "label": "Normal - ₹2150+"
+              "label": "2MP Normal - ₹2150+"
             },
             {
               "value": "2350",
-              "label": "Hybrid - ₹2350+"
+              "label": "2MP Hybrid - ₹2350+"
             }
           ],
           "4MP": [
             {
               "value": "2750",
-              "label": "Normal - ₹2750+"
+              "label": "4MP Normal - ₹2750+"
             },
             {
               "value": "3150",
-              "label": "Hybrid - ₹3150+"
+              "label": "4 MP Hybrid - ₹3150+"
             }
           ]
         }
       },
+
       "CP PLUS": {
         "Recorder": {
           "4CH": [
             {
-              "value": 2850,
-              "label": "4CH - 2850+"
+              "value": 3250,
+              "label": "4CH - 3250+"
             }
           ],
           "8CH": [
             {
-              "value": "3390",
-              "label": "8 CH - ₹3390+"
+              "value": "3890",
+              "label": "8 CH - ₹3890+"
             }
           ],
           "16CH": [
             {
-              "value": "4950",
-              "label": "16 CH - 4950+"
+              "value": "6550",
+              "label": "16 CH - 6550+"
             }
           ],
-          "32 CH": [
+          "32CH": [
             {
-              "value": "11050",
-              "label": "32CH - 11050+"
+              "value": "12500",
+              "label": "32CH - 12500+"
+            }
+          ],
+          "2xHDD-32CH": [
+            {
+              "value": "18250",
+              "label": "32CH 2 x HDD 18250+"
+            }
+          ]
+        },
+        "Camera": {
+           "2MP": [
+            {
+              "value": "2350",
+              "label": "2 MP Normal NV - 2350 (with/ without Mic)"
+            },
+            {
+              "value": "2575",
+              "label": "2 MP Full Colour - ₹2575+"
+            }
+          ],
+          "4MP": [
+            {
+              "value": "3100",
+              "label": "4 MP Normal NV - 3100 (with/ without Mic)"
+            },
+            {
+              "value": "3400",
+              "label": "4 MP HYBRID - ₹3400+"
+            }
+          ],
+          "6MP": [
+            {
+              "value": "4550",
+              "label": "6 MP Normal/Hybrid - 4550 (with/ without Mic)"
+            }
+          ],
+           "8MP": [
+            {
+              "value": "6750",
+              "label": "8 MP Normal NV - 6750 (with/ without Mic)"
+            }
+          ]
+        }
+      },
+      "CONSISTENT": {
+        "Recorder": {
+          "4CH": [
+            {
+              "value": "2775",
+              "label": "4CH NVR - ₹2775+"
+            }
+          ],
+          "8CH": [
+            {
+              "value": "2990",
+              "label": "8CH NVR - ₹2990+"
+            }
+          ],
+          "16CH": [
+            {
+              "value": "4200",
+              "label": "16CH NVR - ₹4200+"
             }
           ]
         },
         "Camera": {
           "4MP": [
             {
-              "value": "2950",
-              "label": "Normal NV - 2950 (with/ without Mic)"
-            },
-            {
-              "value": "3290",
-              "label": "FULL COLOUR - ₹3290+"
+              "value": "1550",
+              "label": "4MP IP Dome/Bullet - ₹1550"
             }
           ]
         }

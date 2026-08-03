@@ -118,7 +118,7 @@
 
   <div class="footer">
     Mobile: 8496080849 | hello@smartronic.online | www.smartronic.online<br>
-    13th Main Road, ITI Layout, HSR Layout, Bangalore 560068
+    Smartronic, 809, 25th Cross, HSR Layout, Bangalore 560 102
   </div>
 
 </body>

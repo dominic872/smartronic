@@ -2,157 +2,6 @@
 (function (window) {
   'use strict';
 
-  // Google API Call Counter
-  window.googleApiCalls = window.googleApiCalls || {
-    geocoding: 0,
-    distanceMatrix: 0,
-    staticMaps: 0,
-    directions: 0,
-    total: 0
-  };
-
-  // Create API counter UI
-  function createApiCounter() {
-    if (document.getElementById('api-counter')) return;
-
-    const counter = document.createElement('div');
-    counter.id = 'api-counter';
-    counter.style.cssText = `
-      position: fixed;
-      bottom: 10px;
-      right: 10px;
-      background: linear-gradient(135deg, #1a237e, #0d47a1);
-      color: white;
-      padding: 10px 15px;
-      border-radius: 8px;
-      font-size: 12px;
-      z-index: 99999;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      cursor: move;
-      min-width: 150px;
-      user-select: none;
-    `;
-
-    // Inner HTML with Close Button
-    counter.innerHTML = `
-      <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 6px;">
-        <div style="font-weight: 700; font-size: 14px; padding-right: 15px;">
-           <i class="fas fa-chart-line"></i> Google API Calls
-        </div>
-        <div id="api-counter-close" style="cursor: pointer; opacity: 0.7; transition: opacity 0.2s; font-size: 14px;">
-           <i class="fas fa-times"></i>
-        </div>
-      </div>
-      <div id="api-counter-content">
-        <div style="display: flex; justify-content: space-between;"><span>Total:</span><strong id="api-total">0</strong></div>
-      </div>
-    `;
-
-    // Toggle detail view state
-    let expanded = false;
-
-    // Close logic
-    const closeBtn = counter.querySelector('#api-counter-close');
-    closeBtn.onmouseover = () => closeBtn.style.opacity = '1';
-    closeBtn.onmouseout = () => closeBtn.style.opacity = '0.7';
-    closeBtn.onclick = (e) => {
-      e.stopPropagation();
-      counter.style.display = 'none'; // Hide instead of remove so we can potentially re-show
-    };
-
-    // Drag Logic
-    let isDragging = false;
-    let dragStartX, dragStartY;
-    let initialLeft, initialTop;
-
-    counter.onmousedown = (e) => {
-      if (e.target.closest('#api-counter-close')) return;
-
-      isDragging = false;
-      dragStartX = e.clientX;
-      dragStartY = e.clientY;
-
-      const rect = counter.getBoundingClientRect();
-      initialLeft = rect.left;
-      initialTop = rect.top;
-
-      // Switch to explicit left/top positioning for dragging
-      counter.style.right = 'auto';
-      counter.style.left = initialLeft + 'px';
-      counter.style.top = initialTop + 'px';
-      counter.style.transform = 'scale(1.02)';
-      counter.style.transition = 'none'; // Disable transition during drag
-
-      document.onmousemove = (e) => {
-        // If moved more than 3px, consider it a drag
-        if (!isDragging && (Math.abs(e.clientX - dragStartX) > 3 || Math.abs(e.clientY - dragStartY) > 3)) {
-          isDragging = true;
-        }
-        if (isDragging) {
-          const dx = e.clientX - dragStartX;
-          const dy = e.clientY - dragStartY;
-          counter.style.left = (initialLeft + dx) + 'px';
-          counter.style.top = (initialTop + dy) + 'px';
-        }
-      };
-
-      document.onmouseup = () => {
-        document.onmousemove = null;
-        document.onmouseup = null;
-        counter.style.transform = 'scale(1)';
-        counter.style.transition = 'all 0.2s';
-      };
-    };
-
-    // Click handler for expand (only if not dragged)
-    counter.onclick = (e) => {
-      if (isDragging) return;
-      if (e.target.closest('#api-counter-close')) return;
-
-      expanded = !expanded;
-      updateApiCounterUI(expanded);
-    };
-
-    document.body.appendChild(counter);
-  }
-
-  // Update the API counter display
-  function updateApiCounterUI(expanded = false) {
-    const content = document.getElementById('api-counter-content');
-    if (!content) return;
-
-    const c = window.googleApiCalls;
-
-    if (expanded) {
-      content.innerHTML = `
-        <div style="display: flex; justify-content: space-between; padding: 2px 0;"><span>Geocoding:</span><strong>${c.geocoding}</strong></div>
-        <div style="display: flex; justify-content: space-between; padding: 2px 0;"><span>Distance:</span><strong>${c.distanceMatrix}</strong></div>
-        <div style="display: flex; justify-content: space-between; padding: 2px 0;"><span>Static Maps:</span><strong>${c.staticMaps}</strong></div>
-        <div style="display: flex; justify-content: space-between; padding: 2px 0; border-top: 1px solid rgba(255,255,255,0.3); margin-top: 4px; font-size: 13px;"><span>Total:</span><strong>${c.total}</strong></div>
-      `;
-    } else {
-      content.innerHTML = `
-        <div style="display: flex; justify-content: space-between;"><span>Total:</span><strong id="api-total">${c.total}</strong></div>
-      `;
-    }
-  }
-
-  // Increment counter function
-  window.incrementApiCounter = function (type) {
-    window.googleApiCalls[type] = (window.googleApiCalls[type] || 0) + 1;
-    window.googleApiCalls.total++;
-    updateApiCounterUI(false);
-    console.log(`[API Counter] ${type} call #${window.googleApiCalls[type]} (Total: ${window.googleApiCalls.total})`);
-  };
-
-  // Initialize counter on DOM ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', createApiCounter);
-  } else {
-    createApiCounter();
-  }
-
   // Global state
   let editingId = null;
 
@@ -191,6 +40,41 @@
   const popup = document.getElementById('order-popup');
   const form = document.getElementById('installForm');
 
+  function isAdminRole() {
+    const runtimeRole = String(window.INSTALLS_CURRENT_ROLE || '').trim().toLowerCase();
+    const cookieRole = String(getCookie('auth_role') || '').trim().toLowerCase();
+    return (runtimeRole || cookieRole) === 'admin';
+  }
+
+  function normalizeInstallDateInput(value) {
+    const raw = value == null ? '' : String(value).trim();
+    if (!raw || raw === '0000-00-00' || raw.toLowerCase() === 'null') return '';
+    return raw;
+  }
+
+  function isPastInstallDate(value) {
+    const normalized = normalizeInstallDateInput(value);
+    if (!normalized) return false;
+    const today = String(window.INSTALLS_TODAY || window.formatDate(new Date()) || '').trim();
+    if (!today) return false;
+    return normalized < today;
+  }
+
+  function getExistingInstallDate(id) {
+    const lookupId = String(id || '').trim();
+    if (!lookupId || !Array.isArray(window.allInstalls)) return '';
+    const existing = window.allInstalls.find(item => String(item && item.id) === lookupId);
+    return normalizeInstallDateInput(existing && existing.date);
+  }
+
+  function isRestrictedPastInstallMove(data) {
+    if (isAdminRole()) return false;
+    const nextDate = normalizeInstallDateInput(data && data.date);
+    if (!isPastInstallDate(nextDate)) return false;
+    const currentDate = getExistingInstallDate(data && data.id);
+    return currentDate !== nextDate;
+  }
+
   // Save installs data
   function saveInstalls(data, options = {}) {
     if (!data) {
@@ -198,6 +82,11 @@
       return;
     }
     const silent = !!options.silent;
+
+    if (isRestrictedPastInstallMove(data)) {
+      alert('Only admin can move an event to a past date.');
+      return;
+    }
 
     console.log('Attempting to save data:', data);
 
@@ -243,6 +132,9 @@
             if (!silent) alert('Install saved successfully!');
             if (typeof window.render === 'function') {
               window.render();
+            }
+            if (typeof window.refreshInstallHistoryPanel === 'function') {
+              window.refreshInstallHistoryPanel();
             }
             // Don't close popup automatically, let user stay in the form
             // if (typeof window.closeOrderPopup === 'function') {
@@ -292,8 +184,8 @@
     // Define the fields that exist in the requirements form
     const validFormFields = [
       'id', 'name', 'cams', 'bullets', 'dome', 'hdd', 'monitor', 'type',
-      'location', 'time', 'date', 'owner', 'technician', 'helper',
-      'resolution', 'brand', 'cam_type', 'map', 'rack', 'notes'
+      'city', 'location', 'time', 'date', 'owner', 'technician', 'helper',
+      'resolution', 'brand', 'cam_type', 'map', 'map_lat', 'map_lng', 'rack', 'admin_event_comment', 'notes'
     ];
 
     // Small delay to ensure the form is visible before populating
@@ -319,6 +211,8 @@
                 // fallback to direct assignment
                 field.value = value;
               }
+            } else if (key === 'city' && field.tagName === 'SELECT') {
+              field.value = String(value || '').trim().toLowerCase() === 'chennai' ? 'Chennai' : 'Bangalore';
             } else {
               field.value = value;
             }
@@ -330,7 +224,7 @@
         // Skip fields that don't belong to this form (no warning needed)
       });
       if (!data.brand && form.brand) {
-        form.brand.value = 'PRAMA';
+        form.brand.value = 'SECUREYE'; 
       }
     }, 50);
 
@@ -368,10 +262,46 @@
     updatePdfSentIndicator('');
   }
 
+  async function syncMapCoordsFields() {
+    if (!form) return { lat: '', lng: '' };
+    const mapField = form.querySelector('#map');
+    const latField = form.querySelector('#map_lat');
+    const lngField = form.querySelector('#map_lng');
+    if (!mapField || !latField || !lngField) return { lat: '', lng: '' };
+
+    const mapUrl = (mapField.value || '').trim();
+    let coords = null;
+    if (typeof window.extractCoordsFromText === 'function') {
+      coords = window.extractCoordsFromText(mapUrl);
+    }
+    if (!coords && mapUrl && typeof window.resolveCoordsFromMapUrl === 'function') {
+      coords = await window.resolveCoordsFromMapUrl(mapUrl);
+    }
+
+    latField.value = coords && typeof coords.lat !== 'undefined' ? String(coords.lat) : '';
+    lngField.value = coords && typeof coords.lng !== 'undefined' ? String(coords.lng) : '';
+    return { lat: latField.value, lng: lngField.value };
+  }
+
   // Form submission handler
   if (form) {
-    form.onsubmit = function (e) {
+    const mapField = form.querySelector('#map');
+    if (mapField) {
+      mapField.addEventListener('change', () => { syncMapCoordsFields(); });
+      mapField.addEventListener('blur', () => { syncMapCoordsFields(); });
+    }
+
+    form.onsubmit = async function (e) {
       e.preventDefault();
+      const coords = await syncMapCoordsFields();
+      if (typeof window.syncInstallInvoiceName === 'function') {
+        const syncedName = window.syncInstallInvoiceName();
+        if (form.name) form.name.value = syncedName || '';
+      }
+      if (typeof window.syncInstallInvoiceNote === 'function') {
+        const syncedNote = window.syncInstallInvoiceNote();
+        if (form.notes) form.notes.value = syncedNote || '';
+      }
 
       // Collect form data and map to database field names
       const data = {
@@ -383,6 +313,7 @@
         hdd: (form.hdd.value || '').replace(/\s+/g, ''),  // Maps to storage in DB
         monitor: form.monitor.value,
         type: form.type.value,           // Maps to product in DB
+        city: form.city ? form.city.value : 'Bangalore',
         location: form.location.value,   // Maps to area in DB
         time: form.time.value,
         date: form.date.value,
@@ -393,9 +324,14 @@
         brand: form.brand.value,
         cam_type: form.cam_type.value,
         map: form.map.value,
+        map_lat: coords.lat,
+        map_lng: coords.lng,
         rack: form.rack.value,
         notes: form.notes.value
       };
+      if (form.admin_event_comment) {
+        data.admin_event_comment = form.admin_event_comment.value;
+      }
 
       console.log('Submitting form data:', data); // Debug log
       saveInstalls(data);
@@ -418,6 +354,7 @@
             hdd: data.storage || data.hdd || '',      // Map storage -> hdd
             monitor: data.monitor || '',
             type: data.product || data.type || '',    // Map product -> type
+            city: data.city || 'Bangalore',
             location: data.area || data.location || '',
             time: data.time || '',
             date: data.date || '',
@@ -428,7 +365,10 @@
             brand: data.brand || '',
             cam_type: data.cam_type || '',
             map: data.Map || data.map || '',          // Handle case difference
+            map_lat: data.map_lat || '',
+            map_lng: data.map_lng || '',
             rack: data.rack || '',
+            admin_event_comment: data.admin_event_comment || '',
             notes: data.notes || data.note || '',     // Handle note vs notes
             pdf_sent: data.pdf_sent || ''
           };
@@ -484,6 +424,9 @@
         if (data.success) {
           if (typeof window.render === 'function') {
             window.render();
+          }
+          if (typeof window.refreshInstallHistoryPanel === 'function') {
+            window.refreshInstallHistoryPanel();
           }
         } else {
           alert(data.message || 'Failed to delete install');
@@ -970,7 +913,6 @@
     console.log(`[Map Debug] Geocodable locations for static map: ${geocodableLocations.length}`);
 
     // Build Static Map URL with only geocodable locations
-    window.incrementApiCounter('staticMaps');
     const key = 'AIzaSyB7BKkBQEI0WpbFFjn8K4VWKRaYeIs3GhU';
     let url = `https://maps.googleapis.com/maps/api/staticmap?size=600x350&maptype=roadmap&key=${key}`;
 
@@ -1100,15 +1042,12 @@
       card.dataset.label = loc.label;
       card.onclick = () => {
         const marker = markersMap[loc.label];
-        if (marker && marker.infoWindow) {
-          // Close any open info windows first
-          Object.values(markersMap).forEach(m => {
-            if (m.infoWindow) m.infoWindow.close();
-          });
-          marker.infoWindow.open(marker.map, marker.marker);
-          // Scroll map to marker
-          marker.map.panTo(marker.marker.getPosition());
-        }
+        if (!marker || !marker.infoWindow) return;
+        Object.values(markersMap).forEach(m => {
+          if (m.infoWindow) m.infoWindow.close();
+        });
+        marker.infoWindow.open(marker.map, marker.marker);
+        marker.map.panTo(marker.marker.getPosition());
       };
 
       listContainer.appendChild(card);
@@ -1154,10 +1093,10 @@
     };
     document.addEventListener('keydown', escHandler);
 
-    // Initialize the Google Map and get markers reference
     initFullMap(mapContainer, locations, (markers) => {
       markersMap = markers;
     });
+
   }
 
   // Helper to create item cards for the horizontal list
@@ -1370,26 +1309,55 @@
     const bounds = new google.maps.LatLngBounds();
     const geocoder = new google.maps.Geocoder();
     const distanceService = new google.maps.DistanceMatrixService();
+    const routeDistanceCache = new Map();
+    const routeDistancePending = new Map();
     let markersPlaced = 0;
     const totalLocations = locations.length;
     const markersMap = {}; // Store markers for card interaction
 
-    // Helper to calculate distance from HSR Layout
-    function calculateDistance(position, callback) {
-      distanceService.getDistanceMatrix({
-        origins: [hsrLayout],
-        destinations: [position],
-        travelMode: google.maps.TravelMode.DRIVING,
-        unitSystem: google.maps.UnitSystem.METRIC
-      }, (response, status) => {
-        if (status === 'OK' && response.rows[0].elements[0].status === 'OK') {
-          const distance = response.rows[0].elements[0].distance.text;
-          const duration = response.rows[0].elements[0].duration.text;
-          callback({ distance, duration });
-        } else {
-          callback(null);
-        }
+    function getApproxDistance(position) {
+      const lat = typeof position.lat === 'function' ? position.lat() : position.lat;
+      const lng = typeof position.lng === 'function' ? position.lng() : position.lng;
+      if (typeof window.haversineDistanceKm !== 'function') return null;
+      const km = window.haversineDistanceKm(hsrLayout, { lat, lng });
+      if (typeof km !== 'number' || Number.isNaN(km)) return null;
+      return {
+        distanceKm: Number(km.toFixed(1)),
+        text: `${km.toFixed(1)} km`
+      };
+    }
+
+    function getRouteDistance(position) {
+      const lat = typeof position.lat === 'function' ? position.lat() : position.lat;
+      const lng = typeof position.lng === 'function' ? position.lng() : position.lng;
+      const key = `${lat.toFixed(6)},${lng.toFixed(6)}`;
+      if (routeDistanceCache.has(key)) return Promise.resolve(routeDistanceCache.get(key));
+      if (routeDistancePending.has(key)) return routeDistancePending.get(key);
+
+      const req = new Promise((resolve) => {
+        distanceService.getDistanceMatrix({
+          origins: [hsrLayout],
+          destinations: [{ lat, lng }],
+          travelMode: google.maps.TravelMode.DRIVING,
+          unitSystem: google.maps.UnitSystem.METRIC
+        }, (response, status) => {
+          if (status === 'OK' && response.rows[0].elements[0].status === 'OK') {
+            const payload = {
+              distance: response.rows[0].elements[0].distance.text,
+              duration: response.rows[0].elements[0].duration.text
+            };
+            routeDistanceCache.set(key, payload);
+            resolve(payload);
+            return;
+          }
+          resolve(null);
+        });
+      }).finally(() => {
+        routeDistancePending.delete(key);
       });
+
+      routeDistancePending.set(key, req);
+      return req;
     }
 
     // Helper to check if it's a short URL
@@ -1469,64 +1437,9 @@
       // Format coordinates for display (debugging)
       const coordDisplay = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
 
-      // Create initial loading content
-      const loadingContent = `
-        <div style="padding: 12px; min-width: 250px; max-width: 320px;">
-          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
-            <span style="background: linear-gradient(135deg, #e53935, #c62828); color: white; min-width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px;">${label}</span>
-            <strong style="font-size: 14px; color: #333;">${name}</strong>
-          </div>
-          <div style="font-size: 12px; color: #666; padding: 8px 0; text-align: center;">
-            <i class="fas fa-spinner fa-spin"></i> Loading distances...
-          </div>
-        </div>
-      `;
+      const approxDistance = getApproxDistance({ lat, lng });
 
-      const infoWindow = new google.maps.InfoWindow({
-        content: loadingContent
-      });
-
-      marker.addListener('click', () => {
-        // Close other info windows
-        Object.values(markersMap).forEach(m => {
-          if (m.infoWindow) m.infoWindow.close();
-        });
-        infoWindow.open(map, marker);
-      });
-
-      // Store marker reference
-      markersMap[label] = {
-        marker: marker,
-        infoWindow: infoWindow,
-        map: map,
-        position: { lat, lng },
-        name: name,
-        plusCode: plusCode
-      };
-
-      // Get distance from HSR Layout (single API call)
-      window.incrementApiCounter('distanceMatrix');
-      calculateDistance({ lat, lng }, (hsrDistance) => {
-        // Calculate distances to other markers
-        const otherDistances = [];
-        const currentPos = new google.maps.LatLng(lat, lng);
-
-        Object.entries(markersMap).forEach(([otherLabel, otherData]) => {
-          if (otherLabel !== label && otherData.position) {
-            const otherPos = new google.maps.LatLng(otherData.position.lat, otherData.position.lng);
-            const dist = google.maps.geometry.spherical.computeDistanceBetween(currentPos, otherPos);
-            otherDistances.push({
-              label: otherLabel,
-              name: otherData.name,
-              distance: dist < 1000 ? `${Math.round(dist)} m` : `${(dist / 1000).toFixed(1)} km`
-            });
-          }
-        });
-
-        // Sort by distance
-        otherDistances.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
-
-        // Build Location Details section (Plus Code + Coords)
+      function buildLocationDetailsHtml() {
         let locationDetailsHtml = `
             <div style="background: #f5f5f5; padding: 8px; border-radius: 6px; margin-bottom: 10px;">
         `;
@@ -1553,55 +1466,132 @@
               </div>
             </div>
         `;
+        return locationDetailsHtml;
+      }
 
-        // Build HSR distance section
-        let hsrHtml = '';
-        if (hsrDistance) {
-          hsrHtml = `
-            <div style="font-size: 12px; color: #333; padding: 6px 0; border-top: 1px solid #eee;">
-              <i class="fas fa-home" style="color: #e53935;"></i> 
-              <strong>${hsrDistance.distance}</strong> from HSR Layout
-              <span style="color: #888; font-size: 11px;">(${hsrDistance.duration})</span>
+      function buildOtherDistancesHtml() {
+        const otherDistances = [];
+        const currentPos = new google.maps.LatLng(lat, lng);
+
+        Object.entries(markersMap).forEach(([otherLabel, otherData]) => {
+          if (otherLabel !== label && otherData.position) {
+            const otherPos = new google.maps.LatLng(otherData.position.lat, otherData.position.lng);
+            const dist = google.maps.geometry.spherical.computeDistanceBetween(currentPos, otherPos);
+            otherDistances.push({
+              label: otherLabel,
+              name: otherData.name,
+              distance: dist < 1000 ? `${Math.round(dist)} m` : `${(dist / 1000).toFixed(1)} km`
+            });
+          }
+        });
+
+        otherDistances.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
+        if (!otherDistances.length) return '';
+
+        return `
+          <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #eee;">
+            <div style="font-size: 11px; color: #888; margin-bottom: 6px; font-weight: 600;">
+              <i class="fas fa-route"></i> Nearby Locations
             </div>
-          `;
-        }
-
-        // Build other distances section
-        let otherHtml = '';
-        if (otherDistances.length > 0) {
-          otherHtml = `
-            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #eee;">
-              <div style="font-size: 11px; color: #888; margin-bottom: 6px; font-weight: 600;">
-                <i class="fas fa-route"></i> Nearby Locations
+            ${otherDistances.slice(0, 5).map(d => `
+              <div style="font-size: 11px; color: #555; padding: 3px 0; display: flex; justify-content: space-between;">
+                <span><span style="background: #e53935; color: white; padding: 1px 5px; border-radius: 8px; font-size: 10px; margin-right: 4px;">${d.label}</span>${d.name.substring(0, 20)}${d.name.length > 20 ? '...' : ''}</span>
+                <strong style="color: #1976d2;">${d.distance}</strong>
               </div>
-              ${otherDistances.slice(0, 5).map(d => `
-                <div style="font-size: 11px; color: #555; padding: 3px 0; display: flex; justify-content: space-between;">
-                  <span><span style="background: #e53935; color: white; padding: 1px 5px; border-radius: 8px; font-size: 10px; margin-right: 4px;">${d.label}</span>${d.name.substring(0, 20)}${d.name.length > 20 ? '...' : ''}</span>
-                  <strong style="color: #1976d2;">${d.distance}</strong>
-                </div>
-              `).join('')}
+            `).join('')}
+          </div>
+        `;
+      }
+
+      function buildInfoContent(routeData = null, loadingRoute = false) {
+        const routeBlock = routeData
+          ? `
+            <div style="font-size: 12px; color: #333; padding: 6px 0; border-top: 1px solid #eee;">
+              <i class="fas fa-road" style="color: #e53935;"></i>
+              <strong>${routeData.distance}</strong> by road from HSR Layout
+              <span style="color: #888; font-size: 11px;">(${routeData.duration})</span>
+            </div>
+          `
+          : `
+            <div style="font-size: 12px; color: #333; padding: 6px 0; border-top: 1px solid #eee; display:flex; align-items:center; justify-content:space-between; gap:8px;">
+              <span>
+                <i class="fas fa-home" style="color: #e53935;"></i>
+                <strong>${approxDistance ? approxDistance.text : 'Unknown'}</strong> approx from HSR Layout
+              </span>
+              <button type="button" class="load-route-btn" data-route-label="${label}" style="background:#fff;border:1px solid #d1d5db;border-radius:6px;padding:5px 8px;font-size:11px;cursor:pointer;white-space:nowrap;">
+                ${loadingRoute ? '<i class="fas fa-spinner fa-spin"></i> Loading' : 'Load route ETA'}
+              </button>
             </div>
           `;
-        }
 
-        // Build complete content
-        const fullContent = `
+        return `
           <div style="padding: 12px; min-width: 250px; max-width: 320px;">
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
               <span style="background: linear-gradient(135deg, #e53935, #c62828); color: white; min-width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px;">${label}</span>
               <strong style="font-size: 14px; color: #333;">${name}</strong>
             </div>
-            ${locationDetailsHtml}
+            ${buildLocationDetailsHtml()}
             <a href="${mapsUrl}" target="_blank" style="display: flex; align-items: center; gap: 6px; background: #4285f4; color: white; text-decoration: none; padding: 8px 12px; border-radius: 6px; font-size: 13px; margin-bottom: 10px;">
               <i class="fas fa-external-link-alt"></i> Open in Google Maps
             </a>
-            ${hsrHtml}
-            ${otherHtml}
+            ${routeBlock}
+            ${buildOtherDistancesHtml()}
           </div>
         `;
+      }
 
-        infoWindow.setContent(fullContent);
+      // Create initial content
+      const loadingContent = `
+        <div style="padding: 12px; min-width: 250px; max-width: 320px;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+            <span style="background: linear-gradient(135deg, #e53935, #c62828); color: white; min-width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px;">${label}</span>
+            <strong style="font-size: 14px; color: #333;">${name}</strong>
+          </div>
+          ${buildLocationDetailsHtml()}
+          <a href="${mapsUrl}" target="_blank" style="display: flex; align-items: center; gap: 6px; background: #4285f4; color: white; text-decoration: none; padding: 8px 12px; border-radius: 6px; font-size: 13px; margin-bottom: 10px;">
+            <i class="fas fa-external-link-alt"></i> Open in Google Maps
+          </a>
+          <div style="font-size: 12px; color: #333; padding: 6px 0; border-top: 1px solid #eee;">
+            <i class="fas fa-home" style="color: #e53935;"></i>
+            <strong>${approxDistance ? approxDistance.text : 'Unknown'}</strong> approx from HSR Layout
+          </div>
+          ${buildOtherDistancesHtml()}
+        </div>
+      `;
+
+      const infoWindow = new google.maps.InfoWindow({
+        content: loadingContent
       });
+
+      marker.addListener('click', () => {
+        // Close other info windows
+        Object.values(markersMap).forEach(m => {
+          if (m.infoWindow) m.infoWindow.close();
+        });
+        infoWindow.setContent(buildInfoContent(routeDistanceCache.get(`${lat.toFixed(6)},${lng.toFixed(6)}`) || null, false));
+        infoWindow.open(map, marker);
+      });
+
+      google.maps.event.addListener(infoWindow, 'domready', () => {
+        const btn = document.querySelector(`.load-route-btn[data-route-label="${label}"]`);
+        if (!btn) return;
+        btn.onclick = async (e) => {
+          e.preventDefault();
+          infoWindow.setContent(buildInfoContent(null, true));
+          const routeData = await getRouteDistance({ lat, lng });
+          infoWindow.setContent(buildInfoContent(routeData, false));
+        };
+      });
+
+      // Store marker reference
+      markersMap[label] = {
+        marker: marker,
+        infoWindow: infoWindow,
+        map: map,
+        position: { lat, lng },
+        name: name,
+        plusCode: plusCode
+      };
 
       return marker;
     }
@@ -1663,7 +1653,6 @@
           });
       } else {
         // Geocode the address
-        window.incrementApiCounter('geocoding');
         geocoder.geocode({ address: location }, (results, status) => {
           if (status === 'OK' && results[0]) {
             const position = results[0].geometry.location;
